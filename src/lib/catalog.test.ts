@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { canExchange, filterListings, formatPrice } from './catalog.ts'
+import { canExchange, estimateLeaseMoveIn, filterListings, formatPrice } from './catalog.ts'
 
 const sample = [
   { id: 'a', city: 'pattaya', region: 'jomtien', terms: ['day', 'month'], management: 'operated', exchangeAuthorized: true, exchangeOpen: true, price: 2800, currency: 'THB', priceUnit: 'day' },
@@ -29,4 +29,15 @@ test('formatPrice shows the listing currency and price unit', () => {
   assert.match(formatPrice(sample[0], 'zh'), /天/)
   assert.match(formatPrice(sample[1], 'en'), /CNY|CN¥|¥/)
   assert.match(formatPrice(sample[1], 'en'), /month/)
+})
+
+test('monthly lease preview separates refundable deposit from prepaid rent', () => {
+  assert.deepEqual(estimateLeaseMoveIn(3900, 3, 'one-two'), { deposit: 3900, prepaidRent: 7800, initialDue: 11700 })
+  assert.deepEqual(estimateLeaseMoveIn(3900, 3, 'two-one'), { deposit: 7800, prepaidRent: 3900, initialDue: 11700 })
+})
+
+test('lease payment choices are not offered for a one-month term or invalid rent', () => {
+  assert.equal(estimateLeaseMoveIn(3900, 1, 'one-two'), null)
+  assert.equal(estimateLeaseMoveIn(3900, 1, 'two-one'), null)
+  assert.equal(estimateLeaseMoveIn(-10, 3, 'one-two'), null)
 })

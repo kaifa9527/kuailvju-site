@@ -47,3 +47,12 @@ export function formatPrice(listing: PricedListing, language: Language): string 
     : listing.priceUnit
   return `${money} / ${unit}`
 }
+
+export type LeasePaymentOption = 'one-two' | 'two-one'
+
+export function estimateLeaseMoveIn(monthlyRent: number, leaseMonths: number, option: LeasePaymentOption) {
+  if (!Number.isFinite(monthlyRent) || monthlyRent <= 0 || !Number.isInteger(leaseMonths) || leaseMonths < 2) return null
+  const deposit = monthlyRent * (option === 'one-two' ? 1 : 2)
+  const prepaidRent = monthlyRent * (option === 'one-two' ? 2 : 1)
+  return { deposit, prepaidRent, initialDue: deposit + prepaidRent }
+}

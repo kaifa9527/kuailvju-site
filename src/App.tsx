@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { cities, listings, type Listing, type Term } from './data'
-import { canExchange, filterListings, formatPrice, type Language } from './lib/catalog'
+import { canExchange, estimateLeaseMoveIn, filterListings, formatPrice, type Language, type LeasePaymentOption } from './lib/catalog'
 
 type Filters = { city: string; region: string; term: string }
 type Route = { page: string; id?: string; mode?: string; filters: Filters }
@@ -17,7 +17,19 @@ const words = {
     unavailable: '当前仅展示页面体验，尚未接入真实房源和申请服务。我们不会在此版本收集您的联系方式。',
     ineligible: '仅委托经营房源的业主可申请旅居置换。此房源未加入委托经营置换房源池。',
     understood: '我知道了', back: '返回房源', ready: '委托经营 · 可申请置换', noExchange: '暂不开放置换',
-    occupants: '可住', rooms: '卧室', size: '面积', experience: '居住体验', terms: '可选租期',
+    occupants: '可住', rooms: '卧室', baths: '卫生间', beds: '床位', size: '面积', experience: '居住体验', terms: '可选租期',
+    quickRent: '房屋租赁', quickExchange: '旅居置换', quickManage: '物业托管',
+    sampleInventory: '以下房源及参数为页面示意，真实房源与可订日期待核验上线。',
+    viewPhotos: '查看示意图片', sampleSpecs: '配置示意', amenities: '空间与设施',
+    feeTitle: '费用先看清', baseRent: '示意房费', zeroAgency: '租客中介费', utilitiesActual: '水电按实际用量结算',
+    datePending: '真实可订日期暂未开放查询；提交或付款前须再次核对房态及最终报价。',
+    chooseTerm: '选择租期', paymentChoice: '押付方式示意', deposit: '可退押金', prepaidRent: '预付租金', initialDue: '首次应付示意',
+    oneTwo: '押一付二', twoOne: '押二付一', oneTwoNote: '1 个月押金 + 前 2 个月租金', twoOneNote: '2 个月押金 + 第 1 个月租金',
+    paymentPending: '1 个月租期不展示两个月预付方案；具体押付以当地核验与最终合同为准。',
+    otherFees: '其他费用和取消规则待房源核验后公布，不在示意阶段给出虚假总价。',
+    exchangeMini: '仅委托经营签约业主可申请；符合条件可免住宿费。每人每次另付 ¥500 保洁费、¥1,000 可退押金，水电据实自付。',
+    exchangeThai: '芭提雅费用按确认时锁定的等值泰铢收取。',
+    listingRules: '入住与房屋规则', listingRulesPending: '入住退房时间、宠物、吸烟及取消条款，在真实房源核验后逐项公布。',
     intro: '从一处好房，开启下一段生活。', homeNote: '选择城市与租期，先看好房。每一次入住，都有认真回应。',
     guide: '三种服务，一目了然', guideSub: '租住、置换、托管，从需求出发，快速找到合适的入口。',
     cityNote: '目前开放芭提雅、三亚、北海。更多城市将逐步加入。',
@@ -52,7 +64,19 @@ const words = {
     unavailable: 'This is a design preview. Live homes and applications are not connected yet. This version does not collect contact details.',
     ineligible: 'Stay exchange is available only to owners of homes under an active operation agreement. This home is not in the exchange pool.',
     understood: 'Got it', back: 'Back to homes', ready: 'Managed operation · Exchange eligible', noExchange: 'Exchange unavailable',
-    occupants: 'Sleeps', rooms: 'Bedrooms', size: 'Area', experience: 'The space', terms: 'Stay options',
+    occupants: 'Sleeps', rooms: 'Bedrooms', baths: 'Bathrooms', beds: 'Beds', size: 'Area', experience: 'The space', terms: 'Stay options',
+    quickRent: 'Rent homes', quickExchange: 'Stay exchange', quickManage: 'Property care',
+    sampleInventory: 'Homes and details below are illustrative. Live inventory and dates require verification.',
+    viewPhotos: 'View concept images', sampleSpecs: 'Illustrative details', amenities: 'Space & amenities',
+    feeTitle: 'See the costs first', baseRent: 'Sample rent', zeroAgency: 'Tenant agency fee', utilitiesActual: 'Utilities billed by actual use',
+    datePending: 'Live dates are not connected yet. Availability and final quotes must be checked before applying or paying.',
+    chooseTerm: 'Choose a term', paymentChoice: 'Sample payment choices', deposit: 'Refundable deposit', prepaidRent: 'Prepaid rent', initialDue: 'Sample amount due now',
+    oneTwo: '1 + 2', twoOne: '2 + 1', oneTwoNote: '1 month deposit + first 2 months rent', twoOneNote: '2 months deposit + first month rent',
+    paymentPending: 'A one-month term does not show a two-month prepayment choice. Final options depend on local review and the contract.',
+    otherFees: 'Other charges and cancellation terms will be published after property review. No invented total is shown in this preview.',
+    exchangeMini: 'Only owners under a managed operation agreement may apply. Eligible exchanges can waive accommodation rent. Each guest still pays a ¥500 cleaning fee, ¥1,000 refundable deposit and actual utilities.',
+    exchangeThai: 'Pattaya collects the locked THB equivalent at confirmation.',
+    listingRules: 'Stay & house rules', listingRulesPending: 'Check-in/out times, pets, smoking and cancellation terms will be published after each real home is verified.',
     intro: 'A good home for the next chapter.', homeNote: 'Pick a city and stay length, then discover a place that feels right.',
     guide: 'Three clear ways to begin', guideSub: 'Rent, exchange or care for a property. Start with what you need.',
     cityNote: 'Now focusing on Pattaya, Sanya and Beihai. More cities will follow.',
@@ -141,18 +165,18 @@ function ListingCard({ listing, lang }: { listing: Listing; lang: Language }) {
   const city = cities.find(c => c.id === listing.city)!
   const region = city.regions.find(r => r.id === listing.region)!
   return <a className="listing-card" href={`#/listing/${listing.id}`}>
-    <div className="listing-image"><img src={asset(listing.image)} alt={`${listing.title[lang]} — ${t.demo}`} loading="lazy"/><span className="image-label">{t.demo}</span></div>
-    <div className="listing-content"><div className="listing-eyebrow">{city[lang]} · {region[lang]} <span>/{listing.type[lang]}</span></div><h3>{listing.title[lang]}</h3><p>{listing.highlight[lang]} <span>·</span> {listing.bedrooms} {t.rooms.toLowerCase()} <span>·</span> {listing.area} m²</p><div className="listing-bottom"><div><small>{t.price}</small><strong>{formatPrice(listing, lang)}</strong></div><span className="circle-arrow" aria-hidden="true">↗</span></div></div>
+    <div className="listing-image"><img src={asset(listing.gallery[0].image)} alt={`${listing.title[lang]} — ${t.demo}`} loading="lazy"/><span className="image-label">{t.demo}</span></div>
+    <div className="listing-content"><div className="listing-eyebrow">{city[lang]} · {region[lang]} <span>/{listing.type[lang]}</span></div><h3>{listing.title[lang]}</h3><p>{listing.highlight[lang]} <span>·</span> {listing.bedrooms} {t.rooms.toLowerCase()} <span>·</span> {listing.area} m²</p><div className="listing-terms">{listing.terms.map(term => <span key={term}>{t[term]}</span>)}</div><div className="listing-bottom"><div><small>{t.price}</small><strong>{formatPrice(listing, lang)}</strong></div><span className="circle-arrow" aria-hidden="true">↗</span></div></div>
   </a>
 }
 
 function HomePage({ lang }: { lang: Language }) {
   const t = words[lang]
   return <>
+    <div className="mobile-service-nav page-shell" aria-label={t.guide}><a href="#/rentals"><span>01</span>{t.quickRent}</a><a href="#/exchange"><span>02</span>{t.quickExchange}</a><a href="#/management"><span>03</span>{t.quickManage}</a></div>
     <section className="hero page-shell"><div className="hero-copy"><p className="eyebrow">KUAI LÜ JU / HOMES & STAYS</p><h1>{t.rentalLine}</h1><p className="hero-description">{t.intro}<br/>{t.homeNote}</p><p className="city-note">{t.cityNote}</p></div><div className="hero-visual"><img src={asset('/images/pattaya-concept.jpg')} alt={t.demo}/><span>{t.demo} / PATTAYA</span></div></section>
     <div className="search-wrap page-shell"><SearchPanel lang={lang} initial={emptyFilters}/></div>
-    <section className="section page-shell" id="homes"><div className="section-heading"><div><p className="eyebrow">01 / CURATED SPACES</p><h2>{t.results}</h2></div><a className="text-link" href="#/rentals">{t.explore} <span>↗</span></a></div><div className="listing-grid">{listings.map(listing => <ListingCard key={listing.id} listing={listing} lang={lang}/>)}</div></section>
-    <section className="journey-section"><div className="page-shell"><div className="section-heading"><div><p className="eyebrow">02 / WHAT WE DO</p><h2>{t.guide}</h2></div><p>{t.guideSub}</p></div><div className="journey-grid"><a href="#/rentals"><span>01</span><h3>{t.rent}</h3><p>{t.rentalLine}</p><b>↗</b></a><a href="#/exchange"><span>02</span><h3>{t.exchange}</h3><p>{t.exchangeLine}</p><b>↗</b></a><a href="#/management"><span>03</span><h3>{t.manage}</h3><p>{t.manageLine}</p><b>↗</b></a></div></div></section>
+    <section className="section page-shell" id="homes"><div className="section-heading"><div><p className="eyebrow">01 / CURATED SPACES</p><h2>{t.results}</h2></div><a className="text-link" href="#/rentals">{t.explore} <span>↗</span></a></div><p className="sample-inventory">{t.sampleInventory}</p><div className="listing-grid">{listings.map(listing => <ListingCard key={listing.id} listing={listing} lang={lang}/>)}</div></section>
     <section className="closing-section page-shell"><p className="eyebrow">A HOME, WELL CARED FOR</p><h2>{t.bottomCta}</h2><p>{t.bottomSub}</p><a className="button button-outline" href="#/management">{t.manage} <span>↗</span></a></section>
   </>
 }
@@ -160,7 +184,38 @@ function HomePage({ lang }: { lang: Language }) {
 function RentalsPage({ lang, filters }: { lang: Language; filters: Filters }) {
   const t = words[lang]
   const found = filterListings(listings, filters)
-  return <div className="page-shell page-top"><div className="page-title"><p className="eyebrow">01 / HOMES</p><h1>{t.rentalLine}</h1><p>{t.homeNote}</p></div><SearchPanel lang={lang} initial={filters} compact/><div className="results-bar"><div><h2>{t.results}</h2><span>{String(found.length).padStart(2, '0')} / {String(listings.length).padStart(2, '0')}</span></div>{(filters.city !== 'all' || filters.region !== 'all' || filters.term !== 'all') && <a href="#/rentals" className="text-link">{t.reset} ↗</a>}</div>{found.length ? <div className="listing-grid">{found.map(item => <ListingCard key={item.id} listing={item} lang={lang}/>)}</div> : <div className="empty-state"><h3>{t.noResult}</h3><p>{t.noResultSub}</p><a className="button button-dark" href="#/rentals">{t.reset} ↗</a></div>}</div>
+  return <div className="page-shell page-top"><div className="page-title"><p className="eyebrow">01 / HOMES</p><h1>{t.rentalLine}</h1><p>{t.homeNote}</p></div><SearchPanel lang={lang} initial={filters} compact/><div className="results-bar"><div><h2>{t.results}</h2><span>{String(found.length).padStart(2, '0')} / {String(listings.length).padStart(2, '0')}</span></div>{(filters.city !== 'all' || filters.region !== 'all' || filters.term !== 'all') && <a href="#/rentals" className="text-link">{t.reset} ↗</a>}</div><p className="sample-inventory">{t.sampleInventory}</p>{found.length ? <div className="listing-grid">{found.map(item => <ListingCard key={item.id} listing={item} lang={lang}/>)}</div> : <div className="empty-state"><h3>{t.noResult}</h3><p>{t.noResultSub}</p><a className="button button-dark" href="#/rentals">{t.reset} ↗</a></div>}</div>
+}
+
+function PropertyGallery({ listing, lang }: { listing: Listing; lang: Language }) {
+  const t = words[lang]
+  const [active, setActive] = useState(0)
+  const photo = listing.gallery[active]
+  return <div className="property-gallery">
+    <div className="detail-image"><img src={asset(photo.image)} alt={`${listing.title[lang]} · ${photo.caption[lang]}`}/><span>{t.demo} · {active + 1}/{listing.gallery.length}</span></div>
+    <div className="gallery-foot"><p>{photo.caption[lang]}</p><div className="gallery-thumbs" aria-label={t.viewPhotos}>{listing.gallery.map((item, index) => <button key={item.image} type="button" className={active === index ? 'is-active' : ''} aria-label={`${t.viewPhotos} ${index + 1}: ${item.caption[lang]}`} aria-pressed={active === index} onClick={() => setActive(index)}><img src={asset(item.image)} alt="" loading="lazy"/></button>)}</div></div>
+  </div>
+}
+
+function ListingBookingCard({ listing, lang, onAction }: { listing: Listing; lang: Language; onAction: (message: string) => void }) {
+  const t = words[lang]
+  const [term, setTerm] = useState<Term>(listing.terms.includes('quarter') ? 'quarter' : listing.terms[0])
+  const [payment, setPayment] = useState<LeasePaymentOption>('one-two')
+  const termMonths = term === 'quarter' ? 3 : term === 'year' ? 12 : term === 'month' ? 1 : 0
+  const estimate = listing.priceUnit === 'month' ? estimateLeaseMoveIn(listing.price, termMonths, payment) : null
+  const money = (value: number) => new Intl.NumberFormat(lang === 'zh' ? 'zh-CN' : 'en-US', { style: 'currency', currency: listing.currency, maximumFractionDigits: 0 }).format(value)
+  return <aside className="booking-card">
+    <span className="eyebrow">{t.feeTitle} / {t.demo}</span>
+    <div className="booking-price"><small>{t.baseRent}</small><strong>{formatPrice(listing, lang)}</strong></div>
+    <div className="fee-lines"><div><span>{t.zeroAgency}</span><strong>{money(0)}</strong></div><div><span>{t.utilitiesActual}</span><strong>↗</strong></div></div>
+    {listing.priceUnit === 'month' && <div className="payment-example">
+      <label className="term-control">{t.chooseTerm}<select value={term} onChange={event => setTerm(event.target.value as Term)}>{listing.terms.map(value => <option key={value} value={value}>{t[value]}</option>)}</select></label>
+      {estimate ? <><p className="field-label">{t.paymentChoice}</p><div className="payment-options"><button type="button" className={payment === 'one-two' ? 'selected' : ''} aria-pressed={payment === 'one-two'} onClick={() => setPayment('one-two')}>{t.oneTwo}</button><button type="button" className={payment === 'two-one' ? 'selected' : ''} aria-pressed={payment === 'two-one'} onClick={() => setPayment('two-one')}>{t.twoOne}</button></div><p className="micro-note">{payment === 'one-two' ? t.oneTwoNote : t.twoOneNote}</p><div className="estimate-lines"><div><span>{t.deposit}</span><strong>{money(estimate.deposit)}</strong></div><div><span>{t.prepaidRent}</span><strong>{money(estimate.prepaidRent)}</strong></div><div className="estimate-total"><span>{t.initialDue}</span><strong>{money(estimate.initialDue)}</strong></div></div></> : <p className="micro-note">{t.paymentPending}</p>}
+    </div>}
+    <p className="booking-disclaimer">{t.datePending} {t.otherFees}</p>
+    <button className="button button-dark" onClick={() => onAction(t.unavailable)}>{t.contact} ↗</button>
+    {canExchange(listing) ? <div className="booking-exchange"><span>{t.ready}</span><p>{t.exchangeMini} {listing.city === 'pattaya' && t.exchangeThai}</p><button className="button button-light" onClick={() => onAction(t.unavailable)}>{t.apply} ↗</button></div> : <button className="exchange-ineligible" onClick={() => onAction(t.ineligible)}>{t.noExchange} ⓘ</button>}
+  </aside>
 }
 
 function ListingPage({ lang, id, onAction }: { lang: Language; id?: string; onAction: (message: string) => void }) {
@@ -169,7 +224,19 @@ function ListingPage({ lang, id, onAction }: { lang: Language; id?: string; onAc
   if (!listing) return <div className="page-shell empty-state"><h1>{t.noResult}</h1><a href="#/rentals" className="button button-dark">{t.back}</a></div>
   const city = cities.find(c => c.id === listing.city)!
   const region = city.regions.find(r => r.id === listing.region)!
-  return <div className="page-shell detail-page"><a className="back-link" href="#/rentals">← {t.back}</a><div className="detail-heading"><div><p className="eyebrow">{city[lang]} / {region[lang]} / {t.demo}</p><h1>{listing.title[lang]}</h1><p>{listing.type[lang]} · {listing.highlight[lang]}</p></div><div className="detail-price"><span>{t.price}</span><strong>{formatPrice(listing, lang)}</strong></div></div>{canExchange(listing) && <div className="exchange-entry"><span>{t.ready}</span><button onClick={() => onAction(t.unavailable)}>{t.apply} ↗</button></div>}<div className="detail-image"><img src={asset(listing.image)} alt={`${listing.title[lang]} — ${t.demo}`}/><span>{t.demo}</span></div><div className="detail-layout"><div className="detail-main"><p className="eyebrow">THE SPACE</p><h2>{t.experience}</h2><p className="lead">{listing.description[lang]}</p><div className="facts"><div><small>{t.occupants}</small><strong>{listing.guests}</strong></div><div><small>{t.rooms}</small><strong>{listing.bedrooms}</strong></div><div><small>{t.size}</small><strong>{listing.area} m²</strong></div></div><h3>{t.terms}</h3><div className="term-list">{listing.terms.map(term => <span key={term}>{t[term]}</span>)}</div></div><aside className="booking-card"><span className="eyebrow">{t.demo}</span><strong>{formatPrice(listing, lang)}</strong><p>{t.legal}</p><button className="button button-dark" onClick={() => onAction(t.unavailable)}>{t.contact} ↗</button>{canExchange(listing) ? <button className="button button-light" onClick={() => onAction(t.unavailable)}>{t.apply} ↗</button> : <button className="button button-light" onClick={() => onAction(t.ineligible)}>{t.noExchange} ⓘ</button>}<p className="micro-note">{canExchange(listing) ? t.ready : t.ineligible}</p></aside></div></div>
+  return <div className="page-shell detail-page">
+    <a className="back-link" href="#/rentals">← {t.back}</a>
+    <div className="detail-heading"><div><p className="eyebrow">{city[lang]} / {region[lang]} / {t.demo}</p><h1>{listing.title[lang]}</h1><p>{listing.type[lang]} · {listing.highlight[lang]}</p></div><div className="detail-price"><span>{t.price}</span><strong>{formatPrice(listing, lang)}</strong></div></div>
+    {canExchange(listing) && <div className="exchange-entry"><span>{t.ready}</span><button onClick={() => onAction(t.unavailable)}>{t.apply} ↗</button></div>}
+    <PropertyGallery key={listing.id} listing={listing} lang={lang}/>
+    <div className="detail-layout"><div className="detail-main">
+      <p className="eyebrow">THE SPACE / {t.sampleSpecs}</p><h2>{t.experience}</h2><p className="lead">{listing.description[lang]}</p>
+      <div className="facts"><div><small>{t.occupants}</small><strong>{listing.guests}</strong></div><div><small>{t.rooms}</small><strong>{listing.bedrooms}</strong></div><div><small>{t.beds}</small><strong>{listing.beds}</strong></div><div><small>{t.baths}</small><strong>{listing.bathrooms}</strong></div><div><small>{t.size}</small><strong>{listing.area} m²</strong></div></div>
+      <ul className="feature-list">{listing.features.map(feature => <li key={feature.zh}>{feature[lang]}</li>)}</ul>
+      <h3>{t.amenities}</h3><div className="amenity-list">{listing.amenities.map(amenity => <span key={amenity.zh}>{amenity[lang]}</span>)}</div>
+      <div className="detail-secondary"><h3>{t.terms}</h3><div className="term-list">{listing.terms.map(value => <span key={value}>{t[value]}</span>)}</div><details><summary>{t.listingRules}</summary><p>{t.listingRulesPending}</p></details></div>
+    </div><ListingBookingCard key={listing.id} listing={listing} lang={lang} onAction={onAction}/></div>
+  </div>
 }
 
 function ExchangePage({ lang, onAction }: { lang: Language; onAction: (message: string) => void }) {
@@ -193,7 +260,13 @@ export default function App() {
   const [lang, setLangState] = useState<Language>(() => (localStorage.getItem('kuailvju-lang') as Language) || (navigator.language.toLowerCase().startsWith('zh') ? 'zh' : 'en'))
   const [message, setMessage] = useState<string | null>(null)
   useEffect(() => { const update = () => { setRoute(parseRoute()); setMessage(null); window.scrollTo({ top: 0, behavior: 'instant' }) }; window.addEventListener('hashchange', update); return () => window.removeEventListener('hashchange', update) }, [])
-  useEffect(() => { document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en' }, [lang])
+  useEffect(() => {
+    document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en'
+    document.title = lang === 'zh' ? '快旅居｜好房源，心服务' : 'Kuai Lü Ju | Good homes. Thoughtful service.'
+    document.querySelector('meta[name="description"]')?.setAttribute('content', lang === 'zh'
+      ? '快旅居：房屋租赁、旅居置换与物业托管。当前为示意页面，暂未开放真实预订。'
+      : 'Kuai Lü Ju: homes, stay exchange and property care. Concept preview only; live bookings are not yet available.')
+  }, [lang])
   const setLang = (next: Language) => { setLangState(next); localStorage.setItem('kuailvju-lang', next) }
   const t = words[lang]
   const content = useMemo(() => {
