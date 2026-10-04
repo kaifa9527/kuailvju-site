@@ -4,6 +4,8 @@ import { canExchange, sortFeaturedListings, type Language } from './lib/catalog'
 import { demoAvailable, demoBlockedDates, emptyExchangeSearch, exchangeQuery, filterExchangeHomes, localDate, parseExchangeSearch, type ExchangeSearch } from './lib/exchangeDiscovery'
 import { validRange } from './lib/testWorkflow'
 import { LineIcon, amenityIcon } from './components/LineIcon'
+import { ExchangeGallery } from './components/ExchangeGallery'
+import { guestRecommendation } from './lib/guestRecommendation'
 
 const asset = (path: string) => `${import.meta.env.BASE_URL}${path.replace(/^\//, '')}`
 const words = {
@@ -131,13 +133,13 @@ export function ExchangeDetailPage({ lang, id, query }: { lang: Language; id?: s
   const [start, setStart] = useState(search.start)
   const [end, setEnd] = useState(search.end)
   const [guests, setGuests] = useState(search.guests)
-  const [image, setImage] = useState(0)
+  const [amenitiesOpen, setAmenitiesOpen] = useState(false)
   const [error, setError] = useState('')
   const [mode, setMode] = useState<'rental' | 'exchange'>('rental')
   const startInput = useRef<HTMLInputElement>(null)
   const endInput = useRef<HTMLInputElement>(null)
   const guestsInput = useRef<HTMLSelectElement>(null)
-  useEffect(() => { setStart(search.start); setEnd(search.end); setGuests(search.guests); setImage(0); setError(''); setMode('rental') }, [id, query])
+  useEffect(() => { setStart(search.start); setEnd(search.end); setGuests(search.guests); setAmenitiesOpen(false); setError(''); setMode('rental') }, [id, query])
   if (!home || !canExchange(home)) return <div className="page-shell empty-state"><h1>{t.empty}</h1><a className="button button-dark" href="#/exchange">{t.from} ↗</a></div>
   const range = { start, end }
   const days = validRange(range) ? stayNights(start, end) : 0
@@ -163,14 +165,22 @@ export function ExchangeDetailPage({ lang, id, query }: { lang: Language; id?: s
   }
   const related = listings.filter(item => canExchange(item) && item.id !== home.id && item.guests >= guests).sort((a, b) => Number(b.city === home.city) - Number(a.city === home.city)).slice(0, 3)
   const exchangeCurrency = home.city === 'pattaya' ? (lang === 'zh' ? '确认时等值泰铢' : 'THB equivalent at confirmation') : null
+  const recommendation = guestRecommendation(home)
+  const hasPool = home.amenities.some(item => /泳池|pool/i.test(item.zh))
+  const highlights = [
+    ...(home.guests >= 4 ? [{ icon: 'family' as const, title: lang === 'zh' ? '适合家庭与好友同行' : 'Room for family and friends', detail: lang === 'zh' ? `${home.bedrooms} 间卧室，最多可住 ${home.guests} 人；真实房客好评将在入住评价核验后展示。` : `${home.bedrooms} bedrooms for up to ${home.guests} guests. Verified guest praise appears after real stays.` }] : [{ icon: 'window' as const, title: home.features[0][lang], detail: lang === 'zh' ? '房源特色以正式核验信息为准。' : 'Features are subject to property verification.' }]),
+    ...(hasPool ? [{ icon: 'pool' as const, title: lang === 'zh' ? '尽享泳池时光' : 'Enjoy time by the pool', detail: lang === 'zh' ? '泳池是这套示意房源的特色配置；开放时间与使用规则须上线前核验。' : 'A concept highlight for this home; access and rules require live verification.' }] : [{ icon: 'window' as const, title: home.highlight[lang], detail: home.features[1]?.[lang] || home.description[lang] }]),
+    ...(home.selfCheckIn ? [{ icon: 'lock' as const, title: lang === 'zh' ? '密码锁自助入住' : 'Self check-in with a keypad', detail: lang === 'zh' ? '置换民宿标配。入住前由平台核验身份，并单独发送当次有效的开门信息。' : 'Standard for exchange stays. The platform verifies the guest and sends a stay-specific code before arrival.' }] : []),
+  ]
   return <div className="page-shell exchange-detail">
     <div className="exchange-detail-top"><a className="back-link" href={`#/exchange${exchangeQuery(search)}`}>← {t.from}</a><span>{t.demo} / {t.test}</span></div>
     <div className="detail-heading"><div><p className="eyebrow">{location(home, lang)} / {home.type[lang]}</p><h1>{home.title[lang]}</h1><p>{home.highlight[lang]} · {t.sleeps} {home.guests} · {home.bedrooms} {t.bedrooms.toLowerCase()} · {home.beds} {t.beds.toLowerCase()} · {home.bathrooms} {t.baths.toLowerCase()}</p></div></div>
-    <div className="exchange-gallery"><div className="exchange-gallery-main"><img src={asset(home.gallery[image].image)} alt={home.gallery[image].caption[lang]}/><span>{home.gallery[image].caption[lang]}</span></div>{home.gallery.length > 1 && <div className="exchange-gallery-side">{home.gallery.map((item, index) => <button key={item.image} type="button" aria-label={`${lang === 'zh' ? '查看图片' : 'View photo'} ${index + 1}`} aria-pressed={image === index} onClick={() => setImage(index)}><img src={asset(item.image)} alt={item.caption[lang]}/></button>)}</div>}</div>
+    <ExchangeGallery home={home} lang={lang}/>
     <div className="exchange-detail-layout"><div className="exchange-detail-main">
       <section className="exchange-info-section" id="space"><p className="eyebrow">THE SPACE</p><h2>{t.overview}</h2><p className="lead">{home.description[lang]}</p><div className="exchange-fact-row"><span><LineIcon name="guests"/>{t.sleeps} {home.guests}</span><span><LineIcon name="bedroom"/>{home.bedrooms} {t.bedrooms}</span><span><LineIcon name="bed"/>{home.beds} {t.beds}</span><span><LineIcon name="bath"/>{home.bathrooms} {t.baths}</span><span><LineIcon name="area"/>{home.area} m²</span></div></section>
-      <section className="exchange-info-section"><p className="eyebrow">HIGHLIGHTS</p><h2>{t.highlights}</h2><div className="exchange-highlight-list">{home.features.map(feature => <p key={feature.zh}><LineIcon name="check" size={20}/>{feature[lang]}</p>)}</div></section>
-      <section className="exchange-info-section"><p className="eyebrow">AMENITIES</p><h2>{t.amenities}</h2><div className="amenity-list">{home.amenities.map(item => <span key={item.zh}><LineIcon name={amenityIcon(item.zh)} size={21}/>{item[lang]}</span>)}</div></section>
+      <section className="exchange-recommendation" aria-label={lang === 'zh' ? '房客推荐' : 'Guest recommendation'}><div className="exchange-recommendation-mark"><LineIcon name="shield" size={28}/><strong>{lang === 'zh' ? '房客推荐' : 'Guest recommended'}</strong></div>{recommendation.recommended ? <p><strong>{recommendation.rating!.toFixed(2)} / 5</strong><span>{lang === 'zh' ? `${recommendation.count} 条已核验入住评价` : `${recommendation.count} verified post-stay reviews`}</span></p> : <p><strong>{lang === 'zh' ? '等待真实入住评价' : 'Awaiting real guest reviews'}</strong><span>{lang === 'zh' ? '示意房源不展示虚构评分与评价数' : 'No invented rating or review count for concept homes'}</span></p>}<details><summary>{lang === 'zh' ? '查看推荐规则' : 'How recommendations work'}</summary><p>{lang === 'zh' ? '仅统计已完成入住、经平台核验的评价；至少 5 条且平均分达到 4.8 / 5 时，才展示房客推荐评分。' : 'Only completed and verified stays count. A recommendation appears after at least five reviews averaging 4.8 / 5 or higher.'}</p></details></section>
+      <section className="exchange-info-section"><p className="eyebrow">HIGHLIGHTS</p><h2>{t.highlights}</h2><div className="exchange-highlight-list">{highlights.map(item => <div className="exchange-highlight" key={item.title}><LineIcon name={item.icon} size={25}/><div><h3>{item.title}</h3><p>{item.detail}</p></div></div>)}</div></section>
+      <section className="exchange-info-section"><p className="eyebrow">AMENITIES</p><h2>{t.amenities}</h2><div className="amenity-list">{(amenitiesOpen ? home.amenities : home.amenities.slice(0, 6)).map(item => <span key={item.zh}><LineIcon name={amenityIcon(item.zh)} size={23}/>{item[lang]}</span>)}</div>{home.amenities.length > 6 && <button className="exchange-amenities-toggle" type="button" aria-expanded={amenitiesOpen} onClick={() => setAmenitiesOpen(!amenitiesOpen)}>{amenitiesOpen ? (lang === 'zh' ? '收起设施' : 'Show fewer') : (lang === 'zh' ? `查看全部 ${home.amenities.length} 项设施` : `Show all ${home.amenities.length} amenities`)} <span aria-hidden="true">{amenitiesOpen ? '−' : '+'}</span></button>}<p className="exchange-amenities-note">{lang === 'zh' ? '以上配置为示意数据，真实房源上线前逐项核验。' : 'Concept amenities are verified individually before a live home is published.'}</p></section>
       <section className="exchange-info-section"><p className="eyebrow">AVAILABILITY</p><h2>{t.availability}</h2><Calendar home={home} lang={lang} start={start} end={end} onSelect={selectDay}/></section>
       <section className="exchange-info-section"><p className="eyebrow">LOCATION</p><h2>{t.location}</h2><div className="exchange-location"><strong>{location(home, lang)}</strong><p>{t.locationNote}</p></div></section>
       <section className="exchange-info-section"><p className="eyebrow">GOOD TO KNOW</p><h2>{t.rules}</h2><p>{t.rulesNote}</p></section>

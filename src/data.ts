@@ -27,6 +27,8 @@ export type Listing = {
   highlight: Localized
   features: Localized[]
   amenities: Localized[]
+  selfCheckIn?: boolean
+  verifiedReviews?: { rating: number; stayCompleted: true }[]
   demo: true
 }
 
@@ -48,7 +50,8 @@ export const listings: Listing[] = [
     guests: 2, bedrooms: 1, bathrooms: 1, beds: 1, area: 72, terms: ['day'], management: 'operated', exchangeAuthorized: true, exchangeOpen: true,
     price: 2800, currency: 'THB', priceUnit: 'day', pinned: false, publishedAt: '2026-09-26', highlight: { zh: '开阔海景', en: 'Open sea view' }, demo: true,
     features: [{ zh: '面向海景的明亮起居', en: 'Bright living area facing the sea' }, { zh: '适合双人短住', en: 'A compact stay for two' }],
-    amenities: [{ zh: '海景窗景', en: 'Sea-facing windows' }, { zh: '独立卧室', en: 'Separate bedroom' }, { zh: '空调', en: 'Air conditioning' }, { zh: '无线网络', en: 'Wi-Fi' }],
+    selfCheckIn: true,
+    amenities: [{ zh: '海景窗景', en: 'Sea-facing windows' }, { zh: '独立卧室', en: 'Separate bedroom' }, { zh: '厨房', en: 'Kitchen' }, { zh: '专用工作空间', en: 'Dedicated workspace' }, { zh: '电视', en: 'TV' }, { zh: '电梯', en: 'Lift' }, { zh: '洗衣机', en: 'Washer' }, { zh: '空调', en: 'Air conditioning' }, { zh: '无线网络', en: 'Wi-Fi' }],
   },
   {
     id: 'sanya-garden-villa', city: 'sanya', region: 'haitang',
@@ -61,7 +64,8 @@ export const listings: Listing[] = [
     guests: 6, bedrooms: 3, bathrooms: 3, beds: 3, area: 220, terms: ['day'], management: 'operated', exchangeAuthorized: true, exchangeOpen: true,
     price: 1680, currency: 'CNY', priceUnit: 'day', pinned: true, publishedAt: '2026-09-15', highlight: { zh: '独立庭院', en: 'Private courtyard' }, demo: true,
     features: [{ zh: '庭院与泳池连成开阔空间', en: 'Courtyard and pool open into one space' }, { zh: '三卧布局，适合结伴旅居', en: 'Three bedrooms for a shared stay' }],
-    amenities: [{ zh: '庭院', en: 'Courtyard' }, { zh: '泳池', en: 'Pool' }, { zh: '独立卧室', en: 'Separate bedrooms' }, { zh: '空调', en: 'Air conditioning' }],
+    selfCheckIn: true,
+    amenities: [{ zh: '庭院', en: 'Courtyard' }, { zh: '泳池', en: 'Pool' }, { zh: '厨房', en: 'Kitchen' }, { zh: '免费停车位', en: 'Free parking' }, { zh: '专用工作空间', en: 'Dedicated workspace' }, { zh: '电视', en: 'TV' }, { zh: '洗衣机', en: 'Washer' }, { zh: '独立卧室', en: 'Separate bedrooms' }, { zh: '空调', en: 'Air conditioning' }, { zh: '无线网络', en: 'Wi-Fi' }],
   },
   {
     id: 'beihai-coastal-flat', city: 'beihai', region: 'yintan',
@@ -85,7 +89,8 @@ export const listings: Listing[] = [
     guests: 4, bedrooms: 2, bathrooms: 2, beds: 2, area: 102, terms: ['day'], management: 'operated', exchangeAuthorized: true, exchangeOpen: true,
     price: 3500, currency: 'THB', priceUnit: 'day', pinned: false, publishedAt: '2026-10-02', highlight: { zh: '城市与海景', en: 'City and sea views' }, demo: true,
     features: [{ zh: '双卧室与独立起居区', en: 'Two bedrooms and a separate living space' }, { zh: '面向城市的阳台', en: 'Balcony overlooking the city' }],
-    amenities: [{ zh: '阳台', en: 'Balcony' }, { zh: '起居室', en: 'Living area' }, { zh: '空调', en: 'Air conditioning' }, { zh: '无线网络', en: 'Wi-Fi' }],
+    selfCheckIn: true,
+    amenities: [{ zh: '阳台', en: 'Balcony' }, { zh: '起居室', en: 'Living area' }, { zh: '厨房', en: 'Kitchen' }, { zh: '专用工作空间', en: 'Dedicated workspace' }, { zh: '电视', en: 'TV' }, { zh: '电梯', en: 'Lift' }, { zh: '洗衣机', en: 'Washer' }, { zh: '空调', en: 'Air conditioning' }, { zh: '无线网络', en: 'Wi-Fi' }],
   },
   {
     id: 'pattaya-jomtien-pool-villa', city: 'pattaya', region: 'jomtien',
@@ -96,7 +101,8 @@ export const listings: Listing[] = [
     guests: 6, bedrooms: 3, bathrooms: 3, beds: 3, area: 235, terms: ['day'], management: 'operated', exchangeAuthorized: true, exchangeOpen: true,
     price: 8900, currency: 'THB', priceUnit: 'day', pinned: false, publishedAt: '2026-09-29', highlight: { zh: '独立泳池', en: 'Private pool' }, demo: true,
     features: [{ zh: '室内空间连通庭院', en: 'Living area opens to the courtyard' }, { zh: '适合多人短住', en: 'Room for a shared short stay' }],
-    amenities: [{ zh: '独立泳池', en: 'Private pool' }, { zh: '庭院', en: 'Courtyard' }, { zh: '空调', en: 'Air conditioning' }, { zh: '无线网络', en: 'Wi-Fi' }],
+    selfCheckIn: true,
+    amenities: [{ zh: '独立泳池', en: 'Private pool' }, { zh: '庭院', en: 'Courtyard' }, { zh: '厨房', en: 'Kitchen' }, { zh: '免费停车位', en: 'Free parking' }, { zh: '专用工作空间', en: 'Dedicated workspace' }, { zh: '电视', en: 'TV' }, { zh: '洗衣机', en: 'Washer' }, { zh: '空调', en: 'Air conditioning' }, { zh: '无线网络', en: 'Wi-Fi' }],
   },
   {
     id: 'sanya-yalong-apartment', city: 'sanya', region: 'yalo',
@@ -107,7 +113,8 @@ export const listings: Listing[] = [
     guests: 4, bedrooms: 2, bathrooms: 2, beds: 2, area: 118, terms: ['day'], management: 'operated', exchangeAuthorized: true, exchangeOpen: true,
     price: 980, currency: 'CNY', priceUnit: 'day', pinned: false, publishedAt: '2026-10-01', highlight: { zh: '山海露台', en: 'Hillside terrace' }, demo: true,
     features: [{ zh: '露台衔接客餐厅', en: 'Terrace extends the living area' }, { zh: '适合双人或家庭', en: 'Flexible stay for couples or families' }],
-    amenities: [{ zh: '露台', en: 'Terrace' }, { zh: '起居室', en: 'Living area' }, { zh: '空调', en: 'Air conditioning' }, { zh: '无线网络', en: 'Wi-Fi' }],
+    selfCheckIn: true,
+    amenities: [{ zh: '露台', en: 'Terrace' }, { zh: '起居室', en: 'Living area' }, { zh: '厨房', en: 'Kitchen' }, { zh: '专用工作空间', en: 'Dedicated workspace' }, { zh: '电视', en: 'TV' }, { zh: '电梯', en: 'Lift' }, { zh: '洗衣机', en: 'Washer' }, { zh: '空调', en: 'Air conditioning' }, { zh: '无线网络', en: 'Wi-Fi' }],
   },
   {
     id: 'beihai-qiaogang-stay', city: 'beihai', region: 'qiaogang',
@@ -118,7 +125,8 @@ export const listings: Listing[] = [
     guests: 4, bedrooms: 2, bathrooms: 1, beds: 2, area: 88, terms: ['day'], management: 'operated', exchangeAuthorized: true, exchangeOpen: true,
     price: 680, currency: 'CNY', priceUnit: 'day', pinned: false, publishedAt: '2026-09-30', highlight: { zh: '窗外海景', en: 'Coastal outlook' }, demo: true,
     features: [{ zh: '窗边阅读与休憩角落', en: 'A quiet corner by the window' }, { zh: '双卧短住布局', en: 'Two-bedroom short-stay layout' }],
-    amenities: [{ zh: '海景窗景', en: 'Sea-facing windows' }, { zh: '起居室', en: 'Living area' }, { zh: '空调', en: 'Air conditioning' }, { zh: '无线网络', en: 'Wi-Fi' }],
+    selfCheckIn: true,
+    amenities: [{ zh: '海景窗景', en: 'Sea-facing windows' }, { zh: '起居室', en: 'Living area' }, { zh: '厨房', en: 'Kitchen' }, { zh: '专用工作空间', en: 'Dedicated workspace' }, { zh: '电视', en: 'TV' }, { zh: '电梯', en: 'Lift' }, { zh: '洗衣机', en: 'Washer' }, { zh: '空调', en: 'Air conditioning' }, { zh: '无线网络', en: 'Wi-Fi' }],
   },
   {
     id: 'pattaya-north-monthly', city: 'pattaya', region: 'north',
