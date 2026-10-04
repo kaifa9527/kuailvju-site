@@ -36,6 +36,14 @@ export function canExchange(listing: ExchangeListing): boolean {
   return listing.management === 'operated' && listing.exchangeAuthorized && listing.exchangeOpen
 }
 
+export function sortFeaturedListings<T extends { id: string; pinned: boolean; publishedAt: string }>(items: readonly T[]): T[] {
+  return [...items].sort((a, b) =>
+    Number(b.pinned) - Number(a.pinned) ||
+    b.publishedAt.localeCompare(a.publishedAt) ||
+    a.id.localeCompare(b.id),
+  )
+}
+
 export function formatPrice(listing: PricedListing, language: Language): string {
   const money = new Intl.NumberFormat(language === 'zh' ? 'zh-CN' : 'en-US', {
     style: 'currency',

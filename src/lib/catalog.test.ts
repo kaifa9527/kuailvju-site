@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { canExchange, estimateLeaseMoveIn, filterListings, formatPrice } from './catalog.ts'
+import { canExchange, estimateLeaseMoveIn, filterListings, formatPrice, sortFeaturedListings } from './catalog.ts'
 
 const sample = [
   { id: 'a', city: 'pattaya', region: 'jomtien', terms: ['day', 'month'], management: 'operated', exchangeAuthorized: true, exchangeOpen: true, price: 2800, currency: 'THB', priceUnit: 'day' },
@@ -22,6 +22,16 @@ test('canExchange requires operated management, owner authorization and open sta
   assert.equal(canExchange(sample[0]), true)
   assert.equal(canExchange(sample[1]), false)
   assert.equal(canExchange(sample[2]), false)
+})
+
+test('featured order keeps pinned homes first, then newest, without changing source order', () => {
+  const homes = [
+    { id: 'older', pinned: false, publishedAt: '2026-09-01' },
+    { id: 'newest', pinned: false, publishedAt: '2026-10-03' },
+    { id: 'pinned', pinned: true, publishedAt: '2026-08-01' },
+  ]
+  assert.deepEqual(sortFeaturedListings(homes).map(item => item.id), ['pinned', 'newest', 'older'])
+  assert.deepEqual(homes.map(item => item.id), ['older', 'newest', 'pinned'])
 })
 
 test('formatPrice shows the listing currency and price unit', () => {

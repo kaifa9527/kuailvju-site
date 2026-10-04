@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { cities, listings, type Listing, type Term } from './data'
-import { canExchange, estimateLeaseMoveIn, filterListings, formatPrice, type Language, type LeasePaymentOption } from './lib/catalog'
+import { canExchange, estimateLeaseMoveIn, filterListings, formatPrice, sortFeaturedListings, type Language, type LeasePaymentOption } from './lib/catalog'
 
 type Filters = { city: string; region: string; term: string }
 type Route = { page: string; id?: string; mode?: string; filters: Filters }
@@ -9,7 +9,7 @@ const asset = (path: string) => `${import.meta.env.BASE_URL}${path.replace(/^\//
 
 const words = {
   zh: {
-    rent: '房屋租赁', exchange: '旅居置换', manage: '物业托管', overview: '托管总览', explore: '探索房源', more: '了解详情',
+    rent: '房屋租赁', exchange: '旅居置换', manage: '物业托管', explore: '探索房源', more: '了解详情',
     preview: '页面示意 · 暂未开放真实预订', menu: '菜单', search: '查找房源', city: '城市', area: '区域', stay: '租期',
     allCities: '全部城市', allAreas: '全部区域', allTerms: '全部租期', day: '日租', month: '月租', quarter: '季租', year: '年租',
     results: '精选房源', reset: '清除筛选', noResult: '没有匹配的示意房源', noResultSub: '试试更换城市或租期。真实房源上线后，选择会持续增加。',
@@ -17,9 +17,20 @@ const words = {
     unavailable: '当前仅展示页面体验，尚未接入真实房源和申请服务。我们不会在此版本收集您的联系方式。',
     ineligible: '仅委托经营房源的业主可申请旅居置换。此房源未加入委托经营置换房源池。',
     understood: '我知道了', back: '返回房源', ready: '委托经营 · 可申请置换', noExchange: '暂不开放置换',
-    occupants: '可住', rooms: '卧室', baths: '卫生间', beds: '床位', size: '面积', experience: '居住体验', terms: '可选租期',
+    occupants: '可住', room: '卧室', rooms: '卧室', baths: '卫生间', beds: '床位', size: '面积', experience: '居住体验', terms: '可选租期',
     quickRent: '房屋租赁', quickExchange: '旅居置换', quickManage: '物业托管',
     sampleInventory: '以下房源及参数为页面示意，真实房源与可订日期待核验上线。',
+    pinned: '置顶', exchangeBadge: '置换示意', exchangeMayWaive: '符合条件可免住宿费', exchangeCostsBrief: '保洁费 + 押金 + 水电',
+    exchangeSectionNote: '仅委托经营签约业主可申请；每次入住另付 ¥500 保洁费、¥1,000 可退押金，水电据实结算。芭提雅按确认时的等值泰铢收取。',
+    homeManageNote: '委托租赁、委托经营、委托看护。选一种适合您房屋现状的方式。',
+    registrationTitle: '登记房源意向', serviceScope: '服务与收费', registrationPreview: '登记表单示意 · 暂不接收真实资料',
+    registrationNotice: '此页面仅供查看登记字段。电话与邮箱暂未开放填写，网站不会保存或发送资料。',
+    registrationUnavailable: '登记系统尚未上线。当前页面不接收、保存或发送任何业主资料。',
+    propertyCity: '房源城市', propertyRegion: '所在区域', propertyType: '房屋类型', propertySize: '建筑面积（m²）',
+    contactPhone: '联系电话', contactEmail: '联系邮箱', apartment: '公寓', villa: '别墅', chooseOne: '请选择', registrationButton: '登记入口预览', registerAction: '查看登记信息', registrationDisabledPlaceholder: '正式开放后填写',
+    leasingSteps: ['评估房源', '签约上架', '招租成交', '收租对账'],
+    operationSteps: ['评估授权', '运营出租', '收益对账', '符合条件后申请置换'],
+    careSteps: ['选择服务', '每周巡检', '拍照留档', '查看报告'],
     viewPhotos: '查看示意图片', sampleSpecs: '配置示意', amenities: '空间与设施',
     feeTitle: '费用先看清', baseRent: '示意房费', zeroAgency: '租客中介费', utilitiesActual: '水电按实际用量结算',
     datePending: '真实可订日期暂未开放查询；提交或付款前须再次核对房态及最终报价。',
@@ -31,9 +42,8 @@ const words = {
     exchangeThai: '芭提雅费用按确认时锁定的等值泰铢收取。',
     listingRules: '入住与房屋规则', listingRulesPending: '入住退房时间、宠物、吸烟及取消条款，在真实房源核验后逐项公布。',
     intro: '从一处好房，开启下一段生活。', homeNote: '选择城市与租期，先看好房。每一次入住，都有认真回应。',
-    guide: '三种服务，一目了然', guideSub: '租住、置换、托管，从需求出发，快速找到合适的入口。',
+    guide: '三种服务，一目了然',
     cityNote: '目前开放芭提雅、三亚、北海。更多城市将逐步加入。',
-    bottomCta: '让闲置房，成为下一段生活的起点。', bottomSub: '从房屋托管开始，让资产被妥善照看，也让旅居拥有更多可能。',
     rentalLine: '好房源，心服务。', exchangeLine: '一房托管，旅居世界。', manageLine: '专业、靠谱，知托付。',
     eligibility: '谁可以置换？', eligibilityText: '仅已签约委托经营、并加入置换房源池的业主，可向另一套委托经营房源发起申请。双方匿名确认，平台协调履约。',
     twoHomes: '两套房源，并列比较', twoHomesSub: '房型、面积、配置与可住日期放在同一画面；双方只做同意、拒绝或修改时间的选择。',
@@ -43,20 +53,20 @@ const words = {
     separate: '双方入住日期可以不同', separateSub: '平台跟踪两个独立入住段，确认房源可用、交接与退房结算。',
     choose: '选择适合房屋的托管方式', manageIntro: '从稳定出租，到专业经营或定期看护，权责、收益与服务清晰可见。',
     lease: '委托租赁', operation: '委托经营', care: '委托看护',
-    leaseBlurb: '免托管费展示与招租。租客免中介费，房东按选定方式承担费用。',
+    leaseBlurb: '免费展示与招租。租客免中介费，成交后由房东按租期支付佣金。',
     operationBlurb: '平台负责经营与服务。日租扣除约定直接运营成本后，平台 30%，房东 70%。业主可申请旅居置换。',
     careBlurb: '空置房定期照看。每周通风、检查、电器通电保护，并留存拍照记录。',
-    leaseDetail: '租赁合作可选择房东支付佣金，或约定房东固定到手租金。具体权利义务在私密签约环节确认。',
-    leaseFees: '房东付佣金：少于 6 个月为月租金的 20%；整 6 个月为半个月租金；超过 6 个月为一个月租金。亦可约定固定到手租金，出租差额归平台。',
-    leaseTerms: '租客免中介费，可选押一付二或押二付一；水电由租客按实际使用承担。',
-    operationDetail: '运营成本、结算周期与授权范围在签约前逐项确认。仅经业主授权且符合标准的房源加入置换池。',
+    leaseDetail: '免费上架与招租，成交后由房东按租期支付约定佣金；带看、签约及租务进度可跟踪。',
+    leaseFees: '房东付佣金：少于 6 个月为月租金的 20%；整 6 个月为半个月租金；超过 6 个月为一个月租金。',
+    leaseTerms: '租客免中介费；符合租期条件时可选押一付二或押二付一，水电由租客按实际使用承担。',
+    operationDetail: '平台负责出租经营、现场服务与收益对账。按日计价房源扣除约定直接成本后平台 30%、房东 70%；符合条件的业主可申请旅居置换。按月经营可另评估固定到手租金方案。',
     careDetail: '公寓与别墅分别报价。基础巡检之外，可按需组合升级项目。',
     careMenu: '可选升级服务', careItems: ['园林绿化修剪', '泳池维护', '深度清洁', '空调与除湿保养', '虫害防治', '软装与布草维护', '台风雨季专项巡检', '离家前封存与返家前准备'],
     termsNote: '具体价格、范围与服务记录，以当地方案和私密签约内容为准。',
     language: '语言', close: '关闭', footer: '快旅居 · 房屋租赁与托管', legal: '这是设计与流程预览。图像、房源及价格均为示意，不能据此预订或交易。',
   },
   en: {
-    rent: 'Homes', exchange: 'Stay Exchange', manage: 'Property Care', overview: 'Overview', explore: 'Explore homes', more: 'View details',
+    rent: 'Homes', exchange: 'Stay Exchange', manage: 'Property Care', explore: 'Explore homes', more: 'View details',
     preview: 'Concept preview · No live bookings', menu: 'Menu', search: 'Search', city: 'City', area: 'Area', stay: 'Stay',
     allCities: 'All cities', allAreas: 'All areas', allTerms: 'All stays', day: 'Daily', month: 'Monthly', quarter: 'Quarterly', year: 'Yearly',
     results: 'Featured homes', reset: 'Clear filters', noResult: 'No concept homes match', noResultSub: 'Try a different city or stay length. More choices will appear when live inventory launches.',
@@ -64,9 +74,20 @@ const words = {
     unavailable: 'This is a design preview. Live homes and applications are not connected yet. This version does not collect contact details.',
     ineligible: 'Stay exchange is available only to owners of homes under an active operation agreement. This home is not in the exchange pool.',
     understood: 'Got it', back: 'Back to homes', ready: 'Managed operation · Exchange eligible', noExchange: 'Exchange unavailable',
-    occupants: 'Sleeps', rooms: 'Bedrooms', baths: 'Bathrooms', beds: 'Beds', size: 'Area', experience: 'The space', terms: 'Stay options',
+    occupants: 'Sleeps', room: 'Bedroom', rooms: 'Bedrooms', baths: 'Bathrooms', beds: 'Beds', size: 'Area', experience: 'The space', terms: 'Stay options',
     quickRent: 'Rent homes', quickExchange: 'Stay exchange', quickManage: 'Property care',
     sampleInventory: 'Homes and details below are illustrative. Live inventory and dates require verification.',
+    pinned: 'Pinned', exchangeBadge: 'Exchange concept', exchangeMayWaive: 'Eligible stays may waive rent', exchangeCostsBrief: 'Cleaning + deposit + utilities',
+    exchangeSectionNote: 'Only owners under active Full Management agreements may apply. Each stay still requires a ¥500 cleaning fee, ¥1,000 refundable deposit and actual utilities. Pattaya charges the locked THB equivalent.',
+    homeManageNote: 'Leasing, full management or home care. Choose the service that fits your property.',
+    registrationTitle: 'Register a property enquiry', serviceScope: 'Service & fees', registrationPreview: 'Form preview · No real enquiries collected',
+    registrationNotice: 'This form shows the planned fields only. Phone and email entry are disabled; nothing is stored or sent.',
+    registrationUnavailable: 'Registration is not connected yet. This page does not collect, store or send owner details.',
+    propertyCity: 'Property city', propertyRegion: 'Area', propertyType: 'Property type', propertySize: 'Floor area (m²)',
+    contactPhone: 'Phone', contactEmail: 'Email', apartment: 'Apartment', villa: 'Villa', chooseOne: 'Select', registrationButton: 'Preview registration', registerAction: 'View registration fields', registrationDisabledPlaceholder: 'Available after launch',
+    leasingSteps: ['Assess home', 'Sign & list', 'Find tenant', 'Reconcile rent'],
+    operationSteps: ['Assess & authorize', 'Operate stays', 'Review earnings', 'Unlock exchange if eligible'],
+    careSteps: ['Choose care', 'Weekly visit', 'Photo record', 'Review report'],
     viewPhotos: 'View concept images', sampleSpecs: 'Illustrative details', amenities: 'Space & amenities',
     feeTitle: 'See the costs first', baseRent: 'Sample rent', zeroAgency: 'Tenant agency fee', utilitiesActual: 'Utilities billed by actual use',
     datePending: 'Live dates are not connected yet. Availability and final quotes must be checked before applying or paying.',
@@ -78,9 +99,8 @@ const words = {
     exchangeThai: 'Pattaya collects the locked THB equivalent at confirmation.',
     listingRules: 'Stay & house rules', listingRulesPending: 'Check-in/out times, pets, smoking and cancellation terms will be published after each real home is verified.',
     intro: 'A good home for the next chapter.', homeNote: 'Pick a city and stay length, then discover a place that feels right.',
-    guide: 'Three clear ways to begin', guideSub: 'Rent, exchange or care for a property. Start with what you need.',
+    guide: 'Three clear ways to begin',
     cityNote: 'Now focusing on Pattaya, Sanya and Beihai. More cities will follow.',
-    bottomCta: 'Give an idle home a new purpose.', bottomSub: 'Thoughtful property care can protect your home and open new ways to travel.',
     rentalLine: 'Good homes. Thoughtful service.', exchangeLine: 'One home entrusted. A world to stay in.', manageLine: 'Professional care. Trust well placed.',
     eligibility: 'Who can exchange?', eligibilityText: 'Only owners with an active managed operation agreement and a home admitted to the exchange pool may request another managed home. Both sides decide anonymously; the platform coordinates delivery.',
     twoHomes: 'Two homes, side by side', twoHomesSub: 'Compare layout, size, amenities and dates at a glance. Each owner may accept, decline or suggest new dates without sharing contact details.',
@@ -90,13 +110,13 @@ const words = {
     separate: 'Stay dates may differ', separateSub: 'The platform tracks two separate stays, including availability, handover and checkout.',
     choose: 'Choose the right care for your home', manageIntro: 'From stable leasing to active operation or regular care, understand the service and earning model at a glance.',
     lease: 'Leasing', operation: 'Managed operation', care: 'Home care',
-    leaseBlurb: 'Free listing and leasing support for owners. Tenants pay no agency fee; owners choose the fee arrangement.',
+    leaseBlurb: 'Free listing and leasing support. Tenants pay no agency fee; owners pay commission after a successful lease.',
     operationBlurb: 'We operate the home and serve guests. For daily stays, net proceeds after agreed direct costs split 30% platform / 70% owner. Owners may exchange stays.',
     careBlurb: 'Routine visits to an idle home: weekly ventilation, checks, electrical protection and photo records.',
-    leaseDetail: 'Owners can choose a commission model or a fixed take-home rent. Rights and obligations are confirmed in private signing.',
-    leaseFees: 'Owner-paid commission: under 6 months, 20% of one month’s rent; exactly 6 months, half a month; over 6 months, one month. Owners may instead agree a fixed take-home rent, with the rental difference going to the platform.',
-    leaseTerms: 'Tenants pay no agency fee. Choose one-month deposit with two months’ rent, or two-month deposit with one month’s rent. Tenants pay actual utilities.',
-    operationDetail: 'Direct operating costs, settlement cycle and authority are confirmed before signing. Exchange access requires owner authorization and approval.',
+    leaseDetail: 'Free listing and leasing support. Owners pay the agreed commission only after a successful lease; viewing, signing and rent progress can be tracked.',
+    leaseFees: 'Owner-paid commission: under 6 months, 20% of one month’s rent; exactly 6 months, half a month; over 6 months, one month.',
+    leaseTerms: 'Tenants pay no agency fee. Where the lease term permits, choose one-month deposit with two months’ rent or two-month deposit with one month’s rent. Tenants pay actual utilities.',
+    operationDetail: 'We manage rental operations, on-site service and earnings. For daily stays, agreed direct costs are deducted before the platform receives 30% and the owner 70%. Eligible owners may request stay exchange. Monthly operations may separately assess a fixed take-home rent.',
     careDetail: 'Apartments and villas have different rates. Add services as needed beyond the basic weekly visit.',
     careMenu: 'Optional upgrades', careItems: ['Garden pruning', 'Pool care', 'Deep cleaning', 'AC and dehumidifier care', 'Pest prevention', 'Linen and furnishing care', 'Storm-season checks', 'Pre-arrival preparation'],
     termsNote: 'Final pricing, scope and records follow local proposals and private agreements.',
@@ -136,7 +156,7 @@ function Header({ lang, setLang, route }: { lang: Language; setLang: (v: Languag
       <a className="brand" href="#/" aria-label={lang === 'zh' ? '快旅居首页' : 'Kuai Lü Ju home'}><span className="brand-mark">快</span><span className="brand-name">快旅居<span>KUAI LÜ JU</span></span></a>
       <nav className={`primary-nav ${open ? 'is-open' : ''}`} aria-label={t.menu}>
         {nav.map(item => <a key={item.key} href={item.href} className={route.page === item.key ? 'is-current' : ''} onClick={() => setOpen(false)}>{item.label}</a>)}
-        <details className="nav-management"><summary className={route.page === 'management' ? 'is-current' : ''}>{t.manage}<span aria-hidden="true">⌄</span></summary><div className="management-menu"><a href="#/management" onClick={() => setOpen(false)}>{t.overview}</a><a href="#/management/leasing" onClick={() => setOpen(false)}>{t.lease}</a><a href="#/management/operation" onClick={() => setOpen(false)}>{t.operation}</a><a href="#/management/care" onClick={() => setOpen(false)}>{t.care}</a></div></details>
+        <details className="nav-management"><summary className={route.page === 'management' ? 'is-current' : ''}>{t.manage}<span aria-hidden="true">⌄</span></summary><div className="management-menu"><a href="#/management/leasing" onClick={() => setOpen(false)}>{t.lease}</a><a href="#/management/operation" onClick={() => setOpen(false)}>{t.operation}</a><a href="#/management/care" onClick={() => setOpen(false)}>{t.care}</a></div></details>
       </nav>
       <div className="header-actions">
         <button className="language-switch" onClick={() => setLang(lang === 'zh' ? 'en' : 'zh')} aria-label={`${t.language}: ${lang === 'zh' ? 'English' : '中文'}`}>{lang === 'zh' ? 'EN' : '中'}</button>
@@ -160,24 +180,36 @@ function SearchPanel({ lang, initial, compact = false }: { lang: Language; initi
   </form>
 }
 
-function ListingCard({ listing, lang }: { listing: Listing; lang: Language }) {
+function ListingCard({ listing, lang, context = 'rentals' }: { listing: Listing; lang: Language; context?: 'rentals' | 'exchange' }) {
   const t = words[lang]
   const city = cities.find(c => c.id === listing.city)!
   const region = city.regions.find(r => r.id === listing.region)!
-  return <a className="listing-card" href={`#/listing/${listing.id}`}>
-    <div className="listing-image"><img src={asset(listing.gallery[0].image)} alt={`${listing.title[lang]} — ${t.demo}`} loading="lazy"/><span className="image-label">{t.demo}</span></div>
-    <div className="listing-content"><div className="listing-eyebrow">{city[lang]} · {region[lang]} <span>/{listing.type[lang]}</span></div><h3>{listing.title[lang]}</h3><p>{listing.highlight[lang]} <span>·</span> {listing.bedrooms} {t.rooms.toLowerCase()} <span>·</span> {listing.area} m²</p><div className="listing-terms">{listing.terms.map(term => <span key={term}>{t[term]}</span>)}</div><div className="listing-bottom"><div><small>{t.price}</small><strong>{formatPrice(listing, lang)}</strong></div><span className="circle-arrow" aria-hidden="true">↗</span></div></div>
+  return <a className={`listing-card ${context === 'exchange' ? 'listing-card-exchange' : ''}`} href={`#/listing/${listing.id}`}>
+    <div className="listing-image"><img src={asset(listing.gallery[0].image)} alt={`${listing.title[lang]} — ${t.demo}`} loading="lazy"/><span className="image-label">{t.demo}</span>{listing.pinned && <span className="listing-pinned">{t.pinned}</span>}</div>
+    <div className="listing-content"><div className="listing-eyebrow">{city[lang]} · {region[lang]} <span>/{listing.type[lang]}</span></div><h3>{listing.title[lang]}</h3><p>{listing.highlight[lang]} <span>·</span> {listing.bedrooms} {(listing.bedrooms === 1 ? t.room : t.rooms).toLowerCase()} <span>·</span> {listing.area} m²</p>{context === 'rentals' ? <div className="listing-terms">{listing.terms.map(term => <span key={term}>{t[term]}</span>)}</div> : <div className="listing-terms"><span>{t.exchangeBadge}</span></div>}<div className="listing-bottom"><div><small>{context === 'exchange' ? t.exchangeMayWaive : t.price}</small><strong>{context === 'exchange' ? t.exchangeCostsBrief : formatPrice(listing, lang)}</strong></div><span className="circle-arrow" aria-hidden="true">↗</span></div></div>
   </a>
+}
+
+function ManagementCards({ lang }: { lang: Language }) {
+  const t = words[lang]
+  return <div className="management-grid">
+    <a className="management-card" href="#/management/leasing"><span>01 / SERVICE</span><h3>{t.lease}</h3><p>{t.leaseBlurb}</p><b>{t.more} ↗</b></a>
+    <a className="management-card" href="#/management/operation"><span>02 / SERVICE</span><h3>{t.operation}</h3><p>{t.operationBlurb}</p><b>{t.more} ↗</b></a>
+    <a className="management-card" href="#/management/care"><span>03 / SERVICE</span><h3>{t.care}</h3><p>{t.careBlurb}</p><b>{t.more} ↗</b></a>
+  </div>
 }
 
 function HomePage({ lang }: { lang: Language }) {
   const t = words[lang]
+  const featured = sortFeaturedListings(listings).slice(0, 6)
+  const exchangeHomes = sortFeaturedListings(listings.filter(canExchange)).slice(0, 6)
   return <>
     <div className="mobile-service-nav page-shell" aria-label={t.guide}><a href="#/rentals"><span>01</span>{t.quickRent}</a><a href="#/exchange"><span>02</span>{t.quickExchange}</a><a href="#/management"><span>03</span>{t.quickManage}</a></div>
     <section className="hero page-shell"><div className="hero-copy"><p className="eyebrow">KUAI LÜ JU / HOMES & STAYS</p><h1>{t.rentalLine}</h1><p className="hero-description">{t.intro}<br/>{t.homeNote}</p><p className="city-note">{t.cityNote}</p></div><div className="hero-visual"><img src={asset('/images/pattaya-concept.jpg')} alt={t.demo}/><span>{t.demo} / PATTAYA</span></div></section>
     <div className="search-wrap page-shell"><SearchPanel lang={lang} initial={emptyFilters}/></div>
-    <section className="section page-shell" id="homes"><div className="section-heading"><div><p className="eyebrow">01 / CURATED SPACES</p><h2>{t.results}</h2></div><a className="text-link" href="#/rentals">{t.explore} <span>↗</span></a></div><p className="sample-inventory">{t.sampleInventory}</p><div className="listing-grid">{listings.map(listing => <ListingCard key={listing.id} listing={listing} lang={lang}/>)}</div></section>
-    <section className="closing-section page-shell"><p className="eyebrow">A HOME, WELL CARED FOR</p><h2>{t.bottomCta}</h2><p>{t.bottomSub}</p><a className="button button-outline" href="#/management">{t.manage} <span>↗</span></a></section>
+    <section className="section page-shell home-property-section" id="homes"><div className="section-heading"><div><p className="eyebrow">01 / RENTAL HOMES</p><h2>{t.results}</h2></div><a className="text-link" href="#/rentals">{t.explore} <span>↗</span></a></div><p className="sample-inventory">{t.sampleInventory}</p><div className="listing-grid home-listing-grid">{featured.map(listing => <ListingCard key={listing.id} listing={listing} lang={lang}/>)}</div></section>
+    <section className="section home-exchange-section" id="exchange-homes"><div className="page-shell"><div className="section-heading"><div><p className="eyebrow">02 / STAY EXCHANGE</p><h2>{t.exchange}</h2></div><a className="text-link" href="#/exchange">{t.more} <span>↗</span></a></div><p className="sample-inventory">{t.exchangeSectionNote} {t.sampleInventory}</p><div className="listing-grid home-listing-grid">{exchangeHomes.map(listing => <ListingCard key={listing.id} listing={listing} lang={lang} context="exchange"/>)}</div></div></section>
+    <section className="section page-shell home-management-section" id="property-management"><div className="section-heading"><div><p className="eyebrow">03 / PROPERTY MANAGEMENT</p><h2>{t.manage}</h2></div><a className="text-link" href="#/management">{t.more} <span>↗</span></a></div><p className="sample-inventory">{t.homeManageNote}</p><ManagementCards lang={lang}/></section>
   </>
 }
 
@@ -241,18 +273,48 @@ function ListingPage({ lang, id, onAction }: { lang: Language; id?: string; onAc
 
 function ExchangePage({ lang, onAction }: { lang: Language; onAction: (message: string) => void }) {
   const t = words[lang]
-  return <><section className="page-shell service-hero"><p className="eyebrow">02 / STAY EXCHANGE</p><div className="service-title"><h1>{t.exchangeLine}</h1><p>{t.eligibilityText}</p></div><a className="button button-dark" href="#/rentals">{t.explore} ↗</a></section><section className="exchange-visual page-shell"><div className="compare-image compare-a"><img src={asset('/images/pattaya-concept.jpg')} alt={t.demo}/><span>A / PATTAYA</span></div><div className="compare-center">↔</div><div className="compare-image compare-b"><img src={asset('/images/sanya-concept.jpg')} alt={t.demo}/><span>B / SANYA</span></div></section><section className="page-shell exchange-body"><div className="exchange-lead"><p className="eyebrow">HOW IT WORKS</p><h2>{t.twoHomes}</h2><p>{t.twoHomesSub}</p></div><ol className="steps"><li><span>01</span>{t.step1}</li><li><span>02</span>{t.step2}</li><li><span>03</span>{t.step3}</li><li><span>04</span>{t.step4}</li></ol><div className="exchange-notes"><article><span>01 / ACCESS</span><h3>{t.eligibility}</h3><p>{t.eligibilityText}</p></article><article><span>02 / TIMING</span><h3>{t.separate}</h3><p>{t.separateSub}</p></article><article><span>03 / COST</span><h3>{t.fee}</h3><p>{t.feeBody}</p><p>{t.utility}</p></article></div><button className="button button-dark" onClick={() => onAction(t.unavailable)}>{t.apply} ↗</button></section></>
+  const exchangeHomes = sortFeaturedListings(listings.filter(canExchange))
+  return <>
+    <section className="page-shell service-hero"><p className="eyebrow">02 / STAY EXCHANGE</p><div className="service-title"><h1>{t.exchangeLine}</h1><p>{t.eligibilityText}</p></div><button className="button button-dark" onClick={() => document.getElementById('exchange-list')?.scrollIntoView({ behavior: 'smooth' })}>{t.explore} ↗</button></section>
+    <section className="section page-shell exchange-list-section" id="exchange-list"><div className="section-heading"><div><p className="eyebrow">EXCHANGE HOMES</p><h2>{t.exchange}</h2></div></div><p className="sample-inventory">{t.exchangeSectionNote} {t.sampleInventory}</p><div className="listing-grid">{exchangeHomes.map(listing => <ListingCard key={listing.id} listing={listing} lang={lang} context="exchange"/>)}</div></section>
+    <section className="exchange-visual page-shell"><div className="compare-image compare-a"><img src={asset('/images/pattaya-concept.jpg')} alt={t.demo}/><span>A / PATTAYA</span></div><div className="compare-center">↔</div><div className="compare-image compare-b"><img src={asset('/images/sanya-concept.jpg')} alt={t.demo}/><span>B / SANYA</span></div></section>
+    <section className="page-shell exchange-body"><div className="exchange-lead"><p className="eyebrow">HOW IT WORKS</p><h2>{t.twoHomes}</h2><p>{t.twoHomesSub}</p></div><ol className="steps"><li><span>01</span>{t.step1}</li><li><span>02</span>{t.step2}</li><li><span>03</span>{t.step3}</li><li><span>04</span>{t.step4}</li></ol><div className="exchange-notes"><article><span>01 / ACCESS</span><h3>{t.eligibility}</h3><p>{t.eligibilityText}</p></article><article><span>02 / TIMING</span><h3>{t.separate}</h3><p>{t.separateSub}</p></article><article><span>03 / COST</span><h3>{t.fee}</h3><p>{t.feeBody}</p><p>{t.utility}</p></article></div><button className="button button-dark" onClick={() => onAction(t.unavailable)}>{t.apply} ↗</button></section>
+  </>
+}
+
+function ServiceRegistration({ lang, onAction }: { lang: Language; onAction: (message: string) => void }) {
+  const t = words[lang]
+  const [cityId, setCityId] = useState('')
+  const city = cities.find(item => item.id === cityId)
+  return <form className="service-registration" id="register-property" onSubmit={event => { event.preventDefault(); onAction(t.registrationUnavailable) }}>
+    <p className="eyebrow">ENQUIRY / PREVIEW</p><h2>{t.registrationTitle}</h2><p className="registration-preview">{t.registrationPreview}</p><p className="registration-notice">{t.registrationNotice}</p>
+    <div className="registration-fields">
+      <label>{t.propertyCity}<select value={cityId} onChange={event => setCityId(event.target.value)}><option value="">{t.chooseOne}</option>{cities.map(item => <option key={item.id} value={item.id}>{item[lang]}</option>)}</select></label>
+      <label>{t.propertyRegion}<select key={cityId} defaultValue="" disabled={!city}><option value="">{t.chooseOne}</option>{city?.regions.map(item => <option key={item.id} value={item.id}>{item[lang]}</option>)}</select></label>
+      <label>{t.propertyType}<select defaultValue=""><option value="">{t.chooseOne}</option><option value="apartment">{t.apartment}</option><option value="villa">{t.villa}</option></select></label>
+      <label>{t.propertySize}<input type="number" min="1" inputMode="numeric" placeholder="m²"/></label>
+      <label>{t.contactPhone}<input type="tel" disabled placeholder={t.registrationDisabledPlaceholder}/></label>
+      <label>{t.contactEmail}<input type="email" disabled placeholder={t.registrationDisabledPlaceholder}/></label>
+    </div>
+    <button className="button button-dark" type="submit">{t.registrationButton} ↗</button>
+  </form>
 }
 
 function ManagementPage({ lang, mode, onAction }: { lang: Language; mode?: string; onAction: (message: string) => void }) {
   const t = words[lang]
   const modes = [
-    { id: 'leasing', number: '01', title: t.lease, blurb: t.leaseBlurb, detail: t.leaseDetail },
-    { id: 'operation', number: '02', title: t.operation, blurb: t.operationBlurb, detail: t.operationDetail },
-    { id: 'care', number: '03', title: t.care, blurb: t.careBlurb, detail: t.careDetail },
+    { id: 'leasing', number: '01', title: t.lease, blurb: t.leaseBlurb, detail: t.leaseDetail, steps: t.leasingSteps },
+    { id: 'operation', number: '02', title: t.operation, blurb: t.operationBlurb, detail: t.operationDetail, steps: t.operationSteps },
+    { id: 'care', number: '03', title: t.care, blurb: t.careBlurb, detail: t.careDetail, steps: t.careSteps },
   ]
   const selected = modes.find(item => item.id === mode)
-  return <div className="page-shell management-page"><div className="page-title"><p className="eyebrow">03 / PROPERTY CARE</p><h1>{t.manageLine}</h1><p>{t.manageIntro}</p></div><div className="management-intro"><h2>{t.choose}</h2><p>{t.cityNote}</p></div><div className="management-grid">{modes.map(item => <a className={`management-card ${selected?.id === item.id ? 'selected' : ''}`} href={`#/management/${item.id}`} key={item.id}><span>{item.number} / SERVICE</span><h3>{item.title}</h3><p>{item.blurb}</p><b>{t.more} ↗</b></a>)}</div>{selected && <section className="mode-detail"><div><p className="eyebrow">{selected.number} / SERVICE DETAIL</p><h2>{selected.title}</h2></div><div><p className="lead">{selected.detail}</p>{selected.id === 'leasing' && <div className="mode-facts"><p>{t.leaseFees}</p><p>{t.leaseTerms}</p></div>}{selected.id === 'care' && <><h3>{t.careMenu}</h3><div className="care-menu">{t.careItems.map((item, index) => <span key={item}><i>{String(index + 1).padStart(2, '0')}</i>{item}</span>)}</div></>}{selected.id === 'operation' && <p className="quiet-note">{t.eligibilityText}</p>}<p className="micro-note">{t.termsNote}</p><button className="button button-dark" onClick={() => onAction(t.unavailable)}>{t.contact} ↗</button></div></section>}</div>
+  if (!selected) return <div className="page-shell management-page"><div className="page-title"><p className="eyebrow">03 / PROPERTY CARE</p><h1>{t.manageLine}</h1><p>{t.manageIntro}</p></div><div className="management-intro"><h2>{t.choose}</h2><p>{t.cityNote}</p></div><ManagementCards lang={lang}/></div>
+  return <div className="page-shell management-page management-service-page">
+    <a href="#/management" className="back-link">← {t.manage}</a>
+    <div className="service-specific-hero"><p className="eyebrow">{selected.number} / PROPERTY MANAGEMENT</p><h1>{selected.title}</h1><p>{selected.blurb}</p><button className="text-link text-link-button" onClick={() => document.getElementById('register-property')?.scrollIntoView({ behavior: 'smooth' })}>{t.registerAction} ↗</button></div>
+    <ol className="service-flow">{selected.steps.map((step, index) => <li key={step}><span>{String(index + 1).padStart(2, '0')}</span>{step}</li>)}</ol>
+    <div className="service-detail-layout"><section className="service-summary"><p className="eyebrow">SERVICE / {selected.number}</p><h2>{t.serviceScope}</h2><p className="lead">{selected.detail}</p>{selected.id === 'leasing' && <div className="mode-facts"><p>{t.leaseFees}</p><p>{t.leaseTerms}</p></div>}{selected.id === 'operation' && <p className="mode-fact-note">{t.eligibilityText}</p>}{selected.id === 'care' && <details className="care-disclosure"><summary>{t.careMenu} ↗</summary><div className="care-menu">{t.careItems.map((item, index) => <span key={item}><i>{String(index + 1).padStart(2, '0')}</i>{item}</span>)}</div></details>}<p className="micro-note">{t.termsNote}</p></section><ServiceRegistration key={selected.id} lang={lang} onAction={onAction}/></div>
+  </div>
 }
 
 export default function App() {
