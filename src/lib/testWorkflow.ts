@@ -3,7 +3,13 @@ import type { LeasePaymentOption } from './catalog'
 export type DateRange = { start: string; end: string }
 export type BaseRequest = { id: string; createdAt: string; status: string }
 export type RentalRequest = BaseRequest & { kind: 'rental'; listingId: string; term: string; payment: LeasePaymentOption | 'confirm'; start: string; guests: number; status: 'submitted' | 'reviewing' | 'replied' }
-export type ManagementRequest = BaseRequest & { kind: 'management'; mode: 'leasing' | 'operation' | 'care'; city: string; region: string; propertyType: string; area: number; status: 'submitted' | 'reviewing' | 'replied' }
+export type ManagementRequest = BaseRequest & {
+  kind: 'management'; mode: 'leasing' | 'operation' | 'care'; city: string; region: string; propertyType: string; area: number;
+  floor?: number; totalFloors?: number; bedrooms?: number; livingRooms?: number; bathrooms?: number; handover?: string;
+  renovation?: string; furnishing?: string; appliances?: string; occupancy?: string; rentalMinimum?: string; cooperationModel?: string;
+  expectedMonthlyRent?: number; operationReady?: string; careAddons?: string[]; photoCount?: number; careEstimate?: number;
+  status: 'submitted' | 'reviewing' | 'replied'
+}
 export type ExchangeRequest = BaseRequest & { kind: 'exchange'; sourceId: string; targetId: string; aStay: DateRange; bStay: DateRange; status: 'pending-owner' | 'counter-proposed' | 'owner-accepted' | 'owner-declined' | 'applicant-declined' | 'platform-confirmed'; counterStay?: DateRange }
 export type TestRequest = RentalRequest | ManagementRequest | ExchangeRequest
 export type ExchangeAction = 'accept' | 'decline' | 'counter' | 'confirm'

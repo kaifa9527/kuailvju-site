@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { cities, listings, type Listing, type Term } from './data'
 import { canExchange, estimateLeaseMoveIn, filterListings, formatPrice, sortFeaturedListings, type Language, type LeasePaymentOption } from './lib/catalog'
 import { LineIcon, amenityIcon } from './components/LineIcon'
-import { ExchangeRequestPage, ManagementTestSubmit, RentalRequestPage, TestInbox } from './TestFlows'
+import { ExchangeRequestPage, RentalRequestPage, TestInbox } from './TestFlows'
+import { ManagementPage } from './ManagementPage'
 
 type Filters = { city: string; region: string; term: string }
 type ExchangeFilters = { city: string; region: string; guests: string }
@@ -156,7 +157,7 @@ function Header({ lang, setLang, route }: { lang: Language; setLang: (v: Languag
       <a className="brand" href="#/" aria-label={lang === 'zh' ? '快旅居首页' : 'Kuai Lü Ju home'}><span className="brand-mark">快</span><span className="brand-name">快旅居<span>KUAI LÜ JU</span></span></a>
       <nav className={`primary-nav ${open ? 'is-open' : ''}`} aria-label={t.menu}>
         {nav.map(item => <a key={item.key} href={item.href} className={route.page === item.key ? 'is-current' : ''} onClick={() => setOpen(false)}>{item.label}</a>)}
-        <details className="nav-management"><summary className={route.page === 'management' ? 'is-current' : ''}>{t.manage}<span aria-hidden="true">⌄</span></summary><div className="management-menu"><a href="#/management/leasing" onClick={() => setOpen(false)}>{t.lease}</a><a href="#/management/operation" onClick={() => setOpen(false)}>{t.operation}</a><a href="#/management/care" onClick={() => setOpen(false)}>{t.care}</a></div></details>
+        <a href="#/management" className={route.page === 'management' ? 'is-current' : ''} onClick={() => setOpen(false)}>{t.manage}</a>
       </nav>
       <div className="header-actions">
         <a className="test-desk-link" href="#/test-inbox">{t.testDesk}</a>
@@ -299,44 +300,6 @@ function ExchangePage({ lang }: { lang: Language }) {
     <section className="exchange-visual page-shell"><div className="compare-image compare-a"><img src={asset('/images/pattaya-concept.jpg')} alt={t.demo}/><span>A / PATTAYA</span></div><div className="compare-center">↔</div><div className="compare-image compare-b"><img src={asset('/images/sanya-concept.jpg')} alt={t.demo}/><span>B / SANYA</span></div></section>
     <section className="page-shell exchange-body"><div className="exchange-lead"><p className="eyebrow">HOW IT WORKS</p><h2>{t.twoHomes}</h2><p>{t.twoHomesSub}</p></div><ol className="steps"><li><span>01</span>{t.step1}</li><li><span>02</span>{t.step2}</li><li><span>03</span>{t.step3}</li><li><span>04</span>{t.step4}</li></ol><div className="exchange-notes"><article><span>01 / ACCESS</span><h3>{t.eligibility}</h3><p>{t.eligibilityText}</p></article><article><span>02 / TIMING</span><h3>{t.separate}</h3><p>{t.separateSub}</p></article><article><span>03 / COST</span><h3>{t.fee}</h3><p>{t.feeBody}</p><p>{t.utility}</p></article></div><a className="button button-dark" href="#exchange-list" onClick={event => { event.preventDefault(); document.getElementById('exchange-list')?.scrollIntoView({ behavior: 'smooth' }) }}>{t.explore} ↗</a></section>
   </>
-}
-
-function ServiceRegistration({ lang, mode }: { lang: Language; mode: 'leasing' | 'operation' | 'care' }) {
-  const t = words[lang]
-  const [cityId, setCityId] = useState('')
-  const [regionId, setRegionId] = useState('')
-  const [propertyType, setPropertyType] = useState('')
-  const [area, setArea] = useState('')
-  const city = cities.find(item => item.id === cityId)
-  return <form className="service-registration" id="register-property" onSubmit={event => { event.preventDefault(); if (cityId && regionId && propertyType && Number(area) > 0) ManagementTestSubmit({ mode, city: cityId, region: regionId, propertyType, area: Number(area) }) }}>
-    <p className="eyebrow">ENQUIRY / PREVIEW</p><h2>{t.registrationTitle}</h2><p className="registration-preview">{t.registrationPreview}</p><p className="registration-notice">{t.registrationNotice}</p>
-    <div className="registration-fields">
-      <label>{t.propertyCity}<select required value={cityId} onChange={event => { setCityId(event.target.value); setRegionId('') }}><option value="">{t.chooseOne}</option>{cities.map(item => <option key={item.id} value={item.id}>{item[lang]}</option>)}</select></label>
-      <label>{t.propertyRegion}<select required value={regionId} onChange={event => setRegionId(event.target.value)} disabled={!city}><option value="">{t.chooseOne}</option>{city?.regions.map(item => <option key={item.id} value={item.id}>{item[lang]}</option>)}</select></label>
-      <label>{t.propertyType}<select required value={propertyType} onChange={event => setPropertyType(event.target.value)}><option value="">{t.chooseOne}</option><option value="apartment">{t.apartment}</option><option value="villa">{t.villa}</option></select></label>
-      <label>{t.propertySize}<input required type="number" min="1" inputMode="numeric" placeholder="m²" value={area} onChange={event => setArea(event.target.value)}/></label>
-      <label>{t.contactPhone}<input type="tel" disabled placeholder={t.registrationDisabledPlaceholder}/></label>
-      <label>{t.contactEmail}<input type="email" disabled placeholder={t.registrationDisabledPlaceholder}/></label>
-    </div>
-    <button className="button button-dark" type="submit">{t.registrationButton} ↗</button>
-  </form>
-}
-
-function ManagementPage({ lang, mode }: { lang: Language; mode?: string }) {
-  const t = words[lang]
-  const modes = [
-    { id: 'leasing', number: '01', title: t.lease, blurb: t.leaseBlurb, detail: t.leaseDetail, steps: t.leasingSteps },
-    { id: 'operation', number: '02', title: t.operation, blurb: t.operationBlurb, detail: t.operationDetail, steps: t.operationSteps },
-    { id: 'care', number: '03', title: t.care, blurb: t.careBlurb, detail: t.careDetail, steps: t.careSteps },
-  ]
-  const selected = modes.find(item => item.id === mode)
-  if (!selected) return <div className="page-shell management-page"><div className="page-title"><p className="eyebrow">03 / PROPERTY CARE</p><h1>{t.manageLine}</h1><p>{t.manageIntro}</p></div><div className="management-intro"><h2>{t.choose}</h2><p>{t.cityNote}</p></div><ManagementCards lang={lang}/></div>
-  return <div className="page-shell management-page management-service-page">
-    <a href="#/management" className="back-link">← {t.manage}</a>
-    <div className="service-specific-hero"><p className="eyebrow">{selected.number} / PROPERTY MANAGEMENT</p><h1>{selected.title}</h1><p>{selected.blurb}</p><button className="text-link text-link-button" onClick={() => document.getElementById('register-property')?.scrollIntoView({ behavior: 'smooth' })}>{t.registerAction} ↗</button></div>
-    <ol className="service-flow">{selected.steps.map((step, index) => <li key={step}><span>{String(index + 1).padStart(2, '0')}</span>{step}</li>)}</ol>
-    <div className="service-detail-layout"><section className="service-summary"><p className="eyebrow">SERVICE / {selected.number}</p><h2>{t.serviceScope}</h2><p className="lead">{selected.detail}</p>{selected.id === 'leasing' && <div className="mode-facts"><p>{t.leaseFees}</p><p>{t.leaseTerms}</p></div>}{selected.id === 'operation' && <p className="mode-fact-note">{t.eligibilityText}</p>}{selected.id === 'care' && <details className="care-disclosure"><summary>{t.careMenu} ↗</summary><div className="care-menu">{t.careItems.map((item, index) => <span key={item}><i>{String(index + 1).padStart(2, '0')}</i>{item}</span>)}</div></details>}<p className="micro-note">{t.termsNote}</p></section><ServiceRegistration key={selected.id} lang={lang} mode={selected.id as 'leasing' | 'operation' | 'care'}/></div>
-  </div>
 }
 
 export default function App() {
