@@ -5,8 +5,10 @@ import { LineIcon, amenityIcon } from './components/LineIcon'
 import { ExchangeRequestPage, ManagementTestSubmit, RentalRequestPage, TestInbox } from './TestFlows'
 
 type Filters = { city: string; region: string; term: string }
+type ExchangeFilters = { city: string; region: string; guests: string }
 type Route = { page: string; id?: string; mode?: string; filters: Filters }
 const emptyFilters: Filters = { city: 'all', region: 'all', term: 'all' }
+const emptyExchangeFilters: ExchangeFilters = { city: 'all', region: 'all', guests: 'all' }
 const asset = (path: string) => `${import.meta.env.BASE_URL}${path.replace(/^\//, '')}`
 
 const words = {
@@ -14,7 +16,7 @@ const words = {
     rent: '房屋租赁', exchange: '旅居置换', manage: '物业托管', explore: '探索房源', more: '了解详情',
     preview: '置换资格提示', menu: '菜单', search: '查找房源', city: '城市', area: '区域', stay: '租期',
     allCities: '全部城市', allAreas: '全部区域', allTerms: '全部租期', day: '日租', month: '月租', quarter: '季租', year: '年租',
-    results: '精选房源', reset: '清除筛选', noResult: '没有匹配的示意房源', noResultSub: '试试更换城市或租期。真实房源上线后，选择会持续增加。',
+    results: '精选房源', exchangeResults: '可置换房源', exchangeIntro: '仅委托经营业主可申请。选好目标房源，发起双房源互换。', guestsFilter: '入住人数', allGuests: '不限人数', guestsAtLeast: '至少可住', reset: '清除筛选', noResult: '没有匹配的示意房源', noResultSub: '试试更换城市或租期。真实房源上线后，选择会持续增加。', exchangeNoResultSub: '试试更换城市、区域或入住人数。',
     demo: '示意房源', price: '示意价格', contact: '咨询房源', apply: '申请置换',
     ineligible: '仅委托经营房源的业主可申请旅居置换。此房源未加入委托经营置换房源池。',
     understood: '我知道了', back: '返回房源', ready: '委托经营 · 可申请置换', noExchange: '暂不开放置换',
@@ -69,7 +71,7 @@ const words = {
     rent: 'Homes', exchange: 'Stay Exchange', manage: 'Property Care', explore: 'Explore homes', more: 'View details',
     preview: 'Exchange eligibility', menu: 'Menu', search: 'Search', city: 'City', area: 'Area', stay: 'Stay',
     allCities: 'All cities', allAreas: 'All areas', allTerms: 'All stays', day: 'Daily', month: 'Monthly', quarter: 'Quarterly', year: 'Yearly',
-    results: 'Featured homes', reset: 'Clear filters', noResult: 'No concept homes match', noResultSub: 'Try a different city or stay length. More choices will appear when live inventory launches.',
+    results: 'Featured homes', exchangeResults: 'Exchange homes', exchangeIntro: 'For managed-operation owners. Choose a home and request a direct exchange.', guestsFilter: 'Guests', allGuests: 'Any number', guestsAtLeast: 'Sleeps at least', reset: 'Clear filters', noResult: 'No concept homes match', noResultSub: 'Try a different city or stay length. More choices will appear when live inventory launches.', exchangeNoResultSub: 'Try another city, area or guest count.',
     demo: 'Concept home', price: 'Sample price', contact: 'Ask about this home', apply: 'Request exchange',
     ineligible: 'Stay exchange is available only to owners of homes under an active operation agreement. This home is not in the exchange pool.',
     understood: 'Got it', back: 'Back to homes', ready: 'Managed operation · Exchange eligible', noExchange: 'Exchange unavailable',
@@ -273,9 +275,27 @@ function ListingPage({ lang, id, onAction }: { lang: Language; id?: string; onAc
 function ExchangePage({ lang }: { lang: Language }) {
   const t = words[lang]
   const exchangeHomes = sortFeaturedListings(listings.filter(canExchange))
+  const [draft, setDraft] = useState<ExchangeFilters>(emptyExchangeFilters)
+  const [filters, setFilters] = useState<ExchangeFilters>(emptyExchangeFilters)
+  const selectedCity = cities.find(city => city.id === draft.city)
+  const found = exchangeHomes.filter(listing =>
+    (filters.city === 'all' || listing.city === filters.city) &&
+    (filters.region === 'all' || listing.region === filters.region) &&
+    (filters.guests === 'all' || listing.guests >= Number(filters.guests)))
+  const hasFilters = filters.city !== 'all' || filters.region !== 'all' || filters.guests !== 'all'
   return <>
-    <section className="page-shell service-hero"><p className="eyebrow">02 / STAY EXCHANGE</p><div className="service-title"><h1>{t.exchangeLine}</h1><p>{t.eligibilityText}</p></div><button className="button button-dark" onClick={() => document.getElementById('exchange-list')?.scrollIntoView({ behavior: 'smooth' })}>{t.explore} ↗</button></section>
-    <section className="section page-shell exchange-list-section" id="exchange-list"><div className="section-heading"><div><p className="eyebrow">EXCHANGE HOMES</p><h2>{t.exchange}</h2></div></div><p className="sample-inventory">{t.exchangeSectionNote} {t.sampleInventory}</p><div className="listing-grid">{exchangeHomes.map(listing => <ListingCard key={listing.id} listing={listing} lang={lang} context="exchange"/>)}</div></section>
+    <section className="page-shell page-top exchange-catalog-page" id="exchange-list">
+      <div className="page-title"><p className="eyebrow">02 / STAY EXCHANGE</p><h1>{t.exchangeLine}</h1><p>{t.exchangeIntro}</p></div>
+      <form className="search-panel search-compact" onSubmit={event => { event.preventDefault(); setFilters(draft) }}>
+        <label><span>{t.city}</span><select value={draft.city} onChange={event => setDraft(previous => ({ ...previous, city: event.target.value, region: 'all' }))}><option value="all">{t.allCities}</option>{cities.map(city => <option key={city.id} value={city.id}>{city[lang]}</option>)}</select></label>
+        <label><span>{t.area}</span><select value={draft.region} onChange={event => setDraft(previous => ({ ...previous, region: event.target.value }))}><option value="all">{t.allAreas}</option>{selectedCity?.regions.map(region => <option key={region.id} value={region.id}>{region[lang]}</option>)}</select></label>
+        <label><span>{t.guestsFilter}</span><select value={draft.guests} onChange={event => setDraft(previous => ({ ...previous, guests: event.target.value }))}><option value="all">{t.allGuests}</option>{[2, 4, 6, 8].map(count => <option key={count} value={count}>{t.guestsAtLeast} {count}</option>)}</select></label>
+        <button className="button button-dark search-submit" type="submit"><span>{t.search}</span><span aria-hidden="true">↗</span></button>
+      </form>
+      <div className="results-bar"><div><h2>{t.exchangeResults}</h2><span>{String(found.length).padStart(2, '0')} / {String(exchangeHomes.length).padStart(2, '0')}</span></div>{hasFilters && found.length > 0 && <button className="text-link text-link-button" onClick={() => { setDraft(emptyExchangeFilters); setFilters(emptyExchangeFilters) }}>{t.reset} ↗</button>}</div>
+      <p className="sample-inventory">{t.sampleInventory}</p>
+      {found.length ? <div className="listing-grid">{found.map(listing => <ListingCard key={listing.id} listing={listing} lang={lang} context="exchange"/>)}</div> : <div className="empty-state"><h3>{t.noResult}</h3><p>{t.exchangeNoResultSub}</p><button className="button button-dark" onClick={() => { setDraft(emptyExchangeFilters); setFilters(emptyExchangeFilters) }}>{t.reset} ↗</button></div>}
+    </section>
     <section className="exchange-visual page-shell"><div className="compare-image compare-a"><img src={asset('/images/pattaya-concept.jpg')} alt={t.demo}/><span>A / PATTAYA</span></div><div className="compare-center">↔</div><div className="compare-image compare-b"><img src={asset('/images/sanya-concept.jpg')} alt={t.demo}/><span>B / SANYA</span></div></section>
     <section className="page-shell exchange-body"><div className="exchange-lead"><p className="eyebrow">HOW IT WORKS</p><h2>{t.twoHomes}</h2><p>{t.twoHomesSub}</p></div><ol className="steps"><li><span>01</span>{t.step1}</li><li><span>02</span>{t.step2}</li><li><span>03</span>{t.step3}</li><li><span>04</span>{t.step4}</li></ol><div className="exchange-notes"><article><span>01 / ACCESS</span><h3>{t.eligibility}</h3><p>{t.eligibilityText}</p></article><article><span>02 / TIMING</span><h3>{t.separate}</h3><p>{t.separateSub}</p></article><article><span>03 / COST</span><h3>{t.fee}</h3><p>{t.feeBody}</p><p>{t.utility}</p></article></div><a className="button button-dark" href="#exchange-list" onClick={event => { event.preventDefault(); document.getElementById('exchange-list')?.scrollIntoView({ behavior: 'smooth' }) }}>{t.explore} ↗</a></section>
   </>

@@ -109,8 +109,9 @@ h1, h2, h3 { min-width: 0; overflow-wrap: anywhere; font-weight: 500; line-heigh
 .footer-bottom p { max-width: 460px; margin: 0; }
 .page-top, .detail-page, .management-page { padding-block: var(--space-16) clamp(80px, 10vw, 140px); }
 .page-title { max-width: 740px; margin-bottom: var(--space-12); }
-.page-title h1, .service-title h1 { margin-bottom: var(--space-5); font-size: clamp(48px, 7vw, 90px); letter-spacing: -.07em; }
+.page-title h1 { margin-bottom: var(--space-5); font-size: clamp(48px, 7vw, 90px); letter-spacing: -.07em; }
 .page-title > p:last-child { max-width: 560px; color: var(--color-muted); font-size: var(--text-lg); }
+.exchange-catalog-page .page-title { max-width: 1120px; }
 .search-compact { margin-bottom: var(--space-16); box-shadow: none; }
 .results-bar { display: flex; align-items: end; justify-content: space-between; gap: var(--space-6); margin-bottom: var(--space-6); border-bottom: var(--rule-light); padding-bottom: var(--space-5); }
 .results-bar > div { display: flex; align-items: baseline; gap: var(--space-4); }
@@ -190,10 +191,6 @@ h1, h2, h3 { min-width: 0; overflow-wrap: anywhere; font-weight: 500; line-heigh
 .booking-exchange .button { width: 100%; }
 .exchange-ineligible { margin-top: var(--space-4); border: 0; padding: 8px 0; background: transparent; color: var(--color-muted); font-size: var(--text-xs); text-decoration: underline; }
 .booking-card > .micro-note { margin: var(--space-5) 0 0; font-size: var(--text-xs); }
-.service-hero { padding-top: clamp(70px, 9vw, 130px); padding-bottom: var(--space-16); }
-.service-title { display: flex; align-items: end; justify-content: space-between; gap: var(--space-10); }
-.service-title h1 { flex: 1.2; max-width: 780px; }
-.service-title p { flex: .8; max-width: 390px; color: var(--color-muted); }
 .exchange-visual { display: grid; grid-template-columns: minmax(0, 1fr) 80px minmax(0, 1fr); align-items: center; }
 .compare-image { position: relative; height: clamp(200px, 30vw, 440px); overflow: hidden; }
 .compare-image img { height: 100%; object-fit: cover; }
@@ -398,7 +395,7 @@ h1, h2, h3 { min-width: 0; overflow-wrap: anywhere; font-weight: 500; line-heigh
   .footer-bottom > * { display: block; margin-bottom: var(--space-3); }
   .page-top, .detail-page, .management-page { padding-block: var(--space-10) 80px; }
   .page-title { margin-bottom: var(--space-8); }
-  .page-title h1, .service-title h1 { font-size: clamp(45px, 11vw, 70px); }
+  .page-title h1 { font-size: clamp(45px, 11vw, 70px); }
   .page-title > p:last-child { font-size: 15px; }
   .search-compact { margin-bottom: var(--space-12); }
   .detail-heading { display: block; }
@@ -414,9 +411,6 @@ h1, h2, h3 { min-width: 0; overflow-wrap: anywhere; font-weight: 500; line-heigh
   .booking-card { order: -1; width: 100%; padding: var(--space-6); }
   .facts { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-5); }
   .amenity-list { gap: 0 var(--space-4); }
-  .service-hero { padding-block: 65px 40px; }
-  .service-title { display: block; }
-  .service-title p { font-size: 15px; }
   .exchange-visual { grid-template-columns: minmax(0, 1fr) 35px minmax(0, 1fr); }
   .compare-image { height: 195px; }
   .compare-center { font-size: 24px; }
