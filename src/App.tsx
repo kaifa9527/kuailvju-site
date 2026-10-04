@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { cities, listings, type Listing, type Term } from './data'
 import { canExchange, estimateLeaseMoveIn, filterListings, formatPrice, sortFeaturedListings, type Language, type LeasePaymentOption } from './lib/catalog'
+import { LineIcon, amenityIcon } from './components/LineIcon'
+import { ExchangeRequestPage, ManagementTestSubmit, RentalRequestPage, TestInbox } from './TestFlows'
 
 type Filters = { city: string; region: string; term: string }
 type Route = { page: string; id?: string; mode?: string; filters: Filters }
@@ -10,11 +12,10 @@ const asset = (path: string) => `${import.meta.env.BASE_URL}${path.replace(/^\//
 const words = {
   zh: {
     rent: '房屋租赁', exchange: '旅居置换', manage: '物业托管', explore: '探索房源', more: '了解详情',
-    preview: '页面示意 · 暂未开放真实预订', menu: '菜单', search: '查找房源', city: '城市', area: '区域', stay: '租期',
+    preview: '置换资格提示', menu: '菜单', search: '查找房源', city: '城市', area: '区域', stay: '租期',
     allCities: '全部城市', allAreas: '全部区域', allTerms: '全部租期', day: '日租', month: '月租', quarter: '季租', year: '年租',
     results: '精选房源', reset: '清除筛选', noResult: '没有匹配的示意房源', noResultSub: '试试更换城市或租期。真实房源上线后，选择会持续增加。',
     demo: '示意房源', price: '示意价格', contact: '咨询房源', apply: '申请置换',
-    unavailable: '当前仅展示页面体验，尚未接入真实房源和申请服务。我们不会在此版本收集您的联系方式。',
     ineligible: '仅委托经营房源的业主可申请旅居置换。此房源未加入委托经营置换房源池。',
     understood: '我知道了', back: '返回房源', ready: '委托经营 · 可申请置换', noExchange: '暂不开放置换',
     occupants: '可住', room: '卧室', rooms: '卧室', baths: '卫生间', beds: '床位', size: '面积', experience: '居住体验', terms: '可选租期',
@@ -23,11 +24,10 @@ const words = {
     pinned: '置顶', exchangeBadge: '置换示意', exchangeMayWaive: '符合条件可免住宿费', exchangeCostsBrief: '保洁费 + 押金 + 水电',
     exchangeSectionNote: '仅委托经营签约业主可申请；每次入住另付 ¥500 保洁费、¥1,000 可退押金，水电据实结算。芭提雅按确认时的等值泰铢收取。',
     homeManageNote: '委托租赁、委托经营、委托看护。选一种适合您房屋现状的方式。',
-    registrationTitle: '登记房源意向', serviceScope: '服务与收费', registrationPreview: '登记表单示意 · 暂不接收真实资料',
-    registrationNotice: '此页面仅供查看登记字段。电话与邮箱暂未开放填写，网站不会保存或发送资料。',
-    registrationUnavailable: '登记系统尚未上线。当前页面不接收、保存或发送任何业主资料。',
+    registrationTitle: '登记房源意向', serviceScope: '服务与收费', registrationPreview: '可测试提交流程 · 不收集真实资料',
+    registrationNotice: '选择房屋信息后可生成一条站内测试记录，保存在当前浏览器。电话与邮箱暂不填写，也不会发送给平台。',
     propertyCity: '房源城市', propertyRegion: '所在区域', propertyType: '房屋类型', propertySize: '建筑面积（m²）',
-    contactPhone: '联系电话', contactEmail: '联系邮箱', apartment: '公寓', villa: '别墅', chooseOne: '请选择', registrationButton: '登记入口预览', registerAction: '查看登记信息', registrationDisabledPlaceholder: '正式开放后填写',
+    contactPhone: '联系电话', contactEmail: '联系邮箱', apartment: '公寓', villa: '别墅', chooseOne: '请选择', registrationButton: '提交测试登记', registerAction: '查看登记信息', registrationDisabledPlaceholder: '正式开放后填写',
     leasingSteps: ['评估房源', '签约上架', '招租成交', '收租对账'],
     operationSteps: ['评估授权', '运营出租', '收益对账', '符合条件后申请置换'],
     careSteps: ['选择服务', '每周巡检', '拍照留档', '查看报告'],
@@ -63,15 +63,14 @@ const words = {
     careDetail: '公寓与别墅分别报价。基础巡检之外，可按需组合升级项目。',
     careMenu: '可选升级服务', careItems: ['园林绿化修剪', '泳池维护', '深度清洁', '空调与除湿保养', '虫害防治', '软装与布草维护', '台风雨季专项巡检', '离家前封存与返家前准备'],
     termsNote: '具体价格、范围与服务记录，以当地方案和私密签约内容为准。',
-    language: '语言', close: '关闭', footer: '快旅居 · 房屋租赁与托管', legal: '这是设计与流程预览。图像、房源及价格均为示意，不能据此预订或交易。',
+    testDesk: '流程测试', language: '语言', close: '关闭', footer: '快旅居 · 房屋租赁与托管', legal: '房源与价格均为示意。可在当前浏览器测试流程，不构成真实预订、置换或交易。',
   },
   en: {
     rent: 'Homes', exchange: 'Stay Exchange', manage: 'Property Care', explore: 'Explore homes', more: 'View details',
-    preview: 'Concept preview · No live bookings', menu: 'Menu', search: 'Search', city: 'City', area: 'Area', stay: 'Stay',
+    preview: 'Exchange eligibility', menu: 'Menu', search: 'Search', city: 'City', area: 'Area', stay: 'Stay',
     allCities: 'All cities', allAreas: 'All areas', allTerms: 'All stays', day: 'Daily', month: 'Monthly', quarter: 'Quarterly', year: 'Yearly',
     results: 'Featured homes', reset: 'Clear filters', noResult: 'No concept homes match', noResultSub: 'Try a different city or stay length. More choices will appear when live inventory launches.',
     demo: 'Concept home', price: 'Sample price', contact: 'Ask about this home', apply: 'Request exchange',
-    unavailable: 'This is a design preview. Live homes and applications are not connected yet. This version does not collect contact details.',
     ineligible: 'Stay exchange is available only to owners of homes under an active operation agreement. This home is not in the exchange pool.',
     understood: 'Got it', back: 'Back to homes', ready: 'Managed operation · Exchange eligible', noExchange: 'Exchange unavailable',
     occupants: 'Sleeps', room: 'Bedroom', rooms: 'Bedrooms', baths: 'Bathrooms', beds: 'Beds', size: 'Area', experience: 'The space', terms: 'Stay options',
@@ -80,11 +79,10 @@ const words = {
     pinned: 'Pinned', exchangeBadge: 'Exchange concept', exchangeMayWaive: 'Eligible stays may waive rent', exchangeCostsBrief: 'Cleaning + deposit + utilities',
     exchangeSectionNote: 'Only owners under active Full Management agreements may apply. Each stay still requires a ¥500 cleaning fee, ¥1,000 refundable deposit and actual utilities. Pattaya charges the locked THB equivalent.',
     homeManageNote: 'Leasing, full management or home care. Choose the service that fits your property.',
-    registrationTitle: 'Register a property enquiry', serviceScope: 'Service & fees', registrationPreview: 'Form preview · No real enquiries collected',
-    registrationNotice: 'This form shows the planned fields only. Phone and email entry are disabled; nothing is stored or sent.',
-    registrationUnavailable: 'Registration is not connected yet. This page does not collect, store or send owner details.',
+    registrationTitle: 'Register a property enquiry', serviceScope: 'Service & fees', registrationPreview: 'Interactive workflow test · no real details collected',
+    registrationNotice: 'Submit property choices to create a browser-only test record. Phone and email remain disabled; nothing is sent to the platform.',
     propertyCity: 'Property city', propertyRegion: 'Area', propertyType: 'Property type', propertySize: 'Floor area (m²)',
-    contactPhone: 'Phone', contactEmail: 'Email', apartment: 'Apartment', villa: 'Villa', chooseOne: 'Select', registrationButton: 'Preview registration', registerAction: 'View registration fields', registrationDisabledPlaceholder: 'Available after launch',
+    contactPhone: 'Phone', contactEmail: 'Email', apartment: 'Apartment', villa: 'Villa', chooseOne: 'Select', registrationButton: 'Submit test enquiry', registerAction: 'View registration fields', registrationDisabledPlaceholder: 'Available after launch',
     leasingSteps: ['Assess home', 'Sign & list', 'Find tenant', 'Reconcile rent'],
     operationSteps: ['Assess & authorize', 'Operate stays', 'Review earnings', 'Unlock exchange if eligible'],
     careSteps: ['Choose care', 'Weekly visit', 'Photo record', 'Review report'],
@@ -120,7 +118,7 @@ const words = {
     careDetail: 'Apartments and villas have different rates. Add services as needed beyond the basic weekly visit.',
     careMenu: 'Optional upgrades', careItems: ['Garden pruning', 'Pool care', 'Deep cleaning', 'AC and dehumidifier care', 'Pest prevention', 'Linen and furnishing care', 'Storm-season checks', 'Pre-arrival preparation'],
     termsNote: 'Final pricing, scope and records follow local proposals and private agreements.',
-    language: 'Language', close: 'Close', footer: 'Kuai Lü Ju · Homes & property care', legal: 'Design and workflow preview. Images, homes and prices are illustrative and cannot be booked or transacted.',
+    testDesk: 'Test workflow', language: 'Language', close: 'Close', footer: 'Kuai Lü Ju · Homes & property care', legal: 'Homes and prices are illustrative. Browser-only workflow tests do not create live bookings, exchanges or payments.',
   },
 }
 
@@ -130,8 +128,8 @@ function parseRoute(): Route {
   const parts = path.split('/').filter(Boolean)
   const params = new URLSearchParams(query)
   return {
-    page: parts[0] || 'home', id: parts[0] === 'listing' ? parts[1] : undefined,
-    mode: parts[0] === 'management' ? parts[1] : undefined,
+    page: parts[0] || 'home', id: parts[0] === 'listing' ? parts[1] : parts[0] === 'request' ? parts[2] : undefined,
+    mode: parts[0] === 'management' || parts[0] === 'request' ? parts[1] : undefined,
     filters: { city: params.get('city') || 'all', region: params.get('region') || 'all', term: params.get('term') || 'all' },
   }
 }
@@ -159,6 +157,7 @@ function Header({ lang, setLang, route }: { lang: Language; setLang: (v: Languag
         <details className="nav-management"><summary className={route.page === 'management' ? 'is-current' : ''}>{t.manage}<span aria-hidden="true">⌄</span></summary><div className="management-menu"><a href="#/management/leasing" onClick={() => setOpen(false)}>{t.lease}</a><a href="#/management/operation" onClick={() => setOpen(false)}>{t.operation}</a><a href="#/management/care" onClick={() => setOpen(false)}>{t.care}</a></div></details>
       </nav>
       <div className="header-actions">
+        <a className="test-desk-link" href="#/test-inbox">{t.testDesk}</a>
         <button className="language-switch" onClick={() => setLang(lang === 'zh' ? 'en' : 'zh')} aria-label={`${t.language}: ${lang === 'zh' ? 'English' : '中文'}`}>{lang === 'zh' ? 'EN' : '中'}</button>
         <button className="menu-button" aria-expanded={open} aria-label={t.menu} onClick={() => setOpen(v => !v)}><span></span><span></span></button>
       </div>
@@ -239,14 +238,14 @@ function ListingBookingCard({ listing, lang, onAction }: { listing: Listing; lan
   return <aside className="booking-card">
     <span className="eyebrow">{t.feeTitle} / {t.demo}</span>
     <div className="booking-price"><small>{t.baseRent}</small><strong>{formatPrice(listing, lang)}</strong></div>
-    <div className="fee-lines"><div><span>{t.zeroAgency}</span><strong>{money(0)}</strong></div><div><span>{t.utilitiesActual}</span><strong>↗</strong></div></div>
+    <div className="fee-lines"><div><span><LineIcon name="shield" size={17}/>{t.zeroAgency}</span><strong>{money(0)}</strong></div><div><span><LineIcon name="utility" size={17}/>{t.utilitiesActual}</span></div></div>
     {listing.priceUnit === 'month' && <div className="payment-example">
       <label className="term-control">{t.chooseTerm}<select value={term} onChange={event => setTerm(event.target.value as Term)}>{listing.terms.map(value => <option key={value} value={value}>{t[value]}</option>)}</select></label>
       {estimate ? <><p className="field-label">{t.paymentChoice}</p><div className="payment-options"><button type="button" className={payment === 'one-two' ? 'selected' : ''} aria-pressed={payment === 'one-two'} onClick={() => setPayment('one-two')}>{t.oneTwo}</button><button type="button" className={payment === 'two-one' ? 'selected' : ''} aria-pressed={payment === 'two-one'} onClick={() => setPayment('two-one')}>{t.twoOne}</button></div><p className="micro-note">{payment === 'one-two' ? t.oneTwoNote : t.twoOneNote}</p><div className="estimate-lines"><div><span>{t.deposit}</span><strong>{money(estimate.deposit)}</strong></div><div><span>{t.prepaidRent}</span><strong>{money(estimate.prepaidRent)}</strong></div><div className="estimate-total"><span>{t.initialDue}</span><strong>{money(estimate.initialDue)}</strong></div></div></> : <p className="micro-note">{t.paymentPending}</p>}
     </div>}
     <p className="booking-disclaimer">{t.datePending} {t.otherFees}</p>
-    <button className="button button-dark" onClick={() => onAction(t.unavailable)}>{t.contact} ↗</button>
-    {canExchange(listing) ? <div className="booking-exchange"><span>{t.ready}</span><p>{t.exchangeMini} {listing.city === 'pattaya' && t.exchangeThai}</p><button className="button button-light" onClick={() => onAction(t.unavailable)}>{t.apply} ↗</button></div> : <button className="exchange-ineligible" onClick={() => onAction(t.ineligible)}>{t.noExchange} ⓘ</button>}
+    <a className="button button-dark" href={`#/request/rental/${listing.id}`}>{t.contact} <LineIcon name="arrow" size={17}/></a>
+    {canExchange(listing) ? <div className="booking-exchange"><span>{t.ready}</span><p>{t.exchangeMini} {listing.city === 'pattaya' && t.exchangeThai}</p><a className="button button-light" href={`#/request/exchange/${listing.id}`}>{t.apply} <LineIcon name="arrow" size={17}/></a></div> : <button className="exchange-ineligible" onClick={() => onAction(t.ineligible)}>{t.noExchange} ⓘ</button>}
   </aside>
 }
 
@@ -259,40 +258,43 @@ function ListingPage({ lang, id, onAction }: { lang: Language; id?: string; onAc
   return <div className="page-shell detail-page">
     <a className="back-link" href="#/rentals">← {t.back}</a>
     <div className="detail-heading"><div><p className="eyebrow">{city[lang]} / {region[lang]} / {t.demo}</p><h1>{listing.title[lang]}</h1><p>{listing.type[lang]} · {listing.highlight[lang]}</p></div><div className="detail-price"><span>{t.price}</span><strong>{formatPrice(listing, lang)}</strong></div></div>
-    {canExchange(listing) && <div className="exchange-entry"><span>{t.ready}</span><button onClick={() => onAction(t.unavailable)}>{t.apply} ↗</button></div>}
+    {canExchange(listing) && <div className="exchange-entry"><span>{t.ready}</span><a href={`#/request/exchange/${listing.id}`}>{t.apply} <LineIcon name="arrow" size={17}/></a></div>}
     <PropertyGallery key={listing.id} listing={listing} lang={lang}/>
     <div className="detail-layout"><div className="detail-main">
       <p className="eyebrow">THE SPACE / {t.sampleSpecs}</p><h2>{t.experience}</h2><p className="lead">{listing.description[lang]}</p>
-      <div className="facts"><div><small>{t.occupants}</small><strong>{listing.guests}</strong></div><div><small>{t.rooms}</small><strong>{listing.bedrooms}</strong></div><div><small>{t.beds}</small><strong>{listing.beds}</strong></div><div><small>{t.baths}</small><strong>{listing.bathrooms}</strong></div><div><small>{t.size}</small><strong>{listing.area} m²</strong></div></div>
-      <ul className="feature-list">{listing.features.map(feature => <li key={feature.zh}>{feature[lang]}</li>)}</ul>
-      <h3>{t.amenities}</h3><div className="amenity-list">{listing.amenities.map(amenity => <span key={amenity.zh}>{amenity[lang]}</span>)}</div>
-      <div className="detail-secondary"><h3>{t.terms}</h3><div className="term-list">{listing.terms.map(value => <span key={value}>{t[value]}</span>)}</div><details><summary>{t.listingRules}</summary><p>{t.listingRulesPending}</p></details></div>
+      <div className="facts"><div><LineIcon name="guests"/><small>{t.occupants}</small><strong>{listing.guests}</strong></div><div><LineIcon name="bedroom"/><small>{t.rooms}</small><strong>{listing.bedrooms}</strong></div><div><LineIcon name="bed"/><small>{t.beds}</small><strong>{listing.beds}</strong></div><div><LineIcon name="bath"/><small>{t.baths}</small><strong>{listing.bathrooms}</strong></div><div><LineIcon name="area"/><small>{t.size}</small><strong>{listing.area} m²</strong></div></div>
+      <ul className="feature-list">{listing.features.map(feature => <li key={feature.zh}><LineIcon name="check" size={17}/>{feature[lang]}</li>)}</ul>
+      <h3>{t.amenities}</h3><div className="amenity-list">{listing.amenities.map(amenity => <span key={amenity.zh}><LineIcon name={amenityIcon(amenity.zh)} size={21}/>{amenity[lang]}</span>)}</div>
+      <div className="detail-secondary"><h3>{t.terms}</h3><div className="term-list">{listing.terms.map(value => <span key={value}><LineIcon name="calendar" size={16}/>{t[value]}</span>)}</div><details><summary><LineIcon name="shield" size={17}/>{t.listingRules}</summary><p>{t.listingRulesPending}</p></details></div>
     </div><ListingBookingCard key={listing.id} listing={listing} lang={lang} onAction={onAction}/></div>
   </div>
 }
 
-function ExchangePage({ lang, onAction }: { lang: Language; onAction: (message: string) => void }) {
+function ExchangePage({ lang }: { lang: Language }) {
   const t = words[lang]
   const exchangeHomes = sortFeaturedListings(listings.filter(canExchange))
   return <>
     <section className="page-shell service-hero"><p className="eyebrow">02 / STAY EXCHANGE</p><div className="service-title"><h1>{t.exchangeLine}</h1><p>{t.eligibilityText}</p></div><button className="button button-dark" onClick={() => document.getElementById('exchange-list')?.scrollIntoView({ behavior: 'smooth' })}>{t.explore} ↗</button></section>
     <section className="section page-shell exchange-list-section" id="exchange-list"><div className="section-heading"><div><p className="eyebrow">EXCHANGE HOMES</p><h2>{t.exchange}</h2></div></div><p className="sample-inventory">{t.exchangeSectionNote} {t.sampleInventory}</p><div className="listing-grid">{exchangeHomes.map(listing => <ListingCard key={listing.id} listing={listing} lang={lang} context="exchange"/>)}</div></section>
     <section className="exchange-visual page-shell"><div className="compare-image compare-a"><img src={asset('/images/pattaya-concept.jpg')} alt={t.demo}/><span>A / PATTAYA</span></div><div className="compare-center">↔</div><div className="compare-image compare-b"><img src={asset('/images/sanya-concept.jpg')} alt={t.demo}/><span>B / SANYA</span></div></section>
-    <section className="page-shell exchange-body"><div className="exchange-lead"><p className="eyebrow">HOW IT WORKS</p><h2>{t.twoHomes}</h2><p>{t.twoHomesSub}</p></div><ol className="steps"><li><span>01</span>{t.step1}</li><li><span>02</span>{t.step2}</li><li><span>03</span>{t.step3}</li><li><span>04</span>{t.step4}</li></ol><div className="exchange-notes"><article><span>01 / ACCESS</span><h3>{t.eligibility}</h3><p>{t.eligibilityText}</p></article><article><span>02 / TIMING</span><h3>{t.separate}</h3><p>{t.separateSub}</p></article><article><span>03 / COST</span><h3>{t.fee}</h3><p>{t.feeBody}</p><p>{t.utility}</p></article></div><button className="button button-dark" onClick={() => onAction(t.unavailable)}>{t.apply} ↗</button></section>
+    <section className="page-shell exchange-body"><div className="exchange-lead"><p className="eyebrow">HOW IT WORKS</p><h2>{t.twoHomes}</h2><p>{t.twoHomesSub}</p></div><ol className="steps"><li><span>01</span>{t.step1}</li><li><span>02</span>{t.step2}</li><li><span>03</span>{t.step3}</li><li><span>04</span>{t.step4}</li></ol><div className="exchange-notes"><article><span>01 / ACCESS</span><h3>{t.eligibility}</h3><p>{t.eligibilityText}</p></article><article><span>02 / TIMING</span><h3>{t.separate}</h3><p>{t.separateSub}</p></article><article><span>03 / COST</span><h3>{t.fee}</h3><p>{t.feeBody}</p><p>{t.utility}</p></article></div><a className="button button-dark" href="#exchange-list" onClick={event => { event.preventDefault(); document.getElementById('exchange-list')?.scrollIntoView({ behavior: 'smooth' }) }}>{t.explore} ↗</a></section>
   </>
 }
 
-function ServiceRegistration({ lang, onAction }: { lang: Language; onAction: (message: string) => void }) {
+function ServiceRegistration({ lang, mode }: { lang: Language; mode: 'leasing' | 'operation' | 'care' }) {
   const t = words[lang]
   const [cityId, setCityId] = useState('')
+  const [regionId, setRegionId] = useState('')
+  const [propertyType, setPropertyType] = useState('')
+  const [area, setArea] = useState('')
   const city = cities.find(item => item.id === cityId)
-  return <form className="service-registration" id="register-property" onSubmit={event => { event.preventDefault(); onAction(t.registrationUnavailable) }}>
+  return <form className="service-registration" id="register-property" onSubmit={event => { event.preventDefault(); if (cityId && regionId && propertyType && Number(area) > 0) ManagementTestSubmit({ mode, city: cityId, region: regionId, propertyType, area: Number(area) }) }}>
     <p className="eyebrow">ENQUIRY / PREVIEW</p><h2>{t.registrationTitle}</h2><p className="registration-preview">{t.registrationPreview}</p><p className="registration-notice">{t.registrationNotice}</p>
     <div className="registration-fields">
-      <label>{t.propertyCity}<select value={cityId} onChange={event => setCityId(event.target.value)}><option value="">{t.chooseOne}</option>{cities.map(item => <option key={item.id} value={item.id}>{item[lang]}</option>)}</select></label>
-      <label>{t.propertyRegion}<select key={cityId} defaultValue="" disabled={!city}><option value="">{t.chooseOne}</option>{city?.regions.map(item => <option key={item.id} value={item.id}>{item[lang]}</option>)}</select></label>
-      <label>{t.propertyType}<select defaultValue=""><option value="">{t.chooseOne}</option><option value="apartment">{t.apartment}</option><option value="villa">{t.villa}</option></select></label>
-      <label>{t.propertySize}<input type="number" min="1" inputMode="numeric" placeholder="m²"/></label>
+      <label>{t.propertyCity}<select required value={cityId} onChange={event => { setCityId(event.target.value); setRegionId('') }}><option value="">{t.chooseOne}</option>{cities.map(item => <option key={item.id} value={item.id}>{item[lang]}</option>)}</select></label>
+      <label>{t.propertyRegion}<select required value={regionId} onChange={event => setRegionId(event.target.value)} disabled={!city}><option value="">{t.chooseOne}</option>{city?.regions.map(item => <option key={item.id} value={item.id}>{item[lang]}</option>)}</select></label>
+      <label>{t.propertyType}<select required value={propertyType} onChange={event => setPropertyType(event.target.value)}><option value="">{t.chooseOne}</option><option value="apartment">{t.apartment}</option><option value="villa">{t.villa}</option></select></label>
+      <label>{t.propertySize}<input required type="number" min="1" inputMode="numeric" placeholder="m²" value={area} onChange={event => setArea(event.target.value)}/></label>
       <label>{t.contactPhone}<input type="tel" disabled placeholder={t.registrationDisabledPlaceholder}/></label>
       <label>{t.contactEmail}<input type="email" disabled placeholder={t.registrationDisabledPlaceholder}/></label>
     </div>
@@ -300,7 +302,7 @@ function ServiceRegistration({ lang, onAction }: { lang: Language; onAction: (me
   </form>
 }
 
-function ManagementPage({ lang, mode, onAction }: { lang: Language; mode?: string; onAction: (message: string) => void }) {
+function ManagementPage({ lang, mode }: { lang: Language; mode?: string }) {
   const t = words[lang]
   const modes = [
     { id: 'leasing', number: '01', title: t.lease, blurb: t.leaseBlurb, detail: t.leaseDetail, steps: t.leasingSteps },
@@ -313,7 +315,7 @@ function ManagementPage({ lang, mode, onAction }: { lang: Language; mode?: strin
     <a href="#/management" className="back-link">← {t.manage}</a>
     <div className="service-specific-hero"><p className="eyebrow">{selected.number} / PROPERTY MANAGEMENT</p><h1>{selected.title}</h1><p>{selected.blurb}</p><button className="text-link text-link-button" onClick={() => document.getElementById('register-property')?.scrollIntoView({ behavior: 'smooth' })}>{t.registerAction} ↗</button></div>
     <ol className="service-flow">{selected.steps.map((step, index) => <li key={step}><span>{String(index + 1).padStart(2, '0')}</span>{step}</li>)}</ol>
-    <div className="service-detail-layout"><section className="service-summary"><p className="eyebrow">SERVICE / {selected.number}</p><h2>{t.serviceScope}</h2><p className="lead">{selected.detail}</p>{selected.id === 'leasing' && <div className="mode-facts"><p>{t.leaseFees}</p><p>{t.leaseTerms}</p></div>}{selected.id === 'operation' && <p className="mode-fact-note">{t.eligibilityText}</p>}{selected.id === 'care' && <details className="care-disclosure"><summary>{t.careMenu} ↗</summary><div className="care-menu">{t.careItems.map((item, index) => <span key={item}><i>{String(index + 1).padStart(2, '0')}</i>{item}</span>)}</div></details>}<p className="micro-note">{t.termsNote}</p></section><ServiceRegistration key={selected.id} lang={lang} onAction={onAction}/></div>
+    <div className="service-detail-layout"><section className="service-summary"><p className="eyebrow">SERVICE / {selected.number}</p><h2>{t.serviceScope}</h2><p className="lead">{selected.detail}</p>{selected.id === 'leasing' && <div className="mode-facts"><p>{t.leaseFees}</p><p>{t.leaseTerms}</p></div>}{selected.id === 'operation' && <p className="mode-fact-note">{t.eligibilityText}</p>}{selected.id === 'care' && <details className="care-disclosure"><summary>{t.careMenu} ↗</summary><div className="care-menu">{t.careItems.map((item, index) => <span key={item}><i>{String(index + 1).padStart(2, '0')}</i>{item}</span>)}</div></details>}<p className="micro-note">{t.termsNote}</p></section><ServiceRegistration key={selected.id} lang={lang} mode={selected.id as 'leasing' | 'operation' | 'care'}/></div>
   </div>
 }
 
@@ -326,16 +328,19 @@ export default function App() {
     document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en'
     document.title = lang === 'zh' ? '快旅居｜好房源，心服务' : 'Kuai Lü Ju | Good homes. Thoughtful service.'
     document.querySelector('meta[name="description"]')?.setAttribute('content', lang === 'zh'
-      ? '快旅居：房屋租赁、旅居置换与物业托管。当前为示意页面，暂未开放真实预订。'
-      : 'Kuai Lü Ju: homes, stay exchange and property care. Concept preview only; live bookings are not yet available.')
+      ? '快旅居：房屋租赁、旅居置换与物业托管。可体验完整站内测试流程，真实房源与交易待核验开放。'
+      : 'Kuai Lü Ju: homes, stay exchange and property care. Explore interactive browser-only workflows; live homes and transactions follow verification.')
   }, [lang])
   const setLang = (next: Language) => { setLangState(next); localStorage.setItem('kuailvju-lang', next) }
   const t = words[lang]
   const content = useMemo(() => {
     if (route.page === 'rentals') return <RentalsPage lang={lang} filters={route.filters}/>
     if (route.page === 'listing') return <ListingPage lang={lang} id={route.id} onAction={setMessage}/>
-    if (route.page === 'exchange') return <ExchangePage lang={lang} onAction={setMessage}/>
-    if (route.page === 'management') return <ManagementPage lang={lang} mode={route.mode} onAction={setMessage}/>
+    if (route.page === 'exchange') return <ExchangePage lang={lang}/>
+    if (route.page === 'management') return <ManagementPage lang={lang} mode={route.mode}/>
+    if (route.page === 'request' && route.mode === 'rental') return <RentalRequestPage lang={lang} listingId={route.id}/>
+    if (route.page === 'request' && route.mode === 'exchange') return <ExchangeRequestPage lang={lang} listingId={route.id}/>
+    if (route.page === 'test-inbox') return <TestInbox lang={lang}/>
     return <HomePage lang={lang}/>
   }, [route, lang])
   return <><Header lang={lang} setLang={setLang} route={route}/><main id="main-content">{content}</main><footer className="site-footer"><div className="page-shell"><div className="footer-top"><a className="footer-brand" href="#/">快旅居 <span>KUAI LÜ JU</span></a><nav aria-label="Footer"><a href="#/rentals">{t.rent}</a><a href="#/exchange">{t.exchange}</a><a href="#/management">{t.manage}</a></nav></div><div className="footer-bottom"><span>{t.footer}</span><p>{t.legal}</p><span>© {new Date().getFullYear()} KUAI LÜ JU</span></div></div></footer>{message && <div className="modal-backdrop" onClick={() => setMessage(null)}><div className="modal" role="dialog" aria-modal="true" aria-label={t.preview} onClick={e => e.stopPropagation()}><button className="modal-close" onClick={() => setMessage(null)} aria-label={t.close}>×</button><span className="eyebrow">PREVIEW NOTICE</span><h2>{t.preview}</h2><p>{message}</p><button className="button button-dark" onClick={() => setMessage(null)}>{t.understood} ↗</button></div></div>}</>
