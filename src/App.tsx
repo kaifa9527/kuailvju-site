@@ -4,12 +4,11 @@ import { canExchange, estimateLeaseMoveIn, filterListings, formatPrice, sortFeat
 import { LineIcon, amenityIcon } from './components/LineIcon'
 import { ExchangeRequestPage, RentalRequestPage, TestInbox } from './TestFlows'
 import { ManagementPage } from './ManagementPage'
+import { ExchangeCatalogPage, ExchangeDetailPage } from './ExchangeExperience'
 
 type Filters = { city: string; region: string; term: string }
-type ExchangeFilters = { city: string; region: string; guests: string }
-type Route = { page: string; id?: string; mode?: string; filters: Filters }
+type Route = { page: string; id?: string; mode?: string; filters: Filters; query: string }
 const emptyFilters: Filters = { city: 'all', region: 'all', term: 'all' }
-const emptyExchangeFilters: ExchangeFilters = { city: 'all', region: 'all', guests: 'all' }
 const asset = (path: string) => `${import.meta.env.BASE_URL}${path.replace(/^\//, '')}`
 
 const words = {
@@ -24,7 +23,7 @@ const words = {
     occupants: '可住', room: '卧室', rooms: '卧室', baths: '卫生间', beds: '床位', size: '面积', experience: '居住体验', terms: '可选租期',
     quickRent: '房屋租赁', quickExchange: '旅居置换', quickManage: '物业托管',
     sampleInventory: '以下房源及参数为页面示意，真实房源与可订日期待核验上线。',
-    pinned: '置顶', exchangeBadge: '置换示意', exchangeMayWaive: '符合条件可免住宿费', exchangeCostsBrief: '保洁费 + 押金 + 水电',
+    pinned: '置顶', exchangeBadge: '可置换 · 示意', exchangeMayWaive: '符合条件可免住宿费', exchangeCostsBrief: '保洁费 + 押金 + 水电',
     exchangeSectionNote: '仅委托经营签约业主可申请；每次入住另付 ¥500 保洁费、¥1,000 可退押金，水电据实结算。芭提雅按确认时的等值泰铢收取。',
     homeManageNote: '委托租赁、委托经营、委托看护。选一种适合您房屋现状的方式。',
     registrationTitle: '登记房源意向', serviceScope: '服务与收费', registrationPreview: '可测试提交流程 · 不收集真实资料',
@@ -79,7 +78,7 @@ const words = {
     occupants: 'Sleeps', room: 'Bedroom', rooms: 'Bedrooms', baths: 'Bathrooms', beds: 'Beds', size: 'Area', experience: 'The space', terms: 'Stay options',
     quickRent: 'Rent homes', quickExchange: 'Stay exchange', quickManage: 'Property care',
     sampleInventory: 'Homes and details below are illustrative. Live inventory and dates require verification.',
-    pinned: 'Pinned', exchangeBadge: 'Exchange concept', exchangeMayWaive: 'Eligible stays may waive rent', exchangeCostsBrief: 'Cleaning + deposit + utilities',
+    pinned: 'Pinned', exchangeBadge: 'Exchange eligible · concept', exchangeMayWaive: 'Eligible stays may waive rent', exchangeCostsBrief: 'Cleaning + deposit + utilities',
     exchangeSectionNote: 'Only owners under active Full Management agreements may apply. Each stay still requires a ¥500 cleaning fee, ¥1,000 refundable deposit and actual utilities. Pattaya charges the locked THB equivalent.',
     homeManageNote: 'Leasing, full management or home care. Choose the service that fits your property.',
     registrationTitle: 'Register a property enquiry', serviceScope: 'Service & fees', registrationPreview: 'Interactive workflow test · no real details collected',
@@ -131,9 +130,10 @@ function parseRoute(): Route {
   const parts = path.split('/').filter(Boolean)
   const params = new URLSearchParams(query)
   return {
-    page: parts[0] || 'home', id: parts[0] === 'listing' ? parts[1] : parts[0] === 'request' ? parts[2] : undefined,
+    page: parts[0] || 'home', id: parts[0] === 'listing' ? parts[1] : parts[0] === 'request' || parts[0] === 'exchange' && parts[1] === 'home' ? parts[2] : undefined,
     mode: parts[0] === 'management' || parts[0] === 'request' ? parts[1] : undefined,
     filters: { city: params.get('city') || 'all', region: params.get('region') || 'all', term: params.get('term') || 'all' },
+    query,
   }
 }
 
@@ -186,9 +186,9 @@ function ListingCard({ listing, lang, context = 'rentals' }: { listing: Listing;
   const t = words[lang]
   const city = cities.find(c => c.id === listing.city)!
   const region = city.regions.find(r => r.id === listing.region)!
-  return <a className={`listing-card ${context === 'exchange' ? 'listing-card-exchange' : ''}`} href={`#/listing/${listing.id}`}>
+  return <a className={`listing-card ${context === 'exchange' ? 'listing-card-exchange' : ''}`} href={context === 'exchange' ? `#/exchange/home/${listing.id}` : `#/listing/${listing.id}`}>
     <div className="listing-image"><img src={asset(listing.gallery[0].image)} alt={`${listing.title[lang]} — ${t.demo}`} loading="lazy"/><span className="image-label">{t.demo}</span>{listing.pinned && <span className="listing-pinned">{t.pinned}</span>}</div>
-    <div className="listing-content"><div className="listing-eyebrow">{city[lang]} · {region[lang]} <span>/{listing.type[lang]}</span></div><h3>{listing.title[lang]}</h3><p>{listing.highlight[lang]} <span>·</span> {listing.bedrooms} {(listing.bedrooms === 1 ? t.room : t.rooms).toLowerCase()} <span>·</span> {listing.area} m²</p>{context === 'rentals' ? <div className="listing-terms">{listing.terms.map(term => <span key={term}>{t[term]}</span>)}</div> : <div className="listing-terms"><span>{t.exchangeBadge}</span></div>}<div className="listing-bottom"><div><small>{context === 'exchange' ? t.exchangeMayWaive : t.price}</small><strong>{context === 'exchange' ? t.exchangeCostsBrief : formatPrice(listing, lang)}</strong></div><span className="circle-arrow" aria-hidden="true">↗</span></div></div>
+    <div className="listing-content"><div className="listing-eyebrow">{city[lang]} · {region[lang]} <span>/{listing.type[lang]}</span></div><h3>{listing.title[lang]}</h3><p>{listing.highlight[lang]} <span>·</span> {listing.bedrooms} {(listing.bedrooms === 1 ? t.room : t.rooms).toLowerCase()} <span>·</span> {listing.area} m²</p>{context === 'rentals' ? <div className="listing-terms">{listing.terms.map(term => <span key={term}>{t[term]}</span>)}</div> : <div className="listing-terms"><span>{t.exchangeBadge}</span></div>}<div className="listing-bottom"><div><small>{t.price}</small><strong>{formatPrice(listing, lang)}</strong></div><span className="circle-arrow" aria-hidden="true">↗</span></div></div>
   </a>
 }
 
@@ -261,7 +261,7 @@ function ListingPage({ lang, id, onAction }: { lang: Language; id?: string; onAc
   return <div className="page-shell detail-page">
     <a className="back-link" href="#/rentals">← {t.back}</a>
     <div className="detail-heading"><div><p className="eyebrow">{city[lang]} / {region[lang]} / {t.demo}</p><h1>{listing.title[lang]}</h1><p>{listing.type[lang]} · {listing.highlight[lang]}</p></div><div className="detail-price"><span>{t.price}</span><strong>{formatPrice(listing, lang)}</strong></div></div>
-    {canExchange(listing) && <div className="exchange-entry"><span>{t.ready}</span><a href={`#/request/exchange/${listing.id}`}>{t.apply} <LineIcon name="arrow" size={17}/></a></div>}
+    {canExchange(listing) && <div className="exchange-entry"><span>{t.ready}</span><a href={`#/exchange/home/${listing.id}`}>{t.apply} <LineIcon name="arrow" size={17}/></a></div>}
     <PropertyGallery key={listing.id} listing={listing} lang={lang}/>
     <div className="detail-layout"><div className="detail-main">
       <p className="eyebrow">THE SPACE / {t.sampleSpecs}</p><h2>{t.experience}</h2><p className="lead">{listing.description[lang]}</p>
@@ -271,35 +271,6 @@ function ListingPage({ lang, id, onAction }: { lang: Language; id?: string; onAc
       <div className="detail-secondary"><h3>{t.terms}</h3><div className="term-list">{listing.terms.map(value => <span key={value}><LineIcon name="calendar" size={16}/>{t[value]}</span>)}</div><details><summary><LineIcon name="shield" size={17}/>{t.listingRules}</summary><p>{t.listingRulesPending}</p></details></div>
     </div><ListingBookingCard key={listing.id} listing={listing} lang={lang} onAction={onAction}/></div>
   </div>
-}
-
-function ExchangePage({ lang }: { lang: Language }) {
-  const t = words[lang]
-  const exchangeHomes = sortFeaturedListings(listings.filter(canExchange))
-  const [draft, setDraft] = useState<ExchangeFilters>(emptyExchangeFilters)
-  const [filters, setFilters] = useState<ExchangeFilters>(emptyExchangeFilters)
-  const selectedCity = cities.find(city => city.id === draft.city)
-  const found = exchangeHomes.filter(listing =>
-    (filters.city === 'all' || listing.city === filters.city) &&
-    (filters.region === 'all' || listing.region === filters.region) &&
-    (filters.guests === 'all' || listing.guests >= Number(filters.guests)))
-  const hasFilters = filters.city !== 'all' || filters.region !== 'all' || filters.guests !== 'all'
-  return <>
-    <section className="page-shell page-top exchange-catalog-page" id="exchange-list">
-      <div className="page-title"><p className="eyebrow">02 / STAY EXCHANGE</p><h1>{t.exchangeLine}</h1><p>{t.exchangeIntro}</p></div>
-      <form className="search-panel search-compact" onSubmit={event => { event.preventDefault(); setFilters(draft) }}>
-        <label><span>{t.city}</span><select value={draft.city} onChange={event => setDraft(previous => ({ ...previous, city: event.target.value, region: 'all' }))}><option value="all">{t.allCities}</option>{cities.map(city => <option key={city.id} value={city.id}>{city[lang]}</option>)}</select></label>
-        <label><span>{t.area}</span><select value={draft.region} onChange={event => setDraft(previous => ({ ...previous, region: event.target.value }))}><option value="all">{t.allAreas}</option>{selectedCity?.regions.map(region => <option key={region.id} value={region.id}>{region[lang]}</option>)}</select></label>
-        <label><span>{t.guestsFilter}</span><select value={draft.guests} onChange={event => setDraft(previous => ({ ...previous, guests: event.target.value }))}><option value="all">{t.allGuests}</option>{[2, 4, 6, 8].map(count => <option key={count} value={count}>{t.guestsAtLeast} {count}</option>)}</select></label>
-        <button className="button button-dark search-submit" type="submit"><span>{t.search}</span><span aria-hidden="true">↗</span></button>
-      </form>
-      <div className="results-bar"><div><h2>{t.exchangeResults}</h2><span>{String(found.length).padStart(2, '0')} / {String(exchangeHomes.length).padStart(2, '0')}</span></div>{hasFilters && found.length > 0 && <button className="text-link text-link-button" onClick={() => { setDraft(emptyExchangeFilters); setFilters(emptyExchangeFilters) }}>{t.reset} ↗</button>}</div>
-      <p className="sample-inventory">{t.sampleInventory}</p>
-      {found.length ? <div className="listing-grid">{found.map(listing => <ListingCard key={listing.id} listing={listing} lang={lang} context="exchange"/>)}</div> : <div className="empty-state"><h3>{t.noResult}</h3><p>{t.exchangeNoResultSub}</p><button className="button button-dark" onClick={() => { setDraft(emptyExchangeFilters); setFilters(emptyExchangeFilters) }}>{t.reset} ↗</button></div>}
-    </section>
-    <section className="exchange-visual page-shell"><div className="compare-image compare-a"><img src={asset('/images/pattaya-concept.jpg')} alt={t.demo}/><span>A / PATTAYA</span></div><div className="compare-center">↔</div><div className="compare-image compare-b"><img src={asset('/images/sanya-concept.jpg')} alt={t.demo}/><span>B / SANYA</span></div></section>
-    <section className="page-shell exchange-body"><div className="exchange-lead"><p className="eyebrow">HOW IT WORKS</p><h2>{t.twoHomes}</h2><p>{t.twoHomesSub}</p></div><ol className="steps"><li><span>01</span>{t.step1}</li><li><span>02</span>{t.step2}</li><li><span>03</span>{t.step3}</li><li><span>04</span>{t.step4}</li></ol><div className="exchange-notes"><article><span>01 / ACCESS</span><h3>{t.eligibility}</h3><p>{t.eligibilityText}</p></article><article><span>02 / TIMING</span><h3>{t.separate}</h3><p>{t.separateSub}</p></article><article><span>03 / COST</span><h3>{t.fee}</h3><p>{t.feeBody}</p><p>{t.utility}</p></article></div><a className="button button-dark" href="#exchange-list" onClick={event => { event.preventDefault(); document.getElementById('exchange-list')?.scrollIntoView({ behavior: 'smooth' }) }}>{t.explore} ↗</a></section>
-  </>
 }
 
 export default function App() {
@@ -319,10 +290,11 @@ export default function App() {
   const content = useMemo(() => {
     if (route.page === 'rentals') return <RentalsPage lang={lang} filters={route.filters}/>
     if (route.page === 'listing') return <ListingPage lang={lang} id={route.id} onAction={setMessage}/>
-    if (route.page === 'exchange') return <ExchangePage lang={lang}/>
+    if (route.page === 'exchange' && route.id) return <ExchangeDetailPage lang={lang} id={route.id} query={route.query}/>
+    if (route.page === 'exchange') return <ExchangeCatalogPage lang={lang} query={route.query}/>
     if (route.page === 'management') return <ManagementPage lang={lang} mode={route.mode}/>
-    if (route.page === 'request' && route.mode === 'rental') return <RentalRequestPage lang={lang} listingId={route.id}/>
-    if (route.page === 'request' && route.mode === 'exchange') return <ExchangeRequestPage lang={lang} listingId={route.id}/>
+    if (route.page === 'request' && route.mode === 'rental') return <RentalRequestPage lang={lang} listingId={route.id} query={route.query}/>
+    if (route.page === 'request' && route.mode === 'exchange') return <ExchangeRequestPage lang={lang} listingId={route.id} query={route.query}/>
     if (route.page === 'test-inbox') return <TestInbox lang={lang}/>
     return <HomePage lang={lang}/>
   }, [route, lang])
