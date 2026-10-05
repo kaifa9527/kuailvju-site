@@ -18,6 +18,22 @@ test('filterListings returns empty results for an unavailable combination', () =
   assert.deepEqual(filterListings(sample, { city: 'beihai', region: 'yintan', term: 'day' }), [])
 })
 
+test('filterListings matches the requested property type', () => {
+  const typed = [
+    { ...sample[0], type: { zh: '双卧公寓', en: 'Two-bedroom apartment' } },
+    { ...sample[1], type: { zh: '庭院别墅', en: 'Garden villa' } },
+  ]
+  assert.deepEqual(filterListings(typed, { type: 'villa' }).map(item => item.id), ['b'])
+})
+
+test('filterListings applies long-stay detail filters', () => {
+  const typed = [
+    { ...sample[0], guests: 2, bedrooms: 1, area: 48 },
+    { ...sample[1], guests: 4, bedrooms: 2, area: 86 },
+  ]
+  assert.deepEqual(filterListings(typed, { guestsMin: '4', bedroomsMin: '2', areaMin: '80' }).map(item => item.id), ['b'])
+})
+
 test('canExchange accepts authorized leased or operated homes only when open', () => {
   assert.equal(canExchange(sample[0]), true)
   assert.equal(canExchange(sample[1]), false)

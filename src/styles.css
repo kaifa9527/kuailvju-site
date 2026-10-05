@@ -55,11 +55,17 @@ h1, h2, h3 { min-width: 0; overflow-wrap: anywhere; font-weight: 500; line-heigh
 .hero-visual img { height: 100%; object-fit: cover; object-position: center; }
 .hero-visual > span { position: absolute; z-index: 1; bottom: 20px; left: 24px; color: var(--color-white); font: 600 11px/1.4 var(--font-body); letter-spacing: .1em; }
 .search-wrap { position: relative; z-index: 2; margin-top: -67px; }
-.search-panel { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(0, 1.05fr); min-height: 100px; background: var(--color-white); border: var(--rule-light); box-shadow: 0 16px 42px var(--color-soft-shadow); }
-.search-panel label { display: flex; flex-direction: column; justify-content: center; min-width: 0; padding: var(--space-4) var(--space-6); border-right: var(--rule-light); }
+.search-panel { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)) minmax(145px, 1.08fr); min-height: 78px; overflow: hidden; border: 1px solid rgba(24, 35, 30, .15); border-radius: 999px; background: var(--color-white); box-shadow: 0 16px 42px var(--color-soft-shadow); }
+.search-panel label { display: flex; flex-direction: column; justify-content: center; min-width: 0; padding: var(--space-3) var(--space-5); border-right: var(--rule-light); }
 .search-panel label span { color: var(--color-muted); font-size: var(--text-xs); font-weight: 600; }
 .search-panel select { width: 100%; min-height: 42px; border: 0; padding-right: 20px; outline-offset: -2px; background: transparent; color: var(--color-ink); font-size: var(--text-base); font-weight: 600; cursor: pointer; }
-.search-panel .search-submit { margin: var(--space-4); gap: var(--space-4); }
+.search-panel .search-submit { margin: 8px; gap: var(--space-4); border-radius: 999px; }
+.search-more-toggle { grid-column: 1 / -1; display: inline-flex; align-items: center; gap: 8px; justify-self: start; margin: 0 0 10px 20px; border: 0; background: transparent; color: var(--color-accent); font-size: var(--text-xs); font-weight: 700; cursor: pointer; }
+.search-more-toggle span:last-child { display: grid; place-items: center; width: 20px; height: 20px; border: 1px solid currentColor; border-radius: 50%; font-size: 16px; line-height: 1; }
+.search-advanced { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; margin: 0 12px 12px; border-top: var(--rule-light); background: var(--color-cream); }
+.search-advanced label { min-height: 70px; border-right: var(--rule-light); padding: 10px 14px; }
+.search-advanced label:last-child { border-right: 0; }
+.search-advanced select { min-height: 30px; font-size: 14px; }
 .section { padding-block: clamp(80px, 10vw, 150px); }
 .section-heading { display: flex; align-items: end; justify-content: space-between; gap: var(--space-12); margin-bottom: var(--space-10); }
 .section-heading .eyebrow { margin-bottom: var(--space-4); }
@@ -311,6 +317,21 @@ h1, h2, h3 { min-width: 0; overflow-wrap: anywhere; font-weight: 500; line-heigh
 .modal .button { width: 100%; margin-top: var(--space-4); }
 .modal-close { position: absolute; top: var(--space-3); right: var(--space-3); width: 44px; height: 44px; border: 0; background: transparent; font-size: 26px; }
 .test-flow-page { padding-block: var(--space-16) clamp(90px, 10vw, 140px); }
+.exchange-request-page { padding-block: clamp(34px, 5vw, 68px) clamp(90px, 10vw, 140px); }
+.exchange-request-heading { margin-bottom: var(--space-8); }
+.exchange-request-heading .back-link { display: inline-flex; margin-bottom: var(--space-8); }
+.exchange-request-heading > div { max-width: 900px; }
+.exchange-request-heading h1 { margin: var(--space-3) 0 var(--space-3); font-size: clamp(40px, 5vw, 68px); }
+.exchange-request-heading > div > p:last-child { color: var(--color-muted); font-size: var(--text-lg); }
+.exchange-test-form { display: flex; flex-direction: column; gap: var(--space-5); }
+.exchange-request-finder { display: grid; grid-template-columns: minmax(230px, 1.15fr) minmax(230px, 1.15fr) minmax(130px, .55fr) minmax(160px, .7fr); min-height: 88px; overflow: hidden; border: 1px solid rgba(24, 35, 30, .15); border-radius: 999px; background: var(--color-white); box-shadow: 0 16px 42px var(--color-soft-shadow); }
+.exchange-request-finder > label, .exchange-request-target { display: flex; min-width: 0; flex-direction: column; justify-content: center; gap: 4px; padding: var(--space-3) var(--space-5); border-right: var(--rule-light); }
+.exchange-request-finder span, .exchange-request-target span { color: var(--color-muted); font-size: var(--text-xs); font-weight: 600; }
+.exchange-request-finder select { width: 100%; min-height: 34px; border: 0; padding: 0 22px 0 0; background: transparent; color: var(--color-ink); font-size: var(--text-sm); font-weight: 700; }
+.exchange-request-target strong { overflow: hidden; color: var(--color-ink); font-size: var(--text-sm); text-overflow: ellipsis; white-space: nowrap; }
+.exchange-request-target small { overflow: hidden; color: var(--color-muted); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.exchange-finder-note { align-self: center; min-height: 50px; margin: 0 12px; border: 0; border-radius: 999px; background: var(--color-ink); color: var(--color-white); font-size: var(--text-sm); font-weight: 700; cursor: pointer; }
+.exchange-request-ribbon { margin: 0; border-top: 0; border-left: 2px solid var(--color-accent); }
 .test-flow-heading { max-width: 760px; margin-bottom: var(--space-10); }
 .test-flow-heading h1 { margin-bottom: var(--space-4); font-size: clamp(44px, 5vw, 72px); }
 .test-flow-heading > p:last-child { color: var(--color-muted); font-size: var(--text-lg); }
@@ -427,12 +448,16 @@ h1, h2, h3 { min-width: 0; overflow-wrap: anywhere; font-weight: 500; line-heigh
   .hero-visual { flex: none; min-height: 0; height: 180px; }
   .hero-visual img { object-position: center 56%; }
   .search-wrap { margin-top: 0; }
-  .search-panel { grid-template-columns: repeat(2, minmax(0, 1fr)); min-height: 0; margin-top: var(--space-4); box-shadow: none; }
+  .search-panel { grid-template-columns: repeat(2, minmax(0, 1fr)); min-height: 0; margin-top: var(--space-4); border-radius: 20px; box-shadow: none; }
   .search-panel label { min-height: 76px; padding: 8px 14px; }
-  .search-panel label:nth-child(2) { border-right: 0; }
-  .search-panel label:nth-child(3) { border-top: var(--rule-light); }
+  .search-panel label:nth-of-type(2) { border-right: 0; }
+  .search-panel label:nth-of-type(n + 3) { border-top: var(--rule-light); }
   .search-panel select { min-height: 36px; font-size: 14px; }
-  .search-panel .search-submit { margin: 0; min-height: 76px; border: 0; border-top: var(--rule-light); }
+  .search-panel .search-submit { grid-column: 1 / -1; margin: 0; min-height: 68px; border: 0; border-top: var(--rule-light); border-radius: 0; }
+  .search-more-toggle { margin: 10px 14px 12px; }
+  .search-advanced { grid-template-columns: 1fr; margin: 0 10px 10px; }
+  .search-advanced label, .search-advanced label:last-child { min-height: 64px; border-right: 0; border-bottom: var(--rule-light); }
+  .search-advanced label:last-child { border-bottom: 0; }
   .section { padding-block: 56px 78px; }
   .home-property-section, .home-exchange-section, .home-management-section { padding-block: 56px 72px; }
   .section-heading { align-items: start; gap: var(--space-4); margin-bottom: var(--space-6); }
@@ -520,6 +545,14 @@ h1, h2, h3 { min-width: 0; overflow-wrap: anywhere; font-weight: 500; line-heigh
 }
 @media (max-width: 700px) {
   .test-flow-page { padding-block: var(--space-10) 80px; }
+  .exchange-request-page { padding-block: var(--space-8) 80px; }
+  .exchange-request-heading { display: block; margin-bottom: var(--space-6); }
+  .exchange-request-heading h1 { font-size: 42px; }
+  .exchange-request-heading > div > p:last-child { font-size: var(--text-sm); }
+  .exchange-request-finder { grid-template-columns: 1fr; min-height: 0; border-radius: 20px; box-shadow: none; }
+  .exchange-request-finder > label, .exchange-request-target { min-height: 72px; border-right: 0; border-bottom: var(--rule-light); }
+  .exchange-finder-note { min-height: 54px; margin: 10px; }
+  .exchange-request-ribbon { margin: 0; }
   .test-flow-heading { margin-bottom: var(--space-6); }
   .test-flow-heading h1 { font-size: 42px; }
   .test-flow-heading > p:last-child { font-size: var(--text-sm); }

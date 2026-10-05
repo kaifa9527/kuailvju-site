@@ -3,13 +3,28 @@ export type Language = 'zh' | 'en'
 export type SearchFilters = {
   city?: string
   region?: string
+  type?: string
   term?: string
+  guestsMin?: string
+  bedroomsMin?: string
+  areaMin?: string
 }
 
 type SearchableListing = {
   city: string
   region: string
+  type?: { zh: string; en: string }
   terms: readonly string[]
+  guests?: number
+  bedrooms?: number
+  area?: number
+}
+
+function propertyCategory(type?: { zh: string; en: string }): string {
+  const text = `${type?.zh || ''} ${type?.en || ''}`.toLowerCase()
+  if (/别墅|villa/.test(text)) return 'villa'
+  if (/公寓|apartment|flat/.test(text)) return 'apartment'
+  return 'residential'
 }
 
 type ExchangeListing = {
@@ -28,7 +43,11 @@ export function filterListings<T extends SearchableListing>(items: readonly T[],
   return items.filter((item) =>
     (!filters.city || filters.city === 'all' || item.city === filters.city) &&
     (!filters.region || filters.region === 'all' || item.region === filters.region) &&
-    (!filters.term || filters.term === 'all' || item.terms.includes(filters.term)),
+    (!filters.type || filters.type === 'all' || propertyCategory(item.type) === filters.type) &&
+    (!filters.term || filters.term === 'all' || item.terms.includes(filters.term)) &&
+    (!filters.guestsMin || filters.guestsMin === 'all' || (item.guests || 0) >= Number(filters.guestsMin)) &&
+    (!filters.bedroomsMin || filters.bedroomsMin === 'all' || (item.bedrooms || 0) >= Number(filters.bedroomsMin)) &&
+    (!filters.areaMin || filters.areaMin === 'all' || (item.area || 0) >= Number(filters.areaMin)),
   )
 }
 

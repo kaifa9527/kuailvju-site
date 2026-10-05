@@ -7,16 +7,16 @@ import { ManagementPage } from './ManagementPage'
 import { ManagementEntry } from './ManagementEntry'
 import { ExchangeCatalogPage, ExchangeDetailPage } from './ExchangeExperience'
 
-type Filters = { city: string; region: string; term: string }
+type Filters = { city: string; region: string; type: string; term: string; guestsMin: string; bedroomsMin: string; areaMin: string }
 type Route = { page: string; id?: string; mode?: string; filters: Filters; query: string }
-const emptyFilters: Filters = { city: 'all', region: 'all', term: 'all' }
+const emptyFilters: Filters = { city: 'all', region: 'all', type: 'all', term: 'all', guestsMin: 'all', bedroomsMin: 'all', areaMin: 'all' }
 const asset = (path: string) => `${import.meta.env.BASE_URL}${path.replace(/^\//, '')}`
 
 const words = {
   zh: {
     rent: '长租房', stays: '民宿房', exchange: '旅居置换', manage: '物业托管', explore: '探索房源', more: '了解详情',
     preview: '置换资格提示', menu: '菜单', search: '查找房源', city: '城市', area: '区域', stay: '租期',
-    allCities: '全部城市', allAreas: '全部区域', allTerms: '全部租期', day: '日租', month: '月租', quarter: '季租', halfYear: '半年', year: '一年',
+    allCities: '全部城市', allAreas: '全部区域', propertyType: '类型', allTypes: '全部类型', residential: '住宅', allTerms: '全部租期', moreOptions: '更多选项', lessOptions: '收起选项', bedroomsFilter: '卧室数', allBedrooms: '不限卧室', areaFilter: '面积', allAreasMin: '不限面积', day: '日租', month: '月租', quarter: '季租', halfYear: '半年', year: '一年',
     results: '精选房源', exchangeResults: '可置换房源', exchangeIntro: '已授权的长租房与民宿房业主均可发起双房源互换。', guestsFilter: '入住人数', allGuests: '不限人数', guestsAtLeast: '至少可住', reset: '清除筛选', noResult: '没有匹配的示意房源', noResultSub: '试试更换城市或租期。真实房源上线后，选择会持续增加。', exchangeNoResultSub: '试试更换城市、区域或入住人数。',
     demo: '示意房源', price: '示意价格', contact: '咨询房源', apply: '申请置换',
     ineligible: '此房源尚未获得业主的置换展示授权，不能发起互换申请。',
@@ -29,7 +29,7 @@ const words = {
     homeManageNote: '委托租赁、委托经营、委托看护。选一种适合您房屋现状的方式。',
     registrationTitle: '登记房源意向', serviceScope: '服务与收费', registrationPreview: '可测试提交流程 · 不收集真实资料',
     registrationNotice: '选择房屋信息后可生成一条站内测试记录，保存在当前浏览器。电话与邮箱暂不填写，也不会发送给平台。',
-    propertyCity: '房源城市', propertyRegion: '所在区域', propertyType: '房屋类型', propertySize: '建筑面积（m²）',
+    propertyCity: '房源城市', propertyRegion: '所在区域', propertySize: '建筑面积（m²）',
     contactPhone: '联系电话', contactEmail: '联系邮箱', apartment: '公寓', villa: '别墅', chooseOne: '请选择', registrationButton: '提交测试登记', registerAction: '查看登记信息', registrationDisabledPlaceholder: '正式开放后填写',
     leasingSteps: ['评估房源', '签约上架', '招租成交', '收租对账'],
     operationSteps: ['评估授权', '运营出租', '收益对账', '符合条件后申请置换'],
@@ -71,7 +71,7 @@ const words = {
   en: {
     rent: 'Long stays', stays: 'Short stays', exchange: 'Stay Exchange', manage: 'Property Care', explore: 'Explore homes', more: 'View details',
     preview: 'Exchange eligibility', menu: 'Menu', search: 'Search', city: 'City', area: 'Area', stay: 'Stay',
-    allCities: 'All cities', allAreas: 'All areas', allTerms: 'All stays', day: 'Daily', month: 'Monthly', quarter: 'Quarterly', halfYear: '6 months', year: '1 year',
+    allCities: 'All cities', allAreas: 'All areas', propertyType: 'Type', allTypes: 'All types', residential: 'Residential', allTerms: 'All stays', moreOptions: 'More options', lessOptions: 'Hide options', bedroomsFilter: 'Bedrooms', allBedrooms: 'Any bedrooms', areaFilter: 'Area', allAreasMin: 'Any area', day: 'Daily', month: 'Monthly', quarter: 'Quarterly', halfYear: '6 months', year: '1 year',
     results: 'Featured homes', exchangeResults: 'Exchange homes', exchangeIntro: 'Authorized long-stay and short-stay owners can request a direct home exchange.', guestsFilter: 'Guests', allGuests: 'Any number', guestsAtLeast: 'Sleeps at least', reset: 'Clear filters', noResult: 'No concept homes match', noResultSub: 'Try a different city or stay length. More choices will appear when live inventory launches.', exchangeNoResultSub: 'Try another city, area or guest count.',
     demo: 'Concept home', price: 'Sample price', contact: 'Ask about this home', apply: 'Request exchange',
     ineligible: 'This home has not been authorized by its owner for the exchange pool, so exchange requests are unavailable.',
@@ -84,7 +84,7 @@ const words = {
     homeManageNote: 'Leasing, full management or home care. Choose the service that fits your property.',
     registrationTitle: 'Register a property enquiry', serviceScope: 'Service & fees', registrationPreview: 'Interactive workflow test · no real details collected',
     registrationNotice: 'Submit property choices to create a browser-only test record. Phone and email remain disabled; nothing is sent to the platform.',
-    propertyCity: 'Property city', propertyRegion: 'Area', propertyType: 'Property type', propertySize: 'Floor area (m²)',
+    propertyCity: 'Property city', propertyRegion: 'Area', propertySize: 'Floor area (m²)',
     contactPhone: 'Phone', contactEmail: 'Email', apartment: 'Apartment', villa: 'Villa', chooseOne: 'Select', registrationButton: 'Submit test enquiry', registerAction: 'View registration fields', registrationDisabledPlaceholder: 'Available after launch',
     leasingSteps: ['Assess home', 'Sign & list', 'Find tenant', 'Reconcile rent'],
     operationSteps: ['Assess & authorize', 'Operate stays', 'Review earnings', 'Unlock exchange if eligible'],
@@ -133,7 +133,7 @@ function parseRoute(): Route {
   return {
     page: parts[0] || 'home', id: parts[0] === 'listing' ? parts[1] : parts[0] === 'request' || (parts[0] === 'exchange' || parts[0] === 'stays') && parts[1] === 'home' ? parts[2] : undefined,
     mode: parts[0] === 'management' || parts[0] === 'request' ? parts[1] : undefined,
-    filters: { city: params.get('city') || 'all', region: params.get('region') || 'all', term: params.get('term') || 'all' },
+    filters: { city: params.get('city') || 'all', region: params.get('region') || 'all', type: params.get('type') || 'all', term: params.get('term') || 'all', guestsMin: params.get('guests') || 'all', bedroomsMin: params.get('bedrooms') || 'all', areaMin: params.get('area') || 'all' },
     query,
   }
 }
@@ -142,7 +142,11 @@ function rentalsHash(filters: Filters) {
   const params = new URLSearchParams()
   if (filters.city !== 'all') params.set('city', filters.city)
   if (filters.region !== 'all') params.set('region', filters.region)
+  if (filters.type !== 'all') params.set('type', filters.type)
   if (filters.term !== 'all') params.set('term', filters.term)
+  if (filters.guestsMin !== 'all') params.set('guests', filters.guestsMin)
+  if (filters.bedroomsMin !== 'all') params.set('bedrooms', filters.bedroomsMin)
+  if (filters.areaMin !== 'all') params.set('area', filters.areaMin)
   return `#/rentals${params.size ? `?${params}` : ''}`
 }
 
@@ -173,14 +177,18 @@ function Header({ lang, setLang, route }: { lang: Language; setLang: (v: Languag
 function SearchPanel({ lang, initial, compact = false }: { lang: Language; initial: Filters; compact?: boolean }) {
   const t = words[lang]
   const [filters, setFilters] = useState(initial)
-  useEffect(() => { setFilters(initial) }, [initial.city, initial.region, initial.term])
+  const [advancedOpen, setAdvancedOpen] = useState(initial.guestsMin !== 'all' || initial.bedroomsMin !== 'all' || initial.areaMin !== 'all')
+  useEffect(() => { setFilters(initial); setAdvancedOpen(initial.guestsMin !== 'all' || initial.bedroomsMin !== 'all' || initial.areaMin !== 'all') }, [initial.city, initial.region, initial.type, initial.term, initial.guestsMin, initial.bedroomsMin, initial.areaMin])
   const selectedCity = cities.find(c => c.id === filters.city)
   const choose = (patch: Partial<Filters>) => setFilters(previous => ({ ...previous, ...patch }))
   return <form className={`search-panel ${compact ? 'search-compact' : ''}`} onSubmit={event => { event.preventDefault(); window.location.hash = rentalsHash(filters) }}>
     <label><span>{t.city}</span><select value={filters.city} onChange={e => choose({ city: e.target.value, region: 'all' })}><option value="all">{t.allCities}</option>{cities.map(c => <option key={c.id} value={c.id}>{c[lang]}</option>)}</select></label>
     <label><span>{t.area}</span><select value={filters.region} onChange={e => choose({ region: e.target.value })}><option value="all">{t.allAreas}</option>{selectedCity?.regions.map(r => <option key={r.id} value={r.id}>{r[lang]}</option>)}</select></label>
+    <label><span>{t.propertyType}</span><select value={filters.type} onChange={e => choose({ type: e.target.value })}><option value="all">{t.allTypes}</option><option value="apartment">{t.apartment}</option><option value="villa">{t.villa}</option><option value="residential">{t.residential}</option></select></label>
     <label><span>{t.stay}</span><select value={filters.term} onChange={e => choose({ term: e.target.value })}><option value="all">{t.allTerms}</option>{(['halfYear', 'year'] as Term[]).map(term => <option key={term} value={term}>{t[term]}</option>)}</select></label>
     <button className="button button-dark search-submit" type="submit"><span>{t.search}</span><span aria-hidden="true">↗</span></button>
+    <button className="search-more-toggle" type="button" aria-expanded={advancedOpen} onClick={() => setAdvancedOpen(value => !value)}><span>{advancedOpen ? t.lessOptions : t.moreOptions}</span><span aria-hidden="true">{advancedOpen ? '−' : '+'}</span></button>
+    {advancedOpen && <div className="search-advanced"><label><span>{t.guestsFilter}</span><select value={filters.guestsMin} onChange={e => choose({ guestsMin: e.target.value })}><option value="all">{t.allGuests}</option><option value="2">{t.guestsAtLeast} 2</option><option value="4">{t.guestsAtLeast} 4</option><option value="6">{t.guestsAtLeast} 6</option></select></label><label><span>{t.bedroomsFilter}</span><select value={filters.bedroomsMin} onChange={e => choose({ bedroomsMin: e.target.value })}><option value="all">{t.allBedrooms}</option><option value="1">1+</option><option value="2">2+</option><option value="3">3+</option></select></label><label><span>{t.areaFilter}</span><select value={filters.areaMin} onChange={e => choose({ areaMin: e.target.value })}><option value="all">{t.allAreasMin}</option><option value="60">60 m²+</option><option value="80">80 m²+</option><option value="100">100 m²+</option></select></label></div>}
   </form>
 }
 
@@ -223,7 +231,7 @@ function RentalsPage({ lang, filters }: { lang: Language; filters: Filters }) {
   const t = words[lang]
   const longHomes = listings.filter(item => item.management === 'leased')
   const found = filterListings(longHomes, filters)
-  return <div className="page-shell page-top"><div className="page-title"><p className="eyebrow">01 / LONG STAYS</p><h1>{t.rent}</h1><p>{lang === 'zh' ? '半年或一年，安心长住。半年月租按一年基础月租上浮 10%。' : 'Stay for six months or a year. Six-month rent adds 10% to the annual base monthly rate.'}</p></div><SearchPanel lang={lang} initial={filters} compact/><div className="results-bar"><div><h2>{t.results}</h2><span>{String(found.length).padStart(2, '0')} / {String(longHomes.length).padStart(2, '0')}</span></div>{(filters.city !== 'all' || filters.region !== 'all' || filters.term !== 'all') && <a href="#/rentals" className="text-link">{t.reset} ↗</a>}</div><p className="sample-inventory">{t.sampleInventory}</p>{found.length ? <div className="listing-grid">{found.map(item => <ListingCard key={item.id} listing={item} lang={lang}/>)}</div> : <div className="empty-state"><h3>{t.noResult}</h3><p>{t.noResultSub}</p><a className="button button-dark" href="#/rentals">{t.reset} ↗</a></div>}</div>
+  return <div className="page-shell page-top"><div className="page-title"><p className="eyebrow">01 / LONG STAYS</p><h1>{t.rent}</h1><p>{lang === 'zh' ? '半年或一年，安心长住。半年月租按一年基础月租上浮 10%。' : 'Stay for six months or a year. Six-month rent adds 10% to the annual base monthly rate.'}</p></div><SearchPanel lang={lang} initial={filters} compact/><div className="results-bar"><div><h2>{t.results}</h2><span>{String(found.length).padStart(2, '0')} / {String(longHomes.length).padStart(2, '0')}</span></div>{(filters.city !== 'all' || filters.region !== 'all' || filters.type !== 'all' || filters.term !== 'all' || filters.guestsMin !== 'all' || filters.bedroomsMin !== 'all' || filters.areaMin !== 'all') && <a href="#/rentals" className="text-link">{t.reset} ↗</a>}</div><p className="sample-inventory">{t.sampleInventory}</p>{found.length ? <div className="listing-grid">{found.map(item => <ListingCard key={item.id} listing={item} lang={lang}/>)}</div> : <div className="empty-state"><h3>{t.noResult}</h3><p>{t.noResultSub}</p><a className="button button-dark" href="#/rentals">{t.reset} ↗</a></div>}</div>
 }
 
 function PropertyGallery({ listing, lang }: { listing: Listing; lang: Language }) {
