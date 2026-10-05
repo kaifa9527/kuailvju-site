@@ -59,9 +59,9 @@ export function exchangeQuery(search: ExchangeSearch): string {
   return params.size ? `?${params}` : ''
 }
 
-export function filterExchangeHomes(homes: Listing[], search: ExchangeSearch, today = localDate()): Listing[] {
+export function filterExchangeHomes(homes: Listing[], search: ExchangeSearch, today = localDate(), kind: 'exchange' | 'stays' = 'exchange'): Listing[] {
   const range = { start: search.start, end: search.end }
-  return homes.filter(home => canExchange(home)
+  return homes.filter(home => (kind === 'stays' ? home.management === 'operated' : canExchange(home))
     && (search.city === 'all' || home.city === search.city)
     && (search.region === 'all' || home.region === search.region)
     && home.guests >= search.guests

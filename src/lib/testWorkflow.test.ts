@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { advanceService, changeExchange, proposeExchangeTopUp, respondExchangeTopUp, validRange, type ExchangeRequest, type RentalRequest } from './testWorkflow.ts'
+import { advanceService, changeExchange, proposeExchangeTopUp, readExchangeDrafts, respondExchangeTopUp, validRange, type ExchangeRequest, type ManagementRequest, type RentalRequest } from './testWorkflow.ts'
 
 const exchange: ExchangeRequest = { id: 'T-1', createdAt: '2026-10-04', kind: 'exchange', sourceId: 'a', targetId: 'b', aStay: { start: '2026-11-01', end: '2026-11-04' }, bStay: { start: '2026-12-01', end: '2026-12-04' }, status: 'pending-owner' }
 
@@ -43,4 +43,11 @@ test('service enquiries progress from submitted through review to response', () 
   assert.equal(advanceService(rental)?.status, 'reviewing')
   assert.equal(advanceService(advanceService(rental)!)?.status, 'replied')
   assert.equal(advanceService({ ...rental, status: 'replied' }), null)
+})
+
+test('only expressly authorized leasing or operated homes enter pending exchange discovery', () => {
+  const base: ManagementRequest = { id: 'T-M', createdAt: '2026-10-05', kind: 'management', mode: 'leasing', city: 'beihai', region: 'yintan', propertyType: 'apartment', area: 90, bedrooms: 2, status: 'submitted' }
+  const drafts = readExchangeDrafts([base, { ...base, id: 'T-YES', exchangeOptIn: true }, { ...base, id: 'T-CARE', mode: 'care', exchangeOptIn: true }])
+  assert.equal(drafts.length, 1)
+  assert.deepEqual(drafts[0], { id: 'draft-T-YES', city: 'beihai', region: 'yintan', propertyType: 'apartment', area: 90, bedrooms: 2, management: 'leasing', authorized: true })
 })

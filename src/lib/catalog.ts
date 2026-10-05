@@ -33,7 +33,11 @@ export function filterListings<T extends SearchableListing>(items: readonly T[],
 }
 
 export function canExchange(listing: ExchangeListing): boolean {
-  return listing.management === 'operated' && listing.exchangeAuthorized && listing.exchangeOpen
+  return ['operated', 'leased'].includes(listing.management) && listing.exchangeAuthorized && listing.exchangeOpen
+}
+
+export function longRentalMonthlyPrice(baseMonthlyRent: number, term: 'halfYear' | 'year'): number {
+  return Math.round(baseMonthlyRent * (term === 'halfYear' ? 1.1 : 1))
 }
 
 export function sortFeaturedListings<T extends { id: string; pinned: boolean; publishedAt: string }>(items: readonly T[]): T[] {
@@ -51,7 +55,7 @@ export function formatPrice(listing: PricedListing, language: Language): string 
     maximumFractionDigits: 0,
   }).format(listing.price)
   const unit = language === 'zh'
-    ? { day: '天', month: '月', quarter: '季', year: '年' }[listing.priceUnit] || listing.priceUnit
+    ? { day: '天', month: '月', quarter: '季', halfYear: '半年', year: '年' }[listing.priceUnit] || listing.priceUnit
     : listing.priceUnit
   return `${money} / ${unit}`
 }

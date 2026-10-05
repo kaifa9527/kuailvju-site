@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { canExchange, estimateLeaseMoveIn, filterListings, formatPrice, sortFeaturedListings } from './catalog.ts'
+import { canExchange, estimateLeaseMoveIn, filterListings, formatPrice, longRentalMonthlyPrice, sortFeaturedListings } from './catalog.ts'
 
 const sample = [
   { id: 'a', city: 'pattaya', region: 'jomtien', terms: ['day', 'month'], management: 'operated', exchangeAuthorized: true, exchangeOpen: true, price: 2800, currency: 'THB', priceUnit: 'day' },
@@ -18,10 +18,18 @@ test('filterListings returns empty results for an unavailable combination', () =
   assert.deepEqual(filterListings(sample, { city: 'beihai', region: 'yintan', term: 'day' }), [])
 })
 
-test('canExchange requires operated management, owner authorization and open status', () => {
+test('canExchange accepts authorized leased or operated homes only when open', () => {
   assert.equal(canExchange(sample[0]), true)
   assert.equal(canExchange(sample[1]), false)
   assert.equal(canExchange(sample[2]), false)
+  assert.equal(canExchange({ ...sample[1], exchangeAuthorized: true, exchangeOpen: true }), true)
+  assert.equal(canExchange({ ...sample[1], management: 'care', exchangeAuthorized: true, exchangeOpen: true }), false)
+})
+
+test('six-month rent rises 10 percent while one-year rent stays at the base rate', () => {
+  assert.equal(longRentalMonthlyPrice(3900, 'halfYear'), 4290)
+  assert.equal(longRentalMonthlyPrice(3900, 'year'), 3900)
+  assert.deepEqual(estimateLeaseMoveIn(longRentalMonthlyPrice(3900, 'halfYear'), 6, 'one-two'), { deposit: 4290, prepaidRent: 8580, initialDue: 12870 })
 })
 
 test('featured order keeps pinned homes first, then newest, without changing source order', () => {

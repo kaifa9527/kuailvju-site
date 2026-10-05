@@ -1,5 +1,5 @@
 export type CityId = 'pattaya' | 'sanya' | 'beihai'
-export type Term = 'day' | 'month' | 'quarter' | 'year'
+export type Term = 'day' | 'month' | 'quarter' | 'halfYear' | 'year'
 export type Localized = { zh: string; en: string }
 
 export type Listing = {
@@ -75,7 +75,7 @@ export const listings: Listing[] = [
       { image: '/images/beihai-concept.jpg', caption: { zh: '卧室与海景 · 视觉示意', en: 'Bedroom and sea view · concept' } },
       { image: '/images/beihai-living.jpg', caption: { zh: '起居与餐厅 · 视觉示意', en: 'Living and dining area · concept' } },
     ],
-    guests: 4, bedrooms: 2, bathrooms: 1, beds: 2, area: 96, terms: ['month', 'quarter', 'year'], management: 'leased', exchangeAuthorized: false, exchangeOpen: false,
+    guests: 4, bedrooms: 2, bathrooms: 1, beds: 2, area: 96, terms: ['halfYear', 'year'], management: 'leased', exchangeAuthorized: true, exchangeOpen: true,
     price: 3900, currency: 'CNY', priceUnit: 'month', pinned: true, publishedAt: '2026-09-20', highlight: { zh: '长租友好', en: 'Long-stay friendly' }, demo: true,
     features: [{ zh: '卧室与起居分区清晰', en: 'Separate rest and living areas' }, { zh: '按月计价，适合较长停留', en: 'Monthly pricing for longer stays' }],
     amenities: [{ zh: '海景窗景', en: 'Sea-facing windows' }, { zh: '起居室', en: 'Living room' }, { zh: '餐厅', en: 'Dining area' }, { zh: '空调', en: 'Air conditioning' }],
@@ -134,7 +134,7 @@ export const listings: Listing[] = [
     description: { zh: '起居、用餐与卧室分区清楚，适合较长居住。房源与价格仅为页面示意。', en: 'A clear living, dining and sleeping layout for longer stays. Concept home and price only.' },
     type: { zh: '长租公寓', en: 'Monthly apartment' },
     gallery: [{ image: '/images/pattaya-north-monthly.jpg', caption: { zh: '客厅与阳台 · 视觉示意', en: 'Living room and balcony · concept' } }],
-    guests: 2, bedrooms: 1, bathrooms: 1, beds: 1, area: 55, terms: ['month', 'quarter', 'year'], management: 'leased', exchangeAuthorized: false, exchangeOpen: false,
+    guests: 2, bedrooms: 1, bathrooms: 1, beds: 1, area: 55, terms: ['halfYear', 'year'], management: 'leased', exchangeAuthorized: false, exchangeOpen: false,
     price: 18000, currency: 'THB', priceUnit: 'month', pinned: false, publishedAt: '2026-10-03', highlight: { zh: '日常生活便利', en: 'Easy everyday living' }, demo: true,
     features: [{ zh: '独立卧室与客厅', en: 'Separate bedroom and living room' }, { zh: '适合一至两人长住', en: 'Suited to one or two long-stay guests' }],
     amenities: [{ zh: '阳台', en: 'Balcony' }, { zh: '起居室', en: 'Living area' }, { zh: '空调', en: 'Air conditioning' }, { zh: '无线网络', en: 'Wi-Fi' }],
@@ -145,7 +145,7 @@ export const listings: Listing[] = [
     description: { zh: '适合家庭长住的双卧公寓，窗外是绿意庭景。房源与价格仅为页面示意。', en: 'A two-bedroom family home with a green garden outlook. Concept home and price only.' },
     type: { zh: '家庭公寓', en: 'Family apartment' },
     gallery: [{ image: '/images/sanya-haitang-monthly.jpg', caption: { zh: '客厅与庭景 · 视觉示意', en: 'Living room and garden · concept' } }],
-    guests: 4, bedrooms: 2, bathrooms: 1, beds: 2, area: 89, terms: ['month', 'quarter', 'year'], management: 'leased', exchangeAuthorized: false, exchangeOpen: false,
+    guests: 4, bedrooms: 2, bathrooms: 1, beds: 2, area: 89, terms: ['halfYear', 'year'], management: 'leased', exchangeAuthorized: false, exchangeOpen: false,
     price: 6200, currency: 'CNY', priceUnit: 'month', pinned: false, publishedAt: '2026-10-02', highlight: { zh: '绿意庭景', en: 'Garden outlook' }, demo: true,
     features: [{ zh: '家庭友好的双卧布局', en: 'Two-bedroom family layout' }, { zh: '起居与用餐空间完整', en: 'Full living and dining areas' }],
     amenities: [{ zh: '庭景窗景', en: 'Garden outlook' }, { zh: '起居室', en: 'Living area' }, { zh: '空调', en: 'Air conditioning' }, { zh: '餐厅', en: 'Dining area' }],
@@ -156,7 +156,7 @@ export const listings: Listing[] = [
     description: { zh: '双卧、餐厅与明亮起居空间，为长住留出呼吸感。房源与价格仅为页面示意。', en: 'Two bedrooms, dining and a bright living space for a longer stay. Concept home and price only.' },
     type: { zh: '双卧公寓', en: 'Two-bedroom apartment' },
     gallery: [{ image: '/images/beihai-qiaogang-monthly.jpg', caption: { zh: '起居与餐厅 · 视觉示意', en: 'Living and dining area · concept' } }],
-    guests: 4, bedrooms: 2, bathrooms: 1, beds: 2, area: 93, terms: ['month', 'quarter', 'year'], management: 'leased', exchangeAuthorized: false, exchangeOpen: false,
+    guests: 4, bedrooms: 2, bathrooms: 1, beds: 2, area: 93, terms: ['halfYear', 'year'], management: 'leased', exchangeAuthorized: false, exchangeOpen: false,
     price: 3600, currency: 'CNY', priceUnit: 'month', pinned: false, publishedAt: '2026-10-01', highlight: { zh: '海岸慢生活', en: 'Easy coastal living' }, demo: true,
     features: [{ zh: '双卧与独立餐厅', en: 'Two bedrooms and a dining area' }, { zh: '适合家庭或结伴长住', en: 'Suited to family or shared long stays' }],
     amenities: [{ zh: '起居室', en: 'Living area' }, { zh: '餐厅', en: 'Dining area' }, { zh: '空调', en: 'Air conditioning' }, { zh: '海景窗景', en: 'Sea-facing windows' }],

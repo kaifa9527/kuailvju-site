@@ -8,10 +8,12 @@ export type ManagementRequest = BaseRequest & {
   floor?: number; totalFloors?: number; bedrooms?: number; livingRooms?: number; bathrooms?: number; handover?: string;
   renovation?: string; furnishing?: string; appliances?: string; occupancy?: string; rentalMinimum?: string; cooperationModel?: string;
   expectedMonthlyRent?: number; operationReady?: string; careAddons?: string[]; photoCount?: number; careEstimate?: number;
+  exchangeOptIn?: boolean;
   status: 'submitted' | 'reviewing' | 'replied'
 }
+export type ExchangeDraft = { id: string; city: string; region: string; propertyType: string; area: number; bedrooms: number; management: 'leasing' | 'operation'; authorized: true }
 export type ExchangeTopUp = { amount: number; currency: 'CNY' | 'THB'; payer: 'a' | 'b'; acceptedA: boolean; acceptedB: boolean }
-export type ExchangeRequest = BaseRequest & { kind: 'exchange'; sourceId: string; targetId: string; aStay: DateRange; bStay: DateRange; guests?: number; status: 'pending-owner' | 'counter-proposed' | 'owner-accepted' | 'owner-declined' | 'applicant-declined' | 'topup-proposed' | 'topup-accepted' | 'topup-declined' | 'platform-confirmed'; counterStay?: DateRange; topUp?: ExchangeTopUp }
+export type ExchangeRequest = BaseRequest & { kind: 'exchange'; sourceId: string; sourceDraft?: ExchangeDraft; targetId: string; aStay: DateRange; bStay: DateRange; guests?: number; status: 'pending-owner' | 'counter-proposed' | 'owner-accepted' | 'owner-declined' | 'applicant-declined' | 'topup-proposed' | 'topup-accepted' | 'topup-declined' | 'platform-confirmed'; counterStay?: DateRange; topUp?: ExchangeTopUp }
 export type TestRequest = RentalRequest | ManagementRequest | ExchangeRequest
 export type ExchangeAction = 'accept' | 'decline' | 'counter' | 'confirm'
 
@@ -31,6 +33,18 @@ export function readTestRequests(): TestRequest[] {
     const parsed: unknown = JSON.parse(localStorage.getItem(storageKey) || '[]')
     return Array.isArray(parsed) ? parsed.filter((item): item is TestRequest => Boolean(item && typeof item === 'object' && 'id' in item && 'kind' in item && 'status' in item)) : []
   } catch { return [] }
+}
+
+export function readExchangeDrafts(requests = readTestRequests()): ExchangeDraft[] {
+  const drafts = new Map<string, ExchangeDraft>()
+  for (const request of requests) {
+    if (request.kind === 'management' && request.exchangeOptIn && request.mode !== 'care') {
+      const draft: ExchangeDraft = { id: `draft-${request.id}`, city: request.city, region: request.region, propertyType: request.propertyType, area: request.area, bedrooms: request.bedrooms || 0, management: request.mode, authorized: true }
+      drafts.set(draft.id, draft)
+    }
+    if (request.kind === 'exchange' && request.sourceDraft?.authorized) drafts.set(request.sourceDraft.id, request.sourceDraft)
+  }
+  return [...drafts.values()]
 }
 
 export function saveTestRequest(request: TestRequest): void {

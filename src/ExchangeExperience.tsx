@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { cities, listings, type Listing } from './data'
-import { canExchange, sortFeaturedListings, type Language } from './lib/catalog'
+import { canExchange, formatPrice, sortFeaturedListings, type Language } from './lib/catalog'
 import { demoAvailable, demoBlockedDates, emptyExchangeSearch, exchangeQuery, filterExchangeHomes, localDate, parseExchangeSearch, type ExchangeSearch } from './lib/exchangeDiscovery'
-import { validRange } from './lib/testWorkflow'
+import { readExchangeDrafts, validRange, type ExchangeDraft } from './lib/testWorkflow'
 import { LineIcon, amenityIcon } from './components/LineIcon'
 import { ExchangeGallery } from './components/ExchangeGallery'
 import { guestRecommendation } from './lib/guestRecommendation'
@@ -10,31 +10,31 @@ import { guestRecommendation } from './lib/guestRecommendation'
 const asset = (path: string) => `${import.meta.env.BASE_URL}${path.replace(/^\//, '')}`
 const words = {
   zh: {
-    title: '一房托管，旅居世界。', intro: '选目的地与日期，找到想住的房子。可按日租住；符合资格的业主也可申请双房源置换。',
+    title: '一房托管，旅居世界。', intro: '长租房与民宿房业主明确授权后，房源进入旅居置换展示；双方匿名确认，平台核验后履约。', staysTitle: '住进喜欢的风景。', staysIntro: '这里是委托经营的民宿房源。选择目的地、日期与人数，按晚寻找适合的旅居空间。', staysResults: '精选民宿房',
     destination: '目的地', area: '区域', anyCity: '全部城市', anyArea: '全部区域', start: '入住', end: '退房', guests: '人数', search: '查找房源', filters: '更多筛选', clear: '清除',
     type: '房源类型', any: '不限', apartment: '公寓', villa: '别墅', bedrooms: '卧室', beds: '床位', baths: '卫生间', amenity: '设施', pool: '泳池', wifi: '无线网络', climate: '空调', view: '景观', apply: '应用筛选',
     results: '可住的房源', sort: '精选优先 · 最新补充', demo: '示意房源', nights: '晚', sleeps: '可住', day: '晚', sample: '展示房源、图片、价格及档期均为交互测试数据；正式预订须核验真实房态与报价。',
     empty: '暂时没有符合条件的房源', tryAgain: '调整日期、人数或筛选条件再试。', from: '返回搜索结果', home: '首页', overview: '房源概览', highlights: '房源亮点', amenities: '提供的设施', location: '房源所在区域', locationNote: '为保护业主隐私，准确地址将在正式入住安排中提供。',
     availability: '选择入住日期', availabilityNote: '先点入住、再点退房。灰色日期为演示不可选；正式档期以平台核验为准。', blocked: '测试不可选', rules: '入住与房屋规则', rulesNote: '入住退房时间、宠物、吸烟、访客与安静时段由平台核验具体房源后逐项告知，申请确认前可查看完整条款。',
-    rental: '按日租住', exchange: '业主旅居置换', rentalLead: '按日计价，提交入住意向后由平台核验房态与最终报价。', exchangeLead: '仅已签约委托经营并加入置换池的业主可申请；双方匿名确认，平台核验后生效。',
+    rental: '按日租住', exchange: '业主旅居置换', rentalLead: '按日计价，提交入住意向后由平台核验房态与最终报价。', exchangeLead: '长租房或民宿房业主明确授权加入置换池后可申请；双方匿名确认，平台核验后生效。',
     daily: '示意每晚房价', total: '示意住宿费', cleaning: '入住前后保洁服务', deposit: '可退入住押金', utilities: '水电', metered: '实际抄表结算', equivalent: '置换住宿费', review: '待对等审核',
     noCharge: '在此页面不收款。', reserve: '提交短住意向', request: '发起置换申请', dateError: '请选择有效的入住和退房日期。', unavailable: '所选日期含演示不可选档期，请换一个时段。', exchangeNoDate: '可先查看房源；申请时填写双方各自的入住日期。',
-    eligibility: '置换资格', eligibilityText: '只有委托经营业主，且其房源已加入置换池，才能提出申请。', timing: '双方档期', timingText: 'A 与 B 可在不同日期入住；业主仅能接受、拒绝或提议日期，不可私下交换联系方式。',
-    fees: '费用透明', feesText: '对等房源免住宿费；若价值不等，平台核算补差额并由双方再次确认。双方每次入住另付 ¥500 保洁费、¥1,000 可退押金，水电据实结算；芭提雅收锁定等值泰铢。',
+    eligibility: '置换资格', eligibilityText: '申请房源须由业主明确授权加入置换池；长租房与民宿房均可登记，平台还须核验房源使用权和档期。', timing: '双方档期', timingText: 'A 与 B 可在不同日期入住；业主仅能接受、拒绝或提议日期，不可私下交换联系方式。',
+    fees: '费用透明', feesText: '对等房源免住宿费；若价值不等，平台核算补差额并由双方再次确认。双方每次入住另付 ¥600 入住前后两次保洁费；长租房押金按入住房源月租金，民宿房押金按房况核定 ¥3,000–6,000，水电据实结算；芭提雅收等值泰铢。入住期间日常保洁由住客自行维护，额外保洁另计。',
     rentalNote: '租赁与置换是两条独立路径。置换不保证即时确认，平台须核对合同授权、房态、对等价值与异期履约。', related: '继续看看', photos: '张示意图片', test: '站内流程测试', topup: '可能补差额', topupPending: '平台报价 · 双方确认',
   },
   en: {
-    title: 'One home entrusted. A world to stay in.', intro: 'Choose a place and dates, then find a home. Stay by the night, or request a two-home exchange if you are an eligible owner.',
+    title: 'One home entrusted. A world to stay in.', intro: 'Long-stay and operated homes enter the exchange section only with the owner’s express consent. Owners decide anonymously; the platform verifies delivery.', staysTitle: 'Stay somewhere worth remembering.', staysIntro: 'Operated homes for nightly stays. Choose a destination, dates and guests to find your place.', staysResults: 'Short-stay homes',
     destination: 'Destination', area: 'Area', anyCity: 'All cities', anyArea: 'All areas', start: 'Check in', end: 'Check out', guests: 'Guests', search: 'Find homes', filters: 'More filters', clear: 'Clear',
     type: 'Property type', any: 'Any', apartment: 'Apartment', villa: 'Villa', bedrooms: 'Bedrooms', beds: 'Beds', baths: 'Bathrooms', amenity: 'Amenities', pool: 'Pool', wifi: 'Wi-Fi', climate: 'Air conditioning', view: 'View', apply: 'Apply filters',
     results: 'Homes to stay in', sort: 'Featured first · newest next', demo: 'Concept home', nights: 'nights', sleeps: 'Sleeps', day: 'night', sample: 'Homes, images, prices and calendar dates are interactive sample data. Live stays require availability and price verification.',
     empty: 'No homes match these choices', tryAgain: 'Try other dates, guest count or filters.', from: 'Back to results', home: 'Home', overview: 'The space', highlights: 'What stands out', amenities: 'What this place offers', location: 'Where you will be', locationNote: 'The exact address is shared in the final stay arrangements to protect owner privacy.',
     availability: 'Choose your dates', availabilityNote: 'Select check-in, then checkout. Muted dates are demo unavailable days. Live dates require platform verification.', blocked: 'Demo unavailable', rules: 'Stay and house rules', rulesNote: 'Check-in/out, pets, smoking, visitors and quiet hours are confirmed for each real home. Full terms are shown before a request is confirmed.',
-    rental: 'Nightly stay', exchange: 'Owner exchange', rentalLead: 'Sample nightly price. The platform checks availability and final price after you send an enquiry.', exchangeLead: 'Only owners with an active managed-operation agreement and an admitted home may apply. Both owners decide anonymously, then the platform verifies.',
+    rental: 'Nightly stay', exchange: 'Owner exchange', rentalLead: 'Sample nightly price. The platform checks availability and final price after you send an enquiry.', exchangeLead: 'Owners of long-stay or operated homes may opt in. Both owners decide anonymously, then the platform verifies.',
     daily: 'Sample nightly rate', total: 'Sample accommodation', cleaning: 'Before/after cleaning', deposit: 'Refundable deposit', utilities: 'Utilities', metered: 'Metered use', equivalent: 'Exchange accommodation', review: 'Subject to equal-value review',
     noCharge: 'No payment is taken here.', reserve: 'Send stay enquiry', request: 'Request exchange', dateError: 'Choose a valid check-in and checkout date.', unavailable: 'These dates include a demo unavailable day. Choose another stay.', exchangeNoDate: 'You can view the home now and select both owners’ separate dates when requesting.',
-    eligibility: 'Who can exchange', eligibilityText: 'Applicants must own a home under active managed operation that is admitted to the exchange pool.', timing: 'Separate dates', timingText: 'A and B may travel at different times. Owners only accept, decline or suggest dates; they cannot exchange private contact details.',
-    fees: 'Clear costs', feesText: 'Equal-value homes waive accommodation rent. If values differ, the platform quotes a top-up for both owners to approve. Each stay also has a ¥500 cleaning fee, ¥1,000 refundable deposit and metered utilities; Pattaya charges the locked THB equivalent.',
+    eligibility: 'Who can exchange', eligibilityText: 'The applicant must expressly opt the home into the exchange pool. Long-stay and operated homes may register, subject to authority and availability checks.', timing: 'Separate dates', timingText: 'A and B may travel at different times. Owners only accept, decline or suggest dates; they cannot exchange private contact details.',
+    fees: 'Clear costs', feesText: 'Equal-value homes waive accommodation rent. If values differ, the platform quotes a top-up for both owners to approve. Each stay has a ¥600 pre/post-stay cleaning fee; the deposit equals the target long-stay home’s monthly rent or ¥3,000–6,000 for a short-stay home. Utilities are metered; Pattaya charges the THB equivalent. Guests handle daily cleaning; extra cleaning is charged separately.',
     rentalNote: 'Nightly stays and owner exchanges are separate paths. Exchanges are never instant; the platform checks authority, availability, value and performance at separate dates.', related: 'Explore more homes', photos: 'concept photos', test: 'Interactive test', topup: 'Possible top-up', topupPending: 'Platform quote · both approve',
   },
 }
@@ -48,17 +48,23 @@ function nightly(home: Listing, lang: Language) {
   return new Intl.NumberFormat(lang === 'zh' ? 'zh-CN' : 'en-US', { style: 'currency', currency: home.currency, maximumFractionDigits: 0 }).format(home.price)
 }
 
+function DraftCard({ draft, lang }: { draft: ExchangeDraft; lang: Language }) {
+  const city = cities.find(item => item.id === draft.city)
+  const region = city?.regions.find(item => item.id === draft.region)
+  return <article className="exchange-draft-card"><div className="exchange-draft-art"><LineIcon name="window" size={48}/><span>{lang === 'zh' ? '待核验' : 'Under review'}</span></div><div className="exchange-draft-body"><small>{city?.[lang]} · {region?.[lang]}</small><h3>{draft.propertyType === 'villa' ? lang === 'zh' ? '别墅' : 'Villa' : lang === 'zh' ? '公寓' : 'Apartment'} · {draft.area} m²</h3><p>{draft.management === 'leasing' ? lang === 'zh' ? '委托租赁' : 'Long-stay management' : lang === 'zh' ? '委托经营' : 'Operated stay'} · {draft.bedrooms} {lang === 'zh' ? '间卧室' : 'bedrooms'}</p><p>{lang === 'zh' ? '业主已授权加入置换展示。平台核验房源与权益后，才可申请入住。' : 'Owner authorized display. Stay requests open after the platform verifies the home and owner rights.'}</p></div></article>
+}
+
 function stayNights(start: string, end: string) { return Math.round((Date.parse(`${end}T00:00:00Z`) - Date.parse(`${start}T00:00:00Z`)) / 86_400_000) }
 
-function ExchangeCard({ home, lang, query }: { home: Listing; lang: Language; query: string }) {
+function ExchangeCard({ home, lang, query, kind }: { home: Listing; lang: Language; query: string; kind: 'exchange' | 'stays' }) {
   const t = words[lang]
-  return <a className="listing-card exchange-discovery-card" href={`#/exchange/home/${home.id}${query}`}>
+  return <a className="listing-card exchange-discovery-card" href={`#/${kind}/home/${home.id}${query}`}>
     <div className="listing-image"><img src={asset(home.gallery[0].image)} alt={home.gallery[0].caption[lang]} loading="lazy"/><span className="image-label">{t.demo}</span>{home.pinned && <span className="listing-pinned">{lang === 'zh' ? '精选' : 'Featured'}</span>}</div>
-    <div className="listing-content"><div className="listing-eyebrow">{location(home, lang)} <span>/ {home.type[lang]}</span></div><h3>{home.title[lang]}</h3><p>{home.highlight[lang]} · {t.sleeps} {home.guests} · {home.bedrooms} {t.bedrooms.toLowerCase()}</p><div className="listing-bottom"><div><small>{t.daily}</small><strong>{nightly(home, lang)} / {t.day}</strong></div><span className="circle-arrow" aria-hidden="true">↗</span></div></div>
+    <div className="listing-content"><div className="listing-eyebrow">{location(home, lang)} <span>/ {home.type[lang]}</span></div><h3>{home.title[lang]}</h3><p>{home.highlight[lang]} · {t.sleeps} {home.guests} · {home.bedrooms} {t.bedrooms.toLowerCase()}</p><div className="listing-bottom"><div><small>{home.management === 'leased' ? (lang === 'zh' ? '长租基础月租 · 置换需核验' : 'Base monthly rent · exchange subject to review') : t.daily}</small><strong>{home.management === 'leased' ? formatPrice(home, lang) : `${nightly(home, lang)} / ${t.day}`}</strong></div><span className="circle-arrow" aria-hidden="true">↗</span></div></div>
   </a>
 }
 
-function SearchForm({ lang, initial }: { lang: Language; initial: ExchangeSearch }) {
+function SearchForm({ lang, initial, kind }: { lang: Language; initial: ExchangeSearch; kind: 'exchange' | 'stays' }) {
   const t = words[lang]
   const [draft, setDraft] = useState(initial)
   const [expanded, setExpanded] = useState(false)
@@ -75,7 +81,7 @@ function SearchForm({ lang, initial }: { lang: Language; initial: ExchangeSearch
       if (!validRange({ start: requested.start, end: requested.end }) || requested.start < localDate()) { setError(t.dateError); return }
     }
     setError('')
-    window.location.hash = `#/exchange${exchangeQuery(requested)}`
+    window.location.hash = `#/${kind}${exchangeQuery(requested)}`
   }
   return <form className="exchange-finder" onSubmit={submit}>
     <div className="exchange-finder-main">
@@ -91,26 +97,27 @@ function SearchForm({ lang, initial }: { lang: Language; initial: ExchangeSearch
       <label>{t.type}<select value={draft.type} onChange={event => update({ type: event.target.value as ExchangeSearch['type'] })}><option value="all">{t.any}</option><option value="apartment">{t.apartment}</option><option value="villa">{t.villa}</option></select></label>
       {(['bedrooms', 'beds', 'baths'] as const).map(key => <label key={key}>{t[key]}<select value={draft[key]} onChange={event => update({ [key]: Number(event.target.value) })}><option value={0}>{t.any}</option>{[1, 2, 3, 4].map(number => <option key={number} value={number}>{number}+</option>)}</select></label>)}
       <label>{t.amenity}<select value={draft.amenity} onChange={event => update({ amenity: event.target.value as ExchangeSearch['amenity'] })}><option value="all">{t.any}</option>{(['pool', 'wifi', 'climate', 'view'] as const).map(key => <option key={key} value={key}>{t[key]}</option>)}</select></label>
-      <button className="button button-outline" type="button" onClick={() => { setDraft(emptyExchangeSearch); window.location.hash = '#/exchange' }}>{t.clear}</button><button className="button button-dark" type="submit">{t.apply} ↗</button>
+      <button className="button button-outline" type="button" onClick={() => { setDraft(emptyExchangeSearch); window.location.hash = `#/${kind}` }}>{t.clear}</button><button className="button button-dark" type="submit">{t.apply} ↗</button>
     </div>}
     {error && <p className="form-error" role="alert">{error}</p>}
   </form>
 }
 
-export function ExchangeCatalogPage({ lang, query }: { lang: Language; query: string }) {
+export function ExchangeCatalogPage({ lang, query, kind = 'exchange' }: { lang: Language; query: string; kind?: 'exchange' | 'stays' }) {
   const t = words[lang]
   const search = parseExchangeSearch(new URLSearchParams(query))
   const hasValidDates = !search.start && !search.end || validRange({ start: search.start, end: search.end }) && search.start >= localDate()
-  const homes = hasValidDates ? filterExchangeHomes(sortFeaturedListings(listings), search) : []
+  const homes = hasValidDates ? filterExchangeHomes(sortFeaturedListings(listings), search, localDate(), kind) : []
+  const drafts = kind === 'exchange' ? readExchangeDrafts().filter(draft => (search.city === 'all' || draft.city === search.city) && (search.region === 'all' || draft.region === search.region) && (search.type === 'all' || draft.propertyType === search.type) && draft.bedrooms >= search.bedrooms) : []
   const linkQuery = exchangeQuery(search)
   return <div className="page-shell page-top exchange-catalog-page exchange-discovery">
-    <div className="page-title"><p className="eyebrow">02 / STAY EXCHANGE</p><h1>{t.title}</h1><p>{t.intro}</p></div>
-    <SearchForm lang={lang} initial={search}/>
-    <div className="results-bar"><div><h2>{t.results}</h2><span>{String(homes.length).padStart(2, '0')}</span></div><span className="exchange-sort-note">{t.sort}</span></div>
+    <div className="page-title"><p className="eyebrow">{kind === 'stays' ? '02 / SHORT STAYS' : '03 / STAY EXCHANGE'}</p><h1>{kind === 'stays' ? t.staysTitle : t.title}</h1><p>{kind === 'stays' ? t.staysIntro : t.intro}</p></div>
+    <SearchForm lang={lang} initial={search} kind={kind}/>
+    <div className="results-bar"><div><h2>{kind === 'stays' ? t.staysResults : t.results}</h2><span>{String(homes.length).padStart(2, '0')}</span></div><span className="exchange-sort-note">{t.sort}</span></div>
     <p className="sample-inventory">{t.sample}</p>
-    {homes.length ? <div className="listing-grid">{homes.map(home => <ExchangeCard key={home.id} home={home} lang={lang} query={linkQuery}/>)}</div> : <div className="empty-state"><h3>{t.empty}</h3><p>{hasValidDates ? t.tryAgain : t.dateError}</p><a className="button button-dark" href="#/exchange">{t.clear} ↗</a></div>}
-    <div className="exchange-paths"><article><span>01 / NIGHTLY STAY</span><h2>{t.rental}</h2><p>{t.rentalLead}</p></article><article><span>02 / OWNER EXCHANGE</span><h2>{t.exchange}</h2><p>{t.exchangeLead}</p></article></div>
-    <p className="exchange-catalog-foot">{t.rentalNote}</p>
+    {homes.length ? <div className="listing-grid">{homes.map(home => <ExchangeCard key={home.id} home={home} lang={lang} query={linkQuery} kind={kind}/>)}</div> : <div className="empty-state"><h3>{t.empty}</h3><p>{hasValidDates ? t.tryAgain : t.dateError}</p><a className="button button-dark" href={`#/${kind}`}>{t.clear} ↗</a></div>}
+    {kind === 'exchange' && drafts.length > 0 && <section className="exchange-drafts"><div className="results-bar"><div><h2>{lang === 'zh' ? '业主授权 · 待核验' : 'Owner authorized · under review'}</h2><span>{String(drafts.length).padStart(2, '0')}</span></div></div><p className="sample-inventory">{lang === 'zh' ? '以下登记仅保存在当前浏览器，用于测试“授权后展示”链路；尚不可申请入住，真实发布需人工核验。' : 'These entries live in this browser to test opt-in discovery. They cannot receive stay requests until human verification.'}</p><div className="listing-grid">{drafts.map(draft => <DraftCard key={draft.id} draft={draft} lang={lang}/>)}</div></section>}
+    {kind === 'exchange' && <><div className="exchange-paths"><article><span>01 / LONG STAYS</span><h2>{lang === 'zh' ? '长租房也可置换' : 'Long-stay homes can opt in'}</h2><p>{t.eligibilityText}</p></article><article><span>02 / OWNER EXCHANGE</span><h2>{t.exchange}</h2><p>{t.exchangeLead}</p></article></div><p className="exchange-catalog-foot">{t.rentalNote}</p></>}
   </div>
 }
 
@@ -126,7 +133,7 @@ function Calendar({ home, lang, start, end, onSelect }: { home: Listing; lang: L
   return <div className="exchange-calendar"><div className="calendar-head"><strong>{new Intl.DateTimeFormat(lang === 'zh' ? 'zh-CN' : 'en-US', { year: 'numeric', month: 'long' }).format(first)}</strong><div><button type="button" disabled={offset === 0} onClick={() => setOffset(offset - 1)} aria-label={lang === 'zh' ? '上个月' : 'Previous month'}>←</button><button type="button" disabled={offset === 5} onClick={() => setOffset(offset + 1)} aria-label={lang === 'zh' ? '下个月' : 'Next month'}>→</button></div></div><div className="calendar-grid">{weekday.map((label, index) => <small key={index}>{label}</small>)}{Array.from({ length: pad }, (_, index) => <i key={`p${index}`}/>)}{Array.from({ length: days }, (_, index) => { const date = `${first.getFullYear()}-${String(first.getMonth() + 1).padStart(2, '0')}-${String(index + 1).padStart(2, '0')}`; const closed = date < localDate() || blocked.has(date); return <button key={date} type="button" disabled={closed} className={`${closed ? 'is-blocked' : ''} ${date >= start && date < end && start && end ? 'is-selected' : ''} ${date === start || date === end ? 'is-boundary' : ''}`} aria-label={`${date}${closed ? ` · ${t.blocked}` : ''}`} aria-pressed={date === start || date === end} onClick={() => onSelect(date)}>{index + 1}</button> })}</div><p>{t.availabilityNote}</p></div>
 }
 
-export function ExchangeDetailPage({ lang, id, query }: { lang: Language; id?: string; query: string }) {
+export function ExchangeDetailPage({ lang, id, query, kind = 'exchange' }: { lang: Language; id?: string; query: string; kind?: 'exchange' | 'stays' }) {
   const t = words[lang]
   const home = listings.find(item => item.id === id)
   const search = parseExchangeSearch(new URLSearchParams(query))
@@ -135,12 +142,12 @@ export function ExchangeDetailPage({ lang, id, query }: { lang: Language; id?: s
   const [guests, setGuests] = useState(search.guests)
   const [amenitiesOpen, setAmenitiesOpen] = useState(false)
   const [error, setError] = useState('')
-  const [mode, setMode] = useState<'rental' | 'exchange'>('rental')
+  const [mode, setMode] = useState<'rental' | 'exchange'>(home?.management === 'leased' ? 'exchange' : 'rental')
   const startInput = useRef<HTMLInputElement>(null)
   const endInput = useRef<HTMLInputElement>(null)
   const guestsInput = useRef<HTMLSelectElement>(null)
-  useEffect(() => { setStart(search.start); setEnd(search.end); setGuests(search.guests); setAmenitiesOpen(false); setError(''); setMode('rental') }, [id, query])
-  if (!home || !canExchange(home)) return <div className="page-shell empty-state"><h1>{t.empty}</h1><a className="button button-dark" href="#/exchange">{t.from} ↗</a></div>
+  useEffect(() => { setStart(search.start); setEnd(search.end); setGuests(search.guests); setAmenitiesOpen(false); setError(''); setMode(home?.management === 'leased' ? 'exchange' : 'rental') }, [id, query, kind, home?.management])
+  if (!home || (kind === 'exchange' ? !canExchange(home) : home.management !== 'operated')) return <div className="page-shell empty-state"><h1>{t.empty}</h1><a className="button button-dark" href={`#/${kind}`}>{t.from} ↗</a></div>
   const range = { start, end }
   const days = validRange(range) ? stayNights(start, end) : 0
   const navigate = () => {
@@ -163,8 +170,9 @@ export function ExchangeDetailPage({ lang, id, query }: { lang: Language; id?: s
     setEnd(date)
     setError('')
   }
-  const related = listings.filter(item => canExchange(item) && item.id !== home.id && item.guests >= guests).sort((a, b) => Number(b.city === home.city) - Number(a.city === home.city)).slice(0, 3)
-  const exchangeCurrency = home.city === 'pattaya' ? (lang === 'zh' ? '确认时等值泰铢' : 'THB equivalent at confirmation') : null
+  const related = listings.filter(item => (kind === 'stays' ? item.management === 'operated' : canExchange(item)) && item.id !== home.id && item.guests >= guests).sort((a, b) => Number(b.city === home.city) - Number(a.city === home.city)).slice(0, 3)
+  const exchangeCleaning = home.city === 'pattaya' ? (lang === 'zh' ? '¥600 等值泰铢' : 'THB equivalent of ¥600') : '¥600'
+  const exchangeDeposit = home.management === 'leased' ? new Intl.NumberFormat(lang === 'zh' ? 'zh-CN' : 'en-US', { style: 'currency', currency: home.currency, maximumFractionDigits: 0 }).format(home.price) : home.city === 'pattaya' ? (lang === 'zh' ? '¥3,000–6,000 等值泰铢' : 'THB equivalent of ¥3,000–6,000') : '¥3,000–6,000'
   const recommendation = guestRecommendation(home)
   const hasPool = home.amenities.some(item => /泳池|pool/i.test(item.zh))
   const highlights = [
@@ -173,7 +181,7 @@ export function ExchangeDetailPage({ lang, id, query }: { lang: Language; id?: s
     ...(home.selfCheckIn ? [{ icon: 'lock' as const, title: lang === 'zh' ? '密码锁自助入住' : 'Self check-in with a keypad', detail: lang === 'zh' ? '置换民宿标配。入住前由平台核验身份，并单独发送当次有效的开门信息。' : 'Standard for exchange stays. The platform verifies the guest and sends a stay-specific code before arrival.' }] : []),
   ]
   return <div className="page-shell exchange-detail">
-    <div className="exchange-detail-top"><a className="back-link" href={`#/exchange${exchangeQuery(search)}`}>← {t.from}</a><span>{t.demo} / {t.test}</span></div>
+    <div className="exchange-detail-top"><a className="back-link" href={`#/${kind}${exchangeQuery(search)}`}>← {t.from}</a><span>{t.demo} / {t.test}</span></div>
     <div className="detail-heading"><div><p className="eyebrow">{location(home, lang)} / {home.type[lang]}</p><h1>{home.title[lang]}</h1><p>{home.highlight[lang]} · {t.sleeps} {home.guests} · {home.bedrooms} {t.bedrooms.toLowerCase()} · {home.beds} {t.beds.toLowerCase()} · {home.bathrooms} {t.baths.toLowerCase()}</p></div></div>
     <ExchangeGallery home={home} lang={lang}/>
     <div className="exchange-detail-layout"><div className="exchange-detail-main">
@@ -185,7 +193,7 @@ export function ExchangeDetailPage({ lang, id, query }: { lang: Language; id?: s
       <section className="exchange-info-section"><p className="eyebrow">LOCATION</p><h2>{t.location}</h2><div className="exchange-location"><strong>{location(home, lang)}</strong><p>{t.locationNote}</p></div></section>
       <section className="exchange-info-section"><p className="eyebrow">GOOD TO KNOW</p><h2>{t.rules}</h2><p>{t.rulesNote}</p></section>
       <section className="exchange-info-section exchange-rules"><p className="eyebrow">OWNER EXCHANGE</p><h2>{t.exchange}</h2><div><article><LineIcon name="shield"/><h3>{t.eligibility}</h3><p>{t.eligibilityText}</p></article><article><LineIcon name="calendar"/><h3>{t.timing}</h3><p>{t.timingText}</p></article><article><LineIcon name="utility"/><h3>{t.fees}</h3><p>{t.feesText}</p></article></div></section>
-    </div><aside className="exchange-action-card"><div className="exchange-mode-tabs" role="tablist" aria-label={t.overview}><button type="button" role="tab" aria-selected={mode === 'rental'} className={mode === 'rental' ? 'active' : ''} onClick={() => { setMode('rental'); setError('') }}>{t.rental}</button><button type="button" role="tab" aria-selected={mode === 'exchange'} className={mode === 'exchange' ? 'active' : ''} onClick={() => { setMode('exchange'); setError('') }}>{t.exchange}</button></div><div className="exchange-action-body"><p className="eyebrow">{mode === 'rental' ? 'NIGHTLY STAY' : 'TWO-HOME EXCHANGE'}</p><strong className="exchange-action-price">{mode === 'rental' ? `${nightly(home, lang)} / ${t.day}` : t.equivalent}</strong><p className="exchange-action-lead">{mode === 'rental' ? t.rentalLead : t.exchangeLead}</p><div className="exchange-action-fields"><label>{t.start}<input ref={startInput} type="date" min={localDate()} value={start} onInput={event => setStart(event.currentTarget.value)} onChange={event => { setStart(event.target.value); setError('') }}/></label><label>{t.end}<input ref={endInput} type="date" min={start || localDate()} value={end} onInput={event => setEnd(event.currentTarget.value)} onChange={event => { setEnd(event.target.value); setError('') }}/></label><label>{t.guests}<select ref={guestsInput} value={guests} onChange={event => setGuests(Number(event.target.value))}>{Array.from({ length: home.guests }, (_, index) => <option key={index + 1} value={index + 1}>{index + 1}</option>)}</select></label></div><div className="exchange-cost-lines">{mode === 'rental' ? <><div><span>{t.daily}</span><strong>{nightly(home, lang)}</strong></div>{days > 0 && <div><span>{days} {t.nights}</span><strong>{nightly({ ...home, price: home.price * days }, lang)}</strong></div>}<div><span>{t.utilities}</span><strong>{t.metered}</strong></div></> : <><div><span>{t.equivalent}</span><strong>{t.review}</strong></div><div><span>{t.topup}</span><strong>{t.topupPending}</strong></div><div><span>{t.cleaning}</span><strong>{exchangeCurrency || '¥500'}</strong></div><div><span>{t.deposit}</span><strong>{exchangeCurrency || '¥1,000'}</strong></div><div><span>{t.utilities}</span><strong>{t.metered}</strong></div></>}</div>{mode === 'exchange' && <p className="exchange-action-note">{home.city === 'pattaya' ? t.feesText : t.exchangeNoDate}</p>}{error && <p className="form-error" role="alert">{error}</p>}<button type="button" className="button button-dark" onClick={navigate}>{mode === 'rental' ? t.reserve : t.request}<LineIcon name="arrow" size={17}/></button><small>{t.noCharge} {t.sample}</small></div></aside></div>
-    <section className="exchange-related"><div className="results-bar"><div><h2>{t.related}</h2></div></div><div className="listing-grid">{related.map(item => <ExchangeCard key={item.id} home={item} lang={lang} query={exchangeQuery(search)}/>)}</div></section>
+    </div><aside className="exchange-action-card"><div className="exchange-mode-tabs" role="tablist" aria-label={t.overview}>{home.management === 'operated' && <button type="button" role="tab" aria-selected={mode === 'rental'} className={mode === 'rental' ? 'active' : ''} onClick={() => { setMode('rental'); setError('') }}>{t.rental}</button>}<button type="button" role="tab" aria-selected={mode === 'exchange'} className={mode === 'exchange' ? 'active' : ''} onClick={() => { setMode('exchange'); setError('') }}>{t.exchange}</button></div><div className="exchange-action-body"><p className="eyebrow">{mode === 'rental' ? 'NIGHTLY STAY' : 'TWO-HOME EXCHANGE'}</p><strong className="exchange-action-price">{mode === 'rental' ? `${nightly(home, lang)} / ${t.day}` : t.equivalent}</strong><p className="exchange-action-lead">{mode === 'rental' ? t.rentalLead : t.exchangeLead}</p><div className="exchange-action-fields"><label>{t.start}<input ref={startInput} type="date" min={localDate()} value={start} onInput={event => setStart(event.currentTarget.value)} onChange={event => { setStart(event.target.value); setError('') }}/></label><label>{t.end}<input ref={endInput} type="date" min={start || localDate()} value={end} onInput={event => setEnd(event.currentTarget.value)} onChange={event => { setEnd(event.target.value); setError('') }}/></label><label>{t.guests}<select ref={guestsInput} value={guests} onChange={event => setGuests(Number(event.target.value))}>{Array.from({ length: home.guests }, (_, index) => <option key={index + 1} value={index + 1}>{index + 1}</option>)}</select></label></div><div className="exchange-cost-lines">{mode === 'rental' ? <><div><span>{t.daily}</span><strong>{nightly(home, lang)}</strong></div>{days > 0 && <div><span>{days} {t.nights}</span><strong>{nightly({ ...home, price: home.price * days }, lang)}</strong></div>}<div><span>{t.utilities}</span><strong>{t.metered}</strong></div></> : <><div><span>{t.equivalent}</span><strong>{t.review}</strong></div><div><span>{t.topup}</span><strong>{t.topupPending}</strong></div><div><span>{t.cleaning}</span><strong>{exchangeCleaning}</strong></div><div><span>{t.deposit}</span><strong>{exchangeDeposit}</strong></div><div><span>{t.utilities}</span><strong>{t.metered}</strong></div></>}</div>{mode === 'exchange' && <p className="exchange-action-note">{home.city === 'pattaya' ? t.feesText : t.exchangeNoDate}</p>}{error && <p className="form-error" role="alert">{error}</p>}<button type="button" className="button button-dark" onClick={navigate}>{mode === 'rental' ? t.reserve : t.request}<LineIcon name="arrow" size={17}/></button><small>{t.noCharge} {t.sample}</small></div></aside></div>
+    <section className="exchange-related"><div className="results-bar"><div><h2>{t.related}</h2></div></div><div className="listing-grid">{related.map(item => <ExchangeCard key={item.id} home={item} lang={lang} query={exchangeQuery(search)} kind={kind}/>)}</div></section>
   </div>
 }
