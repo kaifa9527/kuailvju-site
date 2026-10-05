@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { cities, listings, type Listing } from './data'
 import { canExchange, formatPrice, sortFeaturedListings, type Language } from './lib/catalog'
-import { demoAvailable, demoBlockedDates, emptyExchangeSearch, exchangeQuery, filterExchangeHomes, localDate, parseExchangeSearch, type ExchangeSearch } from './lib/exchangeDiscovery'
+import { demoAvailable, demoBlockedDates, emptyExchangeSearch, exchangeQuery, filterExchangeHomes, localDate, parseExchangeSearch, type AmenityFilter, type ExchangeSearch } from './lib/exchangeDiscovery'
 import { readExchangeDrafts, validRange, type ExchangeDraft } from './lib/testWorkflow'
 import { LineIcon, amenityIcon } from './components/LineIcon'
 import { ExchangeGallery } from './components/ExchangeGallery'
@@ -12,7 +12,7 @@ const words = {
   zh: {
     title: '一房托管，旅居世界。', intro: '长租房与民宿房业主明确授权后，房源进入旅居置换展示；双方匿名确认，平台核验后履约。', staysTitle: '住进喜欢的风景。', staysIntro: '这里是委托经营的民宿房源。选择目的地、日期与人数，按晚寻找适合的旅居空间。', staysResults: '精选民宿房',
     destination: '目的地', area: '区域', anyCity: '全部城市', anyArea: '全部区域', start: '入住', end: '退房', guests: '人数', search: '查找房源', filters: '更多筛选', clear: '清除',
-    type: '房源类型', any: '不限', apartment: '公寓', villa: '别墅', bedrooms: '卧室', beds: '床位', baths: '卫生间', amenity: '设施', pool: '泳池', wifi: '无线网络', climate: '空调', view: '景观', apply: '应用筛选',
+    type: '房源类型', any: '不限', apartment: '公寓', villa: '别墅', bedrooms: '卧室', beds: '床位', baths: '卫生间', amenity: '设施', pool: '泳池', parking: '免费停车', wifi: '无线网络', climate: '空调', view: '海景', apply: '查看房源',
     results: '可住的房源', sort: '精选优先 · 最新补充', demo: '示意房源', nights: '晚', sleeps: '可住', day: '晚', sample: '展示房源、图片、价格及档期均为交互测试数据；正式预订须核验真实房态与报价。',
     empty: '暂时没有符合条件的房源', tryAgain: '调整日期、人数或筛选条件再试。', from: '返回搜索结果', home: '首页', overview: '房源概览', highlights: '房源亮点', amenities: '提供的设施', location: '房源所在区域', locationNote: '为保护业主隐私，准确地址将在正式入住安排中提供。',
     availability: '选择入住日期', availabilityNote: '先点入住、再点退房。灰色日期为演示不可选；正式档期以平台核验为准。', blocked: '测试不可选', rules: '入住与房屋规则', rulesNote: '入住退房时间、宠物、吸烟、访客与安静时段由平台核验具体房源后逐项告知，申请确认前可查看完整条款。',
@@ -26,7 +26,7 @@ const words = {
   en: {
     title: 'One home entrusted. A world to stay in.', intro: 'Long-stay and operated homes enter the exchange section only with the owner’s express consent. Owners decide anonymously; the platform verifies delivery.', staysTitle: 'Stay somewhere worth remembering.', staysIntro: 'Operated homes for nightly stays. Choose a destination, dates and guests to find your place.', staysResults: 'Short-stay homes',
     destination: 'Destination', area: 'Area', anyCity: 'All cities', anyArea: 'All areas', start: 'Check in', end: 'Check out', guests: 'Guests', search: 'Find homes', filters: 'More filters', clear: 'Clear',
-    type: 'Property type', any: 'Any', apartment: 'Apartment', villa: 'Villa', bedrooms: 'Bedrooms', beds: 'Beds', baths: 'Bathrooms', amenity: 'Amenities', pool: 'Pool', wifi: 'Wi-Fi', climate: 'Air conditioning', view: 'View', apply: 'Apply filters',
+    type: 'Property type', any: 'Any', apartment: 'Apartment', villa: 'Villa', bedrooms: 'Bedrooms', beds: 'Beds', baths: 'Bathrooms', amenity: 'Amenities', pool: 'Pool', parking: 'Free parking', wifi: 'Wi-Fi', climate: 'Air conditioning', view: 'Sea view', apply: 'Show homes',
     results: 'Homes to stay in', sort: 'Featured first · newest next', demo: 'Concept home', nights: 'nights', sleeps: 'Sleeps', day: 'night', sample: 'Homes, images, prices and calendar dates are interactive sample data. Live stays require availability and price verification.',
     empty: 'No homes match these choices', tryAgain: 'Try other dates, guest count or filters.', from: 'Back to results', home: 'Home', overview: 'The space', highlights: 'What stands out', amenities: 'What this place offers', location: 'Where you will be', locationNote: 'The exact address is shared in the final stay arrangements to protect owner privacy.',
     availability: 'Choose your dates', availabilityNote: 'Select check-in, then checkout. Muted dates are demo unavailable days. Live dates require platform verification.', blocked: 'Demo unavailable', rules: 'Stay and house rules', rulesNote: 'Check-in/out, pets, smoking, visitors and quiet hours are confirmed for each real home. Full terms are shown before a request is confirmed.',
@@ -67,40 +67,62 @@ function ExchangeCard({ home, lang, query, kind }: { home: Listing; lang: Langua
 function SearchForm({ lang, initial, kind }: { lang: Language; initial: ExchangeSearch; kind: 'exchange' | 'stays' }) {
   const t = words[lang]
   const [draft, setDraft] = useState(initial)
-  const [expanded, setExpanded] = useState(false)
+  const [active, setActive] = useState<'where' | 'when' | 'who' | 'filters' | null>(null)
   const [error, setError] = useState('')
-  const startInput = useRef<HTMLInputElement>(null)
-  const endInput = useRef<HTMLInputElement>(null)
-  useEffect(() => { setDraft(initial) }, [initial])
+  const finder = useRef<HTMLDivElement>(null)
+  const serialized = exchangeQuery(initial)
+  useEffect(() => { setDraft(initial) }, [serialized])
+  useEffect(() => {
+    if (!active) return
+    const close = (event: PointerEvent) => { if (!finder.current?.contains(event.target as Node)) setActive(null) }
+    const escape = (event: KeyboardEvent) => { if (event.key === 'Escape') setActive(null) }
+    document.addEventListener('pointerdown', close)
+    document.addEventListener('keydown', escape)
+    return () => { document.removeEventListener('pointerdown', close); document.removeEventListener('keydown', escape) }
+  }, [active])
   const city = cities.find(item => item.id === draft.city)
   const update = (part: Partial<ExchangeSearch>) => setDraft(previous => ({ ...previous, ...part }))
-  const submit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    const requested = { ...draft, start: startInput.current?.value || '', end: endInput.current?.value || '' }
+  const commit = (requested: ExchangeSearch) => {
     if (requested.start || requested.end) {
-      if (!validRange({ start: requested.start, end: requested.end }) || requested.start < localDate()) { setError(t.dateError); return }
+      if (!validRange({ start: requested.start, end: requested.end }) || requested.start < localDate()) { setError(t.dateError); setActive('when'); return }
     }
     setError('')
+    setDraft(requested)
+    setActive(null)
     window.location.hash = `#/${kind}${exchangeQuery(requested)}`
   }
-  return <form className="exchange-finder" onSubmit={submit}>
-    <div className="exchange-finder-main">
-      <label><span>{t.destination}</span><select value={draft.city} onChange={event => update({ city: event.target.value, region: 'all' })}><option value="all">{t.anyCity}</option>{cities.map(item => <option key={item.id} value={item.id}>{item[lang]}</option>)}</select></label>
-      <label><span>{t.area}</span><select value={draft.region} onChange={event => update({ region: event.target.value })}><option value="all">{t.anyArea}</option>{city?.regions.map(item => <option key={item.id} value={item.id}>{item[lang]}</option>)}</select></label>
-      <label><span>{t.start}</span><input ref={startInput} type="date" value={draft.start} min={localDate()} onInput={event => update({ start: event.currentTarget.value })} onChange={event => update({ start: event.target.value })}/></label>
-      <label><span>{t.end}</span><input ref={endInput} type="date" value={draft.end} min={draft.start || localDate()} onInput={event => update({ end: event.currentTarget.value })} onChange={event => update({ end: event.target.value })}/></label>
-      <label><span>{t.guests}</span><select value={draft.guests} onChange={event => update({ guests: Number(event.target.value) })}>{[1, 2, 3, 4, 5, 6, 7, 8].map(number => <option key={number} value={number}>{number}</option>)}</select></label>
-      <button className="button button-dark" type="submit">{t.search}<LineIcon name="arrow" size={17}/></button>
+  const toggle = (part: 'where' | 'when' | 'who' | 'filters') => { setError(''); setActive(previous => previous === part ? null : part) }
+  const toggleAmenity = (key: AmenityFilter) => commit({ ...initial, amenities: initial.amenities.includes(key) ? initial.amenities.filter(item => item !== key) : [...initial.amenities, key] })
+  const destination = draft.city === 'all' ? t.anyCity : `${city?.[lang]}${draft.region === 'all' ? '' : ` · ${city?.regions.find(item => item.id === draft.region)?.[lang] || ''}`}`
+  const dateLabel = draft.start && draft.end ? `${draft.start.slice(5).replace('-', '/')}–${draft.end.slice(5).replace('-', '/')}` : lang === 'zh' ? '选择日期' : 'Add dates'
+  const guestLabel = lang === 'zh' ? `${draft.guests} 位住客` : `${draft.guests} ${draft.guests === 1 ? 'guest' : 'guests'}`
+  const amenityKeys: AmenityFilter[] = ['pool', 'parking', 'wifi', 'climate', 'view']
+  return <div className="compact-finder" ref={finder}>
+    <div className="compact-searchbar" role="search">
+      <button type="button" className={`compact-segment destination${active === 'where' ? ' is-open' : ''}`} onClick={() => toggle('where')} aria-expanded={active === 'where'}><LineIcon name="window" size={18}/><span><small>{t.destination}</small><strong>{destination}</strong></span></button>
+      <button type="button" className={`compact-segment${active === 'when' ? ' is-open' : ''}`} onClick={() => toggle('when')} aria-expanded={active === 'when'}><LineIcon name="calendar" size={18}/><span><small>{lang === 'zh' ? '入住 — 退房' : 'Check in — out'}</small><strong>{dateLabel}</strong></span></button>
+      <button type="button" className={`compact-segment guests${active === 'who' ? ' is-open' : ''}`} onClick={() => toggle('who')} aria-expanded={active === 'who'}><LineIcon name="guests" size={18}/><span><small>{t.guests}</small><strong>{guestLabel}</strong></span></button>
+      <button type="button" className="compact-submit" onClick={() => commit(draft)} aria-label={t.search}><span>{t.search}</span><LineIcon name="arrow" size={18}/></button>
     </div>
-    <div className="exchange-finder-foot"><button type="button" className="exchange-filter-toggle" aria-expanded={expanded} onClick={() => setExpanded(!expanded)}><LineIcon name="check" size={16}/>{t.filters}<span>{expanded ? '−' : '+'}</span></button><span>{t.test}</span></div>
-    {expanded && <div className="exchange-filter-panel">
-      <label>{t.type}<select value={draft.type} onChange={event => update({ type: event.target.value as ExchangeSearch['type'] })}><option value="all">{t.any}</option><option value="apartment">{t.apartment}</option><option value="villa">{t.villa}</option></select></label>
-      {(['bedrooms', 'beds', 'baths'] as const).map(key => <label key={key}>{t[key]}<select value={draft[key]} onChange={event => update({ [key]: Number(event.target.value) })}><option value={0}>{t.any}</option>{[1, 2, 3, 4].map(number => <option key={number} value={number}>{number}+</option>)}</select></label>)}
-      <label>{t.amenity}<select value={draft.amenity} onChange={event => update({ amenity: event.target.value as ExchangeSearch['amenity'] })}><option value="all">{t.any}</option>{(['pool', 'wifi', 'climate', 'view'] as const).map(key => <option key={key} value={key}>{t[key]}</option>)}</select></label>
-      <button className="button button-outline" type="button" onClick={() => { setDraft(emptyExchangeSearch); window.location.hash = `#/${kind}` }}>{t.clear}</button><button className="button button-dark" type="submit">{t.apply} ↗</button>
+    <button type="button" className="compact-mobile-trigger" onClick={() => toggle('where')} aria-expanded={active !== null}><LineIcon name="window" size={19}/><span><strong>{destination}</strong><small>{dateLabel} · {guestLabel}</small></span><LineIcon name="arrow" size={18}/></button>
+    <div className="compact-quick-filters">
+      <button type="button" className={`compact-filter-entry${active === 'filters' ? ' selected' : ''}`} onClick={() => toggle('filters')} aria-expanded={active === 'filters'}><LineIcon name="check" size={17}/>{t.filters}</button>
+      <span className="compact-quick-rule" aria-hidden="true"/>
+      <button type="button" className={initial.type === 'villa' ? 'selected' : ''} aria-pressed={initial.type === 'villa'} onClick={() => commit({ ...initial, type: initial.type === 'villa' ? 'all' : 'villa' })}>{t.villa}</button>
+      <button type="button" className={initial.bedrooms >= 2 ? 'selected' : ''} aria-pressed={initial.bedrooms >= 2} onClick={() => commit({ ...initial, bedrooms: initial.bedrooms >= 2 ? 0 : 2 })}>{lang === 'zh' ? '2 间卧室+' : '2+ bedrooms'}</button>
+      {(['pool', 'parking', 'climate'] as const).map(key => <button type="button" key={key} className={initial.amenities.includes(key) ? 'selected' : ''} aria-pressed={initial.amenities.includes(key)} onClick={() => toggleAmenity(key)}>{t[key]}</button>)}
+      {(initial.city !== 'all' || initial.start || initial.end || initial.guests > 1 || initial.type !== 'all' || initial.bedrooms || initial.beds || initial.baths || initial.amenities.length > 0) && <button type="button" className="compact-clear" onClick={() => commit(emptyExchangeSearch)}>{t.clear} ×</button>}
+    </div>
+    {active && <div className={`compact-popover compact-popover-${active}`}>
+      <div className="compact-popover-top"><div className="compact-popover-tabs"><button type="button" className={active === 'where' ? 'selected' : ''} onClick={() => setActive('where')}>{t.destination}</button><button type="button" className={active === 'when' ? 'selected' : ''} onClick={() => setActive('when')}>{lang === 'zh' ? '日期' : 'Dates'}</button><button type="button" className={active === 'who' ? 'selected' : ''} onClick={() => setActive('who')}>{t.guests}</button><button type="button" className={active === 'filters' ? 'selected' : ''} onClick={() => setActive('filters')}>{t.filters}</button></div><button type="button" className="compact-close" aria-label={lang === 'zh' ? '关闭搜索' : 'Close search'} onClick={() => setActive(null)}><LineIcon name="close" size={18}/></button></div>
+      {active === 'where' && <div className="compact-popover-body"><p className="compact-panel-label">{lang === 'zh' ? '想住在哪座城市？' : 'Where would you like to stay?'}</p><div className="compact-choice-grid"><button type="button" className={draft.city === 'all' ? 'selected' : ''} onClick={() => update({ city: 'all', region: 'all' })}>{t.anyCity}</button>{cities.map(item => <button type="button" key={item.id} className={draft.city === item.id ? 'selected' : ''} onClick={() => update({ city: item.id, region: 'all' })}>{item[lang]}</button>)}</div>{city && <><p className="compact-panel-label">{t.area} <span>{lang === 'zh' ? '可选' : 'Optional'}</span></p><div className="compact-choice-grid"><button type="button" className={draft.region === 'all' ? 'selected' : ''} onClick={() => update({ region: 'all' })}>{t.anyArea}</button>{city.regions.map(item => <button type="button" key={item.id} className={draft.region === item.id ? 'selected' : ''} onClick={() => update({ region: item.id })}>{item[lang]}</button>)}</div></>}</div>}
+      {active === 'when' && <div className="compact-popover-body"><p className="compact-panel-label">{kind === 'exchange' ? lang === 'zh' ? '希望入住目标房源的日期' : 'Preferred dates for the target home' : lang === 'zh' ? '选择入住与退房日期' : 'Select check-in and checkout'}</p><div className="compact-dates"><label>{t.start}<input type="date" value={draft.start} min={localDate()} onChange={event => update({ start: event.target.value, end: draft.end && draft.end <= event.target.value ? '' : draft.end })}/></label><label>{t.end}<input type="date" value={draft.end} min={draft.start || localDate()} onChange={event => update({ end: event.target.value })}/></label></div><p className="compact-panel-help">{kind === 'exchange' ? lang === 'zh' ? '这只是筛选意向日期。双方可异期入住，实际档期须经业主和平台确认。' : 'These are preferred dates only. Each owner may stay at different times; both stays need confirmation.' : lang === 'zh' ? '日期用于筛选示意档期；提交入住意向后由平台核实。' : 'Dates filter sample availability. The platform verifies live dates after an enquiry.'}</p><button type="button" className="compact-text-action" onClick={() => update({ start: '', end: '' })}>{lang === 'zh' ? '日期不限' : 'Any dates'}</button></div>}
+      {active === 'who' && <div className="compact-popover-body"><div className="compact-stepper"><div><strong>{t.guests}</strong><small>{lang === 'zh' ? '按实际入住人数筛选房源容量' : 'Match the home’s guest capacity'}</small></div><div><button type="button" aria-label={lang === 'zh' ? '减少人数' : 'Fewer guests'} disabled={draft.guests <= 1} onClick={() => update({ guests: draft.guests - 1 })}>−</button><output>{draft.guests}</output><button type="button" aria-label={lang === 'zh' ? '增加人数' : 'More guests'} disabled={draft.guests >= 20} onClick={() => update({ guests: draft.guests + 1 })}>+</button></div></div><p className="compact-panel-help">{lang === 'zh' ? '儿童计入入住人数；婴儿、宠物及加床政策请在房源详情确认。' : 'Children count as guests. Confirm infant, pet and extra-bed rules on each home.'}</p></div>}
+      {active === 'filters' && <div className="compact-popover-body"><p className="compact-panel-label">{t.type}</p><div className="compact-choice-grid"><button type="button" className={draft.type === 'all' ? 'selected' : ''} onClick={() => update({ type: 'all' })}>{t.any}</button><button type="button" className={draft.type === 'apartment' ? 'selected' : ''} onClick={() => update({ type: 'apartment' })}>{t.apartment}</button><button type="button" className={draft.type === 'villa' ? 'selected' : ''} onClick={() => update({ type: 'villa' })}>{t.villa}</button></div><div className="compact-number-filters">{(['bedrooms', 'beds', 'baths'] as const).map(key => <label key={key}>{t[key]}<select value={draft[key]} onChange={event => update({ [key]: Number(event.target.value) })}><option value={0}>{t.any}</option>{[1, 2, 3, 4, 5].map(number => <option key={number} value={number}>{number}+</option>)}</select></label>)}</div><p className="compact-panel-label">{t.amenity}</p><div className="compact-choice-grid">{amenityKeys.map(key => <button type="button" key={key} className={draft.amenities.includes(key) ? 'selected' : ''} aria-pressed={draft.amenities.includes(key)} onClick={() => update({ amenities: draft.amenities.includes(key) ? draft.amenities.filter(item => item !== key) : [...draft.amenities, key] })}>{t[key]}</button>)}</div></div>}
+      {error && <p className="form-error" role="alert">{error}</p>}
+      <div className="compact-popover-actions"><button type="button" className="compact-text-action" onClick={() => { setDraft(emptyExchangeSearch); commit(emptyExchangeSearch) }}>{t.clear}</button><button type="button" className="button button-dark" onClick={() => commit(draft)}>{t.apply}<LineIcon name="arrow" size={17}/></button></div>
     </div>}
-    {error && <p className="form-error" role="alert">{error}</p>}
-  </form>
+  </div>
 }
 
 export function ExchangeCatalogPage({ lang, query, kind = 'exchange' }: { lang: Language; query: string; kind?: 'exchange' | 'stays' }) {

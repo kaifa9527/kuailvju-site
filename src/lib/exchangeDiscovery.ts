@@ -5,10 +5,17 @@ import { validRange, type DateRange } from './testWorkflow.ts'
 export type ExchangeSearch = {
   city: string; region: string; start: string; end: string; guests: number;
   type: 'all' | 'apartment' | 'villa'; bedrooms: number; beds: number; baths: number;
-  amenity: 'all' | 'pool' | 'wifi' | 'climate' | 'view'
+  amenities: AmenityFilter[]
 }
 
-export const emptyExchangeSearch: ExchangeSearch = { city: 'all', region: 'all', start: '', end: '', guests: 1, type: 'all', bedrooms: 0, beds: 0, baths: 0, amenity: 'all' }
+export type AmenityFilter = 'pool' | 'parking' | 'wifi' | 'climate' | 'view'
+const amenityFilters: AmenityFilter[] = ['pool', 'parking', 'wifi', 'climate', 'view']
+const amenityPatterns: Record<AmenityFilter, RegExp> = {
+  pool: /泳池|pool/i, parking: /停车|parking/i, wifi: /网络|wi-fi/i,
+  climate: /空调|air conditioning/i, view: /海景|sea.view|sea-facing/i,
+}
+
+export const emptyExchangeSearch: ExchangeSearch = { city: 'all', region: 'all', start: '', end: '', guests: 1, type: 'all', bedrooms: 0, beds: 0, baths: 0, amenities: [] }
 
 const dayMs = 86_400_000
 const dayNumber = (date: string) => Date.parse(`${date}T00:00:00Z`) / dayMs
@@ -40,7 +47,7 @@ export function parseExchangeSearch(params: URLSearchParams): ExchangeSearch {
     start: params.get('start') || '', end: params.get('end') || '', guests: positive('guests', 1),
     type: params.get('type') === 'villa' ? 'villa' : params.get('type') === 'apartment' ? 'apartment' : 'all',
     bedrooms: positive('bedrooms', 0), beds: positive('beds', 0), baths: positive('baths', 0),
-    amenity: (['pool', 'wifi', 'climate', 'view'].includes(params.get('amenity') || '') ? params.get('amenity') : 'all') as ExchangeSearch['amenity'],
+    amenities: [...new Set([...params.getAll('amenity'), ...params.getAll('amenities')])].filter((value): value is AmenityFilter => amenityFilters.includes(value as AmenityFilter)),
   }
 }
 
@@ -55,7 +62,7 @@ export function exchangeQuery(search: ExchangeSearch): string {
   if (search.bedrooms) params.set('bedrooms', String(search.bedrooms))
   if (search.beds) params.set('beds', String(search.beds))
   if (search.baths) params.set('baths', String(search.baths))
-  if (search.amenity !== 'all') params.set('amenity', search.amenity)
+  search.amenities.forEach(amenity => params.append('amenity', amenity))
   return params.size ? `?${params}` : ''
 }
 
@@ -67,6 +74,6 @@ export function filterExchangeHomes(homes: Listing[], search: ExchangeSearch, to
     && home.guests >= search.guests
     && (search.type === 'all' || (search.type === 'villa' ? /别墅|villa/i : /公寓|flat|apartment/i).test(home.type.zh + home.type.en))
     && home.bedrooms >= search.bedrooms && home.beds >= search.beds && home.bathrooms >= search.baths
-    && (search.amenity === 'all' || home.amenities.some(item => ({ pool: /泳池|pool/i, wifi: /网络|wi-fi/i, climate: /空调|air conditioning/i, view: /海景|窗景|view/i }[search.amenity as Exclude<ExchangeSearch['amenity'], 'all'>]).test(item.zh + item.en)))
+    && search.amenities.every(amenity => home.amenities.some(item => amenityPatterns[amenity].test(item.zh + item.en)))
     && (!search.start || demoAvailable(home.id, range, today)))
 }
