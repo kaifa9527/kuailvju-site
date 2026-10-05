@@ -584,6 +584,11 @@ h1, h2, h3 { min-width: 0; overflow-wrap: anywhere; font-weight: 500; line-heigh
 .compact-segment { display: flex; flex: 1 1 0; align-items: center; gap: 12px; min-width: 0; margin: 8px 0; border: 0; border-right: var(--rule-light); padding: 4px 18px; background: transparent; color: var(--color-ink); text-align: left; transition: background .18s ease, color .18s ease; }
 .compact-segment.destination { flex: 1.25 1 0; padding-left: 25px; }
 .compact-segment.guests { flex: .8 1 0; border-right: 0; }
+.compact-segment.rental-term { border-right: 0; }
+.rental-finder .compact-searchbar { width: min(100%, 780px); }
+.rental-finder .compact-segment { padding-inline: 13px; }
+.rental-finder .compact-segment:first-child { padding-left: 22px; }
+.rental-finder .compact-segment span { min-width: 0; }
 .compact-segment:hover, .compact-segment.is-open { color: var(--color-accent); }
 .compact-segment svg { flex: none; color: var(--color-accent); }
 .compact-segment span { display: grid; gap: 2px; min-width: 0; }

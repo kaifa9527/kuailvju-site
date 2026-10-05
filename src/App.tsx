@@ -16,7 +16,7 @@ const words = {
   zh: {
     rent: '长租房', stays: '民宿房', exchange: '旅居置换', manage: '物业托管', explore: '探索房源', more: '了解详情',
     preview: '置换资格提示', menu: '菜单', search: '查找房源', city: '城市', area: '区域', stay: '租期',
-    allCities: '全部城市', allAreas: '全部区域', propertyType: '类型', allTypes: '全部类型', residential: '住宅', allTerms: '全部租期', moreOptions: '更多选项', lessOptions: '收起选项', bedroomsFilter: '卧室数', allBedrooms: '不限卧室', areaFilter: '面积', allAreasMin: '不限面积', day: '日租', month: '月租', quarter: '季租', halfYear: '半年', year: '一年',
+    allCities: '全部城市', allAreas: '全部区域', propertyType: '类型', allTypes: '全部类型', residential: '住宅', allTerms: '全部租期', moreOptions: '更多选项', moreFilters: '更多筛选', lessOptions: '收起选项', bedroomsFilter: '卧室数', allBedrooms: '不限卧室', areaFilter: '面积', allAreasMin: '不限面积', sort: '精选优先 · 最新补充', day: '日租', month: '月租', quarter: '季租', halfYear: '半年', year: '一年',
     results: '精选房源', exchangeResults: '可置换房源', exchangeIntro: '已授权的长租房与民宿房业主均可发起双房源互换。', guestsFilter: '入住人数', allGuests: '不限人数', guestsAtLeast: '至少可住', reset: '清除筛选', noResult: '没有匹配的示意房源', noResultSub: '试试更换城市或租期。真实房源上线后，选择会持续增加。', exchangeNoResultSub: '试试更换城市、区域或入住人数。',
     demo: '示意房源', price: '示意价格', contact: '咨询房源', apply: '申请置换',
     ineligible: '此房源尚未获得业主的置换展示授权，不能发起互换申请。',
@@ -71,7 +71,7 @@ const words = {
   en: {
     rent: 'Long stays', stays: 'Short stays', exchange: 'Stay Exchange', manage: 'Property Care', explore: 'Explore homes', more: 'View details',
     preview: 'Exchange eligibility', menu: 'Menu', search: 'Search', city: 'City', area: 'Area', stay: 'Stay',
-    allCities: 'All cities', allAreas: 'All areas', propertyType: 'Type', allTypes: 'All types', residential: 'Residential', allTerms: 'All stays', moreOptions: 'More options', lessOptions: 'Hide options', bedroomsFilter: 'Bedrooms', allBedrooms: 'Any bedrooms', areaFilter: 'Area', allAreasMin: 'Any area', day: 'Daily', month: 'Monthly', quarter: 'Quarterly', halfYear: '6 months', year: '1 year',
+    allCities: 'All cities', allAreas: 'All areas', propertyType: 'Type', allTypes: 'All types', residential: 'Residential', allTerms: 'All stays', moreOptions: 'More options', moreFilters: 'More filters', lessOptions: 'Hide options', bedroomsFilter: 'Bedrooms', allBedrooms: 'Any bedrooms', areaFilter: 'Area', allAreasMin: 'Any area', sort: 'Featured first · newest next', day: 'Daily', month: 'Monthly', quarter: 'Quarterly', halfYear: '6 months', year: '1 year',
     results: 'Featured homes', exchangeResults: 'Exchange homes', exchangeIntro: 'Authorized long-stay and short-stay owners can request a direct home exchange.', guestsFilter: 'Guests', allGuests: 'Any number', guestsAtLeast: 'Sleeps at least', reset: 'Clear filters', noResult: 'No concept homes match', noResultSub: 'Try a different city or stay length. More choices will appear when live inventory launches.', exchangeNoResultSub: 'Try another city, area or guest count.',
     demo: 'Concept home', price: 'Sample price', contact: 'Ask about this home', apply: 'Request exchange',
     ineligible: 'This home has not been authorized by its owner for the exchange pool, so exchange requests are unavailable.',
@@ -174,22 +174,48 @@ function Header({ lang, setLang, route }: { lang: Language; setLang: (v: Languag
   </header>
 }
 
-function SearchPanel({ lang, initial, compact = false }: { lang: Language; initial: Filters; compact?: boolean }) {
+function SearchPanel({ lang, initial }: { lang: Language; initial: Filters }) {
   const t = words[lang]
-  const [filters, setFilters] = useState(initial)
-  const [advancedOpen, setAdvancedOpen] = useState(initial.guestsMin !== 'all' || initial.bedroomsMin !== 'all' || initial.areaMin !== 'all')
-  useEffect(() => { setFilters(initial); setAdvancedOpen(initial.guestsMin !== 'all' || initial.bedroomsMin !== 'all' || initial.areaMin !== 'all') }, [initial.city, initial.region, initial.type, initial.term, initial.guestsMin, initial.bedroomsMin, initial.areaMin])
-  const selectedCity = cities.find(c => c.id === filters.city)
-  const choose = (patch: Partial<Filters>) => setFilters(previous => ({ ...previous, ...patch }))
-  return <form className={`search-panel ${compact ? 'search-compact' : ''}`} onSubmit={event => { event.preventDefault(); window.location.hash = rentalsHash(filters) }}>
-    <label><span>{t.city}</span><select value={filters.city} onChange={e => choose({ city: e.target.value, region: 'all' })}><option value="all">{t.allCities}</option>{cities.map(c => <option key={c.id} value={c.id}>{c[lang]}</option>)}</select></label>
-    <label><span>{t.area}</span><select value={filters.region} onChange={e => choose({ region: e.target.value })}><option value="all">{t.allAreas}</option>{selectedCity?.regions.map(r => <option key={r.id} value={r.id}>{r[lang]}</option>)}</select></label>
-    <label><span>{t.propertyType}</span><select value={filters.type} onChange={e => choose({ type: e.target.value })}><option value="all">{t.allTypes}</option><option value="apartment">{t.apartment}</option><option value="villa">{t.villa}</option><option value="residential">{t.residential}</option></select></label>
-    <label><span>{t.stay}</span><select value={filters.term} onChange={e => choose({ term: e.target.value })}><option value="all">{t.allTerms}</option>{(['halfYear', 'year'] as Term[]).map(term => <option key={term} value={term}>{t[term]}</option>)}</select></label>
-    <button className="button button-dark search-submit" type="submit"><span>{t.search}</span><span aria-hidden="true">↗</span></button>
-    <button className="search-more-toggle" type="button" aria-expanded={advancedOpen} onClick={() => setAdvancedOpen(value => !value)}><span>{advancedOpen ? t.lessOptions : t.moreOptions}</span><span aria-hidden="true">{advancedOpen ? '−' : '+'}</span></button>
-    {advancedOpen && <div className="search-advanced"><label><span>{t.guestsFilter}</span><select value={filters.guestsMin} onChange={e => choose({ guestsMin: e.target.value })}><option value="all">{t.allGuests}</option><option value="2">{t.guestsAtLeast} 2</option><option value="4">{t.guestsAtLeast} 4</option><option value="6">{t.guestsAtLeast} 6</option></select></label><label><span>{t.bedroomsFilter}</span><select value={filters.bedroomsMin} onChange={e => choose({ bedroomsMin: e.target.value })}><option value="all">{t.allBedrooms}</option><option value="1">1+</option><option value="2">2+</option><option value="3">3+</option></select></label><label><span>{t.areaFilter}</span><select value={filters.areaMin} onChange={e => choose({ areaMin: e.target.value })}><option value="all">{t.allAreasMin}</option><option value="60">60 m²+</option><option value="80">80 m²+</option><option value="100">100 m²+</option></select></label></div>}
-  </form>
+  const [draft, setDraft] = useState(initial)
+  const [active, setActive] = useState<'where' | 'type' | 'term' | 'filters' | null>(null)
+  const serialized = rentalsHash(initial)
+  useEffect(() => { setDraft(initial) }, [serialized])
+  const city = cities.find(item => item.id === draft.city)
+  const update = (part: Partial<Filters>) => setDraft(previous => ({ ...previous, ...part }))
+  const commit = (next: Filters) => { setDraft(next); setActive(null); window.location.hash = rentalsHash(next) }
+  const activeFilters = initial.type !== 'all' || initial.guestsMin !== 'all' || initial.bedroomsMin !== 'all' || initial.areaMin !== 'all'
+  const typeLabel = draft.type === 'villa' ? t.villa : draft.type === 'apartment' ? t.apartment : draft.type === 'residential' ? t.residential : t.allTypes
+  const termLabel = draft.term === 'halfYear' ? t.halfYear : draft.term === 'year' ? t.year : t.allTerms
+  const cityLabel = draft.city === 'all' ? t.allCities : city?.[lang] || t.allCities
+  const regionLabel = draft.region === 'all' ? t.allAreas : city?.regions.find(item => item.id === draft.region)?.[lang] || t.allAreas
+  const clear = () => commit(emptyFilters)
+  return <div className="compact-finder rental-finder">
+    <div className="compact-searchbar rental-searchbar" role="search">
+      <button type="button" className={`compact-segment rental-city${active === 'where' ? ' is-open' : ''}`} onClick={() => setActive(active === 'where' ? null : 'where')} aria-expanded={active === 'where'}><LineIcon name="window" size={18}/><span><small>{t.city}</small><strong>{cityLabel}</strong></span></button>
+      <button type="button" className={`compact-segment rental-area${active === 'where' ? ' is-open' : ''}`} onClick={() => setActive(active === 'where' ? null : 'where')} aria-expanded={active === 'where'}><LineIcon name="area" size={18}/><span><small>{t.area}</small><strong>{regionLabel}</strong></span></button>
+      <button type="button" className={`compact-segment rental-type${active === 'type' ? ' is-open' : ''}`} onClick={() => setActive(active === 'type' ? null : 'type')} aria-expanded={active === 'type'}><LineIcon name="living" size={18}/><span><small>{t.propertyType}</small><strong>{typeLabel}</strong></span></button>
+      <button type="button" className={`compact-segment rental-term${active === 'term' ? ' is-open' : ''}`} onClick={() => setActive(active === 'term' ? null : 'term')} aria-expanded={active === 'term'}><LineIcon name="calendar" size={18}/><span><small>{t.stay}</small><strong>{termLabel}</strong></span></button>
+      <button type="button" className="compact-submit" onClick={() => commit(draft)} aria-label={t.search}><span>{t.search}</span><LineIcon name="arrow" size={18}/></button>
+    </div>
+    <button type="button" className="compact-mobile-trigger" onClick={() => setActive(active ? null : 'where')} aria-expanded={active !== null}><LineIcon name="window" size={19}/><span><strong>{cityLabel}</strong><small>{regionLabel} · {typeLabel} · {termLabel}</small></span><LineIcon name="arrow" size={18}/></button>
+    <div className="compact-quick-filters rental-quick-filters">
+      <button type="button" className={`compact-filter-entry${active === 'filters' ? ' selected' : ''}`} onClick={() => setActive(active === 'filters' ? null : 'filters')} aria-expanded={active === 'filters'}><LineIcon name="check" size={17}/>{t.moreFilters}</button>
+      <span className="compact-quick-rule" aria-hidden="true"/>
+      <button type="button" className={initial.type === 'villa' ? 'selected' : ''} aria-pressed={initial.type === 'villa'} onClick={() => commit({ ...initial, type: initial.type === 'villa' ? 'all' : 'villa' })}>{t.villa}</button>
+      <button type="button" className={initial.bedroomsMin === '2' ? 'selected' : ''} aria-pressed={initial.bedroomsMin === '2'} onClick={() => commit({ ...initial, bedroomsMin: initial.bedroomsMin === '2' ? 'all' : '2' })}>{lang === 'zh' ? '2 间卧室+' : '2+ bedrooms'}</button>
+      <button type="button" className={initial.guestsMin === '4' ? 'selected' : ''} aria-pressed={initial.guestsMin === '4'} onClick={() => commit({ ...initial, guestsMin: initial.guestsMin === '4' ? 'all' : '4' })}>{lang === 'zh' ? '可住 4 人+' : 'Sleeps 4+'}</button>
+      <button type="button" className={initial.areaMin === '80' ? 'selected' : ''} aria-pressed={initial.areaMin === '80'} onClick={() => commit({ ...initial, areaMin: initial.areaMin === '80' ? 'all' : '80' })}>{lang === 'zh' ? '80㎡+' : '80 m²+'}</button>
+      {(activeFilters || initial.city !== 'all' || initial.region !== 'all' || initial.term !== 'all') && <button type="button" className="compact-clear" onClick={clear}>{lang === 'zh' ? '清除' : 'Clear'} ×</button>}
+    </div>
+    {active && <div className="compact-popover compact-popover-filters rental-popover">
+      <div className="compact-popover-top"><div className="compact-popover-tabs"><button type="button" className={active === 'where' ? 'selected' : ''} onClick={() => setActive('where')}>{t.city} / {t.area}</button><button type="button" className={active === 'type' ? 'selected' : ''} onClick={() => setActive('type')}>{t.propertyType}</button><button type="button" className={active === 'term' ? 'selected' : ''} onClick={() => setActive('term')}>{t.stay}</button><button type="button" className={active === 'filters' ? 'selected' : ''} onClick={() => setActive('filters')}>{t.moreFilters}</button></div><button type="button" className="compact-close" aria-label={lang === 'zh' ? '关闭搜索' : 'Close search'} onClick={() => setActive(null)}><LineIcon name="close" size={18}/></button></div>
+      {active === 'where' && <div className="compact-popover-body"><p className="compact-panel-label">{t.city}</p><div className="compact-choice-grid"><button type="button" className={draft.city === 'all' ? 'selected' : ''} onClick={() => update({ city: 'all', region: 'all' })}>{t.allCities}</button>{cities.map(item => <button type="button" key={item.id} className={draft.city === item.id ? 'selected' : ''} onClick={() => update({ city: item.id, region: 'all' })}>{item[lang]}</button>)}</div>{city && <><p className="compact-panel-label">{t.area}</p><div className="compact-choice-grid"><button type="button" className={draft.region === 'all' ? 'selected' : ''} onClick={() => update({ region: 'all' })}>{t.allAreas}</button>{city.regions.map(item => <button type="button" key={item.id} className={draft.region === item.id ? 'selected' : ''} onClick={() => update({ region: item.id })}>{item[lang]}</button>)}</div></>}</div>}
+      {active === 'type' && <div className="compact-popover-body"><p className="compact-panel-label">{t.propertyType}</p><div className="compact-choice-grid"><button type="button" className={draft.type === 'all' ? 'selected' : ''} onClick={() => update({ type: 'all' })}>{t.allTypes}</button><button type="button" className={draft.type === 'apartment' ? 'selected' : ''} onClick={() => update({ type: 'apartment' })}>{t.apartment}</button><button type="button" className={draft.type === 'villa' ? 'selected' : ''} onClick={() => update({ type: 'villa' })}>{t.villa}</button><button type="button" className={draft.type === 'residential' ? 'selected' : ''} onClick={() => update({ type: 'residential' })}>{t.residential}</button></div></div>}
+      {active === 'term' && <div className="compact-popover-body"><p className="compact-panel-label">{t.stay}</p><div className="compact-choice-grid"><button type="button" className={draft.term === 'all' ? 'selected' : ''} onClick={() => update({ term: 'all' })}>{t.allTerms}</button>{(['halfYear', 'year'] as Term[]).map(term => <button type="button" key={term} className={draft.term === term ? 'selected' : ''} onClick={() => update({ term })}>{t[term]}</button>)}</div></div>}
+      {active === 'filters' && <div className="compact-popover-body"><p className="compact-panel-label">{t.moreFilters}</p><div className="compact-number-filters"><label>{t.guestsFilter}<select value={draft.guestsMin} onChange={event => update({ guestsMin: event.target.value })}><option value="all">{t.allGuests}</option><option value="2">{t.guestsAtLeast} 2</option><option value="4">{t.guestsAtLeast} 4</option><option value="6">{t.guestsAtLeast} 6</option></select></label><label>{t.bedroomsFilter}<select value={draft.bedroomsMin} onChange={event => update({ bedroomsMin: event.target.value })}><option value="all">{t.allBedrooms}</option><option value="1">1+</option><option value="2">2+</option><option value="3">3+</option></select></label><label>{t.areaFilter}<select value={draft.areaMin} onChange={event => update({ areaMin: event.target.value })}><option value="all">{t.allAreasMin}</option><option value="60">60 m²+</option><option value="80">80 m²+</option><option value="100">100 m²+</option></select></label></div></div>}
+      <div className="compact-popover-actions"><button type="button" className="compact-text-action" onClick={clear}>{lang === 'zh' ? '清除全部' : 'Clear all'}</button><button type="button" className="button button-dark" onClick={() => commit(draft)}>{lang === 'zh' ? '应用筛选' : 'Apply'} <LineIcon name="arrow" size={17}/></button></div>
+    </div>}
+  </div>
 }
 
 function ListingCard({ listing, lang, context = 'rentals' }: { listing: Listing; lang: Language; context?: 'rentals' | 'stays' | 'exchange' }) {
@@ -229,9 +255,9 @@ function HomePage({ lang }: { lang: Language }) {
 
 function RentalsPage({ lang, filters }: { lang: Language; filters: Filters }) {
   const t = words[lang]
-  const longHomes = listings.filter(item => item.management === 'leased')
+  const longHomes = sortFeaturedListings(listings.filter(item => item.management === 'leased'))
   const found = filterListings(longHomes, filters)
-  return <div className="page-shell page-top"><div className="page-title"><p className="eyebrow">01 / LONG STAYS</p><h1>{t.rent}</h1><p>{lang === 'zh' ? '半年或一年，安心长住。半年月租按一年基础月租上浮 10%。' : 'Stay for six months or a year. Six-month rent adds 10% to the annual base monthly rate.'}</p></div><SearchPanel lang={lang} initial={filters} compact/><div className="results-bar"><div><h2>{t.results}</h2><span>{String(found.length).padStart(2, '0')} / {String(longHomes.length).padStart(2, '0')}</span></div>{(filters.city !== 'all' || filters.region !== 'all' || filters.type !== 'all' || filters.term !== 'all' || filters.guestsMin !== 'all' || filters.bedroomsMin !== 'all' || filters.areaMin !== 'all') && <a href="#/rentals" className="text-link">{t.reset} ↗</a>}</div><p className="sample-inventory">{t.sampleInventory}</p>{found.length ? <div className="listing-grid">{found.map(item => <ListingCard key={item.id} listing={item} lang={lang}/>)}</div> : <div className="empty-state"><h3>{t.noResult}</h3><p>{t.noResultSub}</p><a className="button button-dark" href="#/rentals">{t.reset} ↗</a></div>}</div>
+  return <div className="page-shell page-top exchange-discovery rentals-catalog-page"><div className="page-title"><p className="eyebrow">01 / LONG STAYS</p><h1>{t.rent}</h1><p>{lang === 'zh' ? '半年或一年，安心长住。半年月租按一年基础月租上浮 10%。' : 'Stay for six months or a year. Six-month rent adds 10% to the annual base monthly rate.'}</p></div><SearchPanel lang={lang} initial={filters}/><div className="results-bar"><div><h2>{t.results}</h2><span>{String(found.length).padStart(2, '0')}</span></div><span className="exchange-sort-note">{t.sort}</span></div><p className="sample-inventory">{t.sampleInventory}</p>{found.length ? <div className="listing-grid">{found.map(item => <ListingCard key={item.id} listing={item} lang={lang}/>)}</div> : <div className="empty-state"><h3>{t.noResult}</h3><p>{t.noResultSub}</p><a className="button button-dark" href="#/rentals">{t.reset} ↗</a></div>}</div>
 }
 
 function PropertyGallery({ listing, lang }: { listing: Listing; lang: Language }) {
