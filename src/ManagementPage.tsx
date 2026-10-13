@@ -16,8 +16,8 @@ const copy = {
     location: '房屋位置与规模', condition: '房屋现状与交付', special: '服务偏好', city: '所在城市', area: '所在区域', type: '房屋类型', size: '建筑面积（m²）', floor: '所在楼层', totalFloors: '总楼层', bedrooms: '卧室', livingRooms: '客厅', bathrooms: '卫生间',
     apartment: '公寓 / 大平层', villa: '别墅', choose: '请选择', handover: '预计交房时间', renovation: '装修情况', furnishing: '软装配置', appliances: '家电配置', occupancy: '目前状态',
     renoOptions: [['new', '新装 / 状态良好'], ['standard', '正常使用'], ['refresh', '需要翻新评估']], furnishingOptions: [['none', '空置'], ['partial', '部分配置'], ['full', '可拎包入住']], applianceOptions: [['none', '无家电'], ['basic', '基础家电'], ['full', '配备齐全']], occupancyOptions: [['vacant', '空置'], ['owner', '业主自住'], ['tenant', '现有租客']],
-    rentMinimum: '可接受的租期', rentLong: '仅接受一年', rentQuarter: '半年或一年都可以', cooperationModel: '合作结算方式', modelCommission: '成交后房东支付佣金', modelFixed: '约定房东固定到手租金', expectedRent: '期望一年基础月租 / 到手租金（选填）', operationReady: '经营准备情况', readyOptions: [['ready', '可直接经营'], ['prepare', '需要整理或配置'], ['review', '希望平台评估']],
-    exchangeChoice: '授权加入旅居置换展示', exchangeHint: '勾选后，表示您同意将这套房的城市、区域、房型、面积和经核验的照片展示于“旅居置换”板块，供其他业主匿名选择。不会公开联系方式或精确地址；正式开放前仍须核验房源与使用权。', exchangePromptTitle: '要让这套房参与旅居置换吗？', exchangePrompt: '授权后可让更多有旅居需求的业主发现您的房源，也为您申请互换保留入口。现在不加入也可以，日后仍可修改授权。', exchangeBack: '返回勾选授权', exchangeSkip: '不加入，继续登记',
+    rentMinimum: '可接受的租期', rentLong: '仅接受一年', rentQuarter: '半年或一年都可以', cooperationModel: '合作结算方式', modelCommission: '成交后房东支付佣金', modelFixed: '约定房东固定到手租金', expectedRent: '期望一年基础月租 / 到手租金（选填）', mandate: '委托方式', exclusive: '独家委托', nonexclusive: '非独家委托', mandateHint: '长期委托；生效、退出及独家范围以双方私密电子协议为准。非独家房源可在外部出租，平台须先核实档期再确认。', operationReady: '经营准备情况', readyOptions: [['ready', '可直接经营'], ['prepare', '需要整理或配置'], ['review', '希望平台评估']],
+    exchangeChoice: '另行授权加入旅居置换', exchangeHint: '仅委托租赁的长租房可自愿加入。勾选后，经核验的城市、区域、房型、面积和照片可在置换板块展示；不公开门牌与联系方式。已有租客占用的日期不可置换；与长租共用档期。', exchangePromptTitle: '要让这套长租房参与旅居置换吗？', exchangePrompt: '授权后，空置可交付的档期可供其他业主发现。置换与长租共用同一房态，已出租期间不可置换。现在不加入也可继续登记。', exchangeBack: '返回勾选授权', exchangeSkip: '不加入，继续登记',
     careAddons: '希望了解的升级服务（选填）', careItems: [['garden', '园林修剪'], ['pool', '泳池管理'], ['deepClean', '深度清洁'], ['ac', '空调与除湿维护'], ['pest', '虫害防治'], ['linen', '布草与软装维护'], ['storm', '雨季 / 台风专项巡检'], ['arrival', '返家前准备']],
     photos: '房屋图片（选填）', photoAction: '选择图片', photoHint: '最多 8 张 JPG、PNG 或 WebP；单张不超过 8 MB。只在本页预览，测试记录仅保存图片张数。', photoError: '请选择不超过 8 张、单张小于 8 MB 的 JPG、PNG 或 WebP 图片。', removePhoto: '移除图片', careBase: '基础看护示意月费', careExtra: '升级项目另行报价，不计入基础月费。',
     privateAddress: '详细地址及联系方式', privateHint: '正式服务时，在私密登记流程中填写；当前测试版不采集。', submit: '提交测试登记', saveError: '当前浏览器未能保存测试记录，请检查存储权限后重试。', floorError: '所在楼层不能高于总楼层。',
@@ -32,10 +32,10 @@ const copy = {
       },
       operation: {
         name: '委托经营', short: '专业经营 · 收益分成', lead: '按日经营的房源，先扣双方确认的直接运营成本，再按房东 70%、平台 30% 分配净收益。',
-        paragraphs: ['平台负责房源上架、定价建议、入住服务、保洁调度、现场维护与收益对账。房态、可经营范围、当地要求及成本项目会在签约前逐一核定。', '运营成本可包含该订单或结算期内约定的水电、物业费、保洁与必要耗材等直接支出；以可核对的账目为准。委托租赁和委托经营业主均可明确授权房源进入置换展示，实际互换须另行核验。'],
+        paragraphs: ['平台负责房源上架、定价建议、入住服务、保洁调度、现场维护与收益对账。民宿按晚独立经营，不参与旅居置换。', '短租住客的正常水电已包含在住宿费中；经营分账时，约定的水电、物业费、保洁与耗材等直接支出按凭证核算，不再向住客重复收取。'],
         rateTitle: '净收益分配', rates: [['业主', '70%'], ['平台', '30%'], ['分配基数', '收入 − 约定直接成本']],
         example: '举例：某结算期入住收入 ¥10,000，约定直接运营成本 ¥2,000，净收益为 ¥8,000；业主分得 ¥5,600，平台分得 ¥2,400。此例仅用于说明计算方法，不是收益承诺。',
-        note: '置换须由双方业主匿名确认并经平台核验。互换入住各自另付每次 ¥600 入住前后两次保洁费；长租房押金按目标月租金，民宿房押金按房况核定 ¥3,000–6,000，水电按抄表结算；芭提雅收等值泰铢。入住期间日常保洁由住客自行维护，额外保洁另计。',
+        note: '民宿与长租、置换共用同一套房源库存记录；本经营模式不在置换板块展示。示意价格与成本由平台核验后发布。',
       },
       care: {
         name: '委托看护', short: '每周巡检 · 按需升级', lead: '每周到房一次：通风、检查与电器通电保护，完成后拍照留档。',
@@ -53,8 +53,8 @@ const copy = {
     location: 'Location & size', condition: 'Condition & handover', special: 'Service preferences', city: 'City', area: 'Area', type: 'Property type', size: 'Floor area (m²)', floor: 'Floor', totalFloors: 'Building floors', bedrooms: 'Bedrooms', livingRooms: 'Living rooms', bathrooms: 'Bathrooms',
     apartment: 'Apartment / large flat', villa: 'Villa', choose: 'Select', handover: 'Expected handover', renovation: 'Condition', furnishing: 'Furniture & soft furnishings', appliances: 'Appliances', occupancy: 'Current use',
     renoOptions: [['new', 'New / good condition'], ['standard', 'Normal use'], ['refresh', 'Needs assessment']], furnishingOptions: [['none', 'Unfurnished'], ['partial', 'Part furnished'], ['full', 'Ready to move in']], applianceOptions: [['none', 'None'], ['basic', 'Basic appliances'], ['full', 'Fully equipped']], occupancyOptions: [['vacant', 'Vacant'], ['owner', 'Owner occupied'], ['tenant', 'Tenanted']],
-    rentMinimum: 'Lease terms you accept', rentLong: 'One year only', rentQuarter: 'Six months or one year', cooperationModel: 'Owner payout model', modelCommission: 'Owner pays commission after leasing', modelFixed: 'Agree a fixed take-home rent', expectedRent: 'Annual base monthly rent / take-home rent (optional)', operationReady: 'Operating readiness', readyOptions: [['ready', 'Ready to operate'], ['prepare', 'Needs furnishing or preparation'], ['review', 'Request an assessment']],
-    exchangeChoice: 'Authorize exchange discovery', exchangeHint: 'By selecting this, you permit the home’s city, area, type, size and verified photos to appear in Stay Exchange for anonymous owner discovery. Contact details and exact address stay private. The home and your authority still require review before live use.', exchangePromptTitle: 'Let this home join Stay Exchange?', exchangePrompt: 'Opting in helps other owners find your home and preserves your path to an exchange request. You can skip now and change this later.', exchangeBack: 'Return to authorize', exchangeSkip: 'Continue without exchange',
+    rentMinimum: 'Lease terms you accept', rentLong: 'One year only', rentQuarter: 'Six months or one year', cooperationModel: 'Owner payout model', modelCommission: 'Owner pays commission after leasing', modelFixed: 'Agree a fixed take-home rent', expectedRent: 'Annual base monthly rent / take-home rent (optional)', mandate: 'Mandate type', exclusive: 'Exclusive', nonexclusive: 'Non-exclusive', mandateHint: 'Ongoing mandate; start, exit and exclusivity scope belong in the private e-agreement. Non-exclusive homes require an external availability check before confirmation.', operationReady: 'Operating readiness', readyOptions: [['ready', 'Ready to operate'], ['prepare', 'Needs furnishing or preparation'], ['review', 'Request an assessment']],
+    exchangeChoice: 'Separately authorize stay exchange', exchangeHint: 'Only entrusted long-stay homes may opt in. Verified city, area, type, size and photos may appear in exchange discovery; exact address and contact details stay private. Tenanted dates are unavailable, and both channels share one calendar.', exchangePromptTitle: 'Add this long-stay home to exchange?', exchangePrompt: 'Available, deliverable dates can be discovered by other owners. Long stays and exchanges share one calendar. You may continue without opting in.', exchangeBack: 'Return to authorize', exchangeSkip: 'Continue without exchange',
     careAddons: 'Optional care upgrades', careItems: [['garden', 'Garden pruning'], ['pool', 'Pool management'], ['deepClean', 'Deep cleaning'], ['ac', 'AC & humidity care'], ['pest', 'Pest prevention'], ['linen', 'Linen & furnishings'], ['storm', 'Storm season checks'], ['arrival', 'Pre-arrival preparation']],
     photos: 'Property photos (optional)', photoAction: 'Choose photos', photoHint: 'Up to 8 JPG, PNG or WebP images, 8 MB each. Previewed on this page only; test records store the photo count.', photoError: 'Choose up to 8 JPG, PNG or WebP images, each below 8 MB.', removePhoto: 'Remove photo', careBase: 'Sample base care per month', careExtra: 'Upgrades are quoted separately and excluded from the base rate.',
     privateAddress: 'Exact address & contact details', privateHint: 'Collected in a private secure flow for live service. This preview does not collect them.', submit: 'Submit test enquiry', saveError: 'This browser could not save the test record. Check storage permissions and try again.', floorError: 'Floor cannot be higher than the total building floors.',
@@ -69,10 +69,10 @@ const copy = {
       },
       operation: {
         name: 'Managed operation', short: 'Active stays · Shared net revenue', lead: 'For daily stays, agreed direct operating costs are deducted first. The owner receives 70% of net proceeds and the platform 30%.',
-        paragraphs: ['We manage listing, pricing guidance, arrivals, cleaning, on-site coordination and earnings statements. Availability, local operating requirements and costs are verified before signing.', 'Direct costs may include agreed utilities, property fees, cleaning and necessary supplies for the booking or statement period, supported by checkable records. Both leasing and operated owners may authorize exchange discovery; actual use still requires review.'],
+        paragraphs: ['We manage listing, pricing guidance, arrivals, cleaning, on-site coordination and earnings statements. Short stays operate independently and do not join owner exchange.', 'Normal utilities are included in the guest room price. Agreed utilities, property fees, cleaning and supplies may be counted once as documented direct operating costs; they are not charged to the guest again.'],
         rateTitle: 'Net revenue split', rates: [['Owner', '70%'], ['Platform', '30%'], ['Split base', 'Revenue − agreed direct costs']],
         example: 'Example: ¥10,000 stay revenue minus ¥2,000 agreed direct costs leaves ¥8,000 net. The owner receives ¥5,600 and the platform ¥2,400. This illustrates the calculation, not a return promise.',
-        note: 'Exchange requires both owners’ anonymous approval and platform review. Each stay has a ¥600 pre/post-stay cleaning fee; deposits equal the target long-stay monthly rent or ¥3,000–6,000 for short stays. Utilities are metered; Pattaya collects the THB equivalent. Guests handle daily cleaning; extra cleaning costs more.',
+        note: 'Short stays use the same underlying property inventory but do not appear in exchange discovery. Sample rates and costs require review before live release.',
       },
       care: {
         name: 'Home care', short: 'Weekly checks · Optional upgrades', lead: 'One visit each week for ventilation, inspection, appliance power protection and a photo record.',
@@ -128,19 +128,20 @@ function RegistrationForm({ lang, mode }: { lang: Language; mode: Mode }) {
         renovation: value('renovation'), furnishing: value('furnishing'), appliances: value('appliances'), occupancy: value('occupancy'),
         rentalMinimum: mode === 'leasing' ? value('rentalMinimum') : undefined,
         cooperationModel: mode === 'leasing' ? value('cooperationModel') : undefined,
+        mandateType: mode === 'leasing' ? value('mandateType') as 'exclusive' | 'nonexclusive' : undefined,
         expectedMonthlyRent: mode === 'leasing' && value('expectedMonthlyRent') ? Number(value('expectedMonthlyRent')) : undefined,
         operationReady: mode === 'operation' ? value('operationReady') : undefined,
         careAddons: mode === 'care' ? data.getAll('careAddons').map(String) : undefined,
         careEstimate: careEstimate || undefined,
         photoCount: previews.length,
-        exchangeOptIn: mode !== 'care' && exchangeOptIn,
+        exchangeOptIn: mode === 'leasing' && exchangeOptIn,
       })
     } catch { setSaveError(t.saveError) }
   }
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (mode !== 'care' && !exchangeOptIn) { setExchangePromptOpen(true); return }
+    if (mode === 'leasing' && !exchangeOptIn) { setExchangePromptOpen(true); return }
     saveRegistration(event.currentTarget)
   }
 
@@ -168,11 +169,11 @@ function RegistrationForm({ lang, mode }: { lang: Language; mode: Mode }) {
       <label>{t.appliances}<select name="appliances" required>{selectOptions(t.applianceOptions)}</select></label>
     </div></fieldset>
     <fieldset className="management-fieldset"><legend>03 / {t.special}</legend>
-      {mode === 'leasing' && <div className="management-fields"><label className="field-wide">{t.rentMinimum}<select name="rentalMinimum" required><option value="">{t.choose}</option><option value="year">{t.rentLong}</option><option value="halfYear">{t.rentQuarter}</option></select></label><label className="field-wide">{t.cooperationModel}<select name="cooperationModel" required><option value="">{t.choose}</option><option value="commission">{t.modelCommission}</option><option value="fixed">{t.modelFixed}</option></select></label><label>{t.expectedRent}<input name="expectedMonthlyRent" type="number" min="0" inputMode="decimal" placeholder={cityId === 'pattaya' ? 'THB' : 'CNY'}/></label></div>}
+      {mode === 'leasing' && <div className="management-fields"><label className="field-wide">{t.rentMinimum}<select name="rentalMinimum" required><option value="">{t.choose}</option><option value="year">{t.rentLong}</option><option value="halfYear">{t.rentQuarter}</option></select></label><label className="field-wide">{t.cooperationModel}<select name="cooperationModel" required><option value="">{t.choose}</option><option value="commission">{t.modelCommission}</option><option value="fixed">{t.modelFixed}</option></select></label><label className="field-wide">{t.mandate}<select name="mandateType" required><option value="">{t.choose}</option><option value="exclusive">{t.exclusive}</option><option value="nonexclusive">{t.nonexclusive}</option></select><small>{t.mandateHint}</small></label><label>{t.expectedRent}<input name="expectedMonthlyRent" type="number" min="0" inputMode="decimal" placeholder={cityId === 'pattaya' ? 'THB' : 'CNY'}/></label></div>}
       {mode === 'operation' && <div className="management-fields"><label className="field-wide">{t.operationReady}<select name="operationReady" required>{selectOptions(t.readyOptions)}</select></label></div>}
       {mode === 'care' && <><p className="management-choice-label">{t.careAddons}</p><div className="management-checks">{t.careItems.map(([value, label]) => <label key={value}><input type="checkbox" name="careAddons" value={value}/>{label}</label>)}</div>{careEstimate !== null && <p className="management-care-estimate"><span>{t.careBase}</span><strong>{new Intl.NumberFormat(lang === 'zh' ? 'zh-CN' : 'en-US', { style: 'currency', currency: careCurrency, maximumFractionDigits: 0 }).format(careEstimate)}</strong><small>{t.careExtra}</small></p>}</>}
     </fieldset>
-    {mode !== 'care' && <label className={`management-exchange-consent ${exchangeOptIn ? 'is-selected' : ''}`}><input ref={exchangeCheckRef} type="checkbox" checked={exchangeOptIn} onChange={event => setExchangeOptIn(event.target.checked)}/><span><strong>{t.exchangeChoice}</strong><small>{t.exchangeHint}</small></span></label>}
+    {mode === 'leasing' && <label className={`management-exchange-consent ${exchangeOptIn ? 'is-selected' : ''}`}><input ref={exchangeCheckRef} type="checkbox" checked={exchangeOptIn} onChange={event => setExchangeOptIn(event.target.checked)}/><span><strong>{t.exchangeChoice}</strong><small>{t.exchangeHint}</small></span></label>}
     <div className="management-photos"><div><strong>{t.photos}</strong><p>{t.photoHint}</p></div><label className="button button-outline">{t.photoAction}<input type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={event => { selectPhotos(event.target.files); event.target.value = '' }}/></label></div>
     {photoError && <p role="alert" className="form-error">{photoError}</p>}
     {previews.length > 0 && <div className="management-photo-grid">{previews.map((item, index) => <div key={item.url}><img src={item.url} alt={`${t.photos} ${index + 1}`}/><button type="button" aria-label={`${t.removePhoto} ${index + 1}`} onClick={() => setPreviews(previous => previous.filter(photo => photo.url !== item.url))}>×</button></div>)}</div>}

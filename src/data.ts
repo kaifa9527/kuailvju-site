@@ -17,6 +17,8 @@ export type Listing = {
   area: number
   terms: Term[]
   management: 'operated' | 'leased'
+  condition?: 'new' | 'standard' | 'refresh'
+  mandateType?: 'exclusive' | 'nonexclusive'
   exchangeAuthorized: boolean
   exchangeOpen: boolean
   price: number
@@ -47,7 +49,7 @@ export const listings: Listing[] = [
       { image: '/images/pattaya-concept.jpg', caption: { zh: '起居空间与海景 · 视觉示意', en: 'Living area and sea view · concept' } },
       { image: '/images/pattaya-bedroom.jpg', caption: { zh: '卧室与海景 · 视觉示意', en: 'Bedroom and sea view · concept' } },
     ],
-    guests: 2, bedrooms: 1, bathrooms: 1, beds: 1, area: 72, terms: ['day'], management: 'operated', exchangeAuthorized: true, exchangeOpen: true,
+    guests: 2, bedrooms: 1, bathrooms: 1, beds: 1, area: 72, terms: ['day'], management: 'operated', exchangeAuthorized: false, exchangeOpen: false,
     price: 2800, currency: 'THB', priceUnit: 'day', pinned: false, publishedAt: '2026-09-26', highlight: { zh: '开阔海景', en: 'Open sea view' }, demo: true,
     features: [{ zh: '面向海景的明亮起居', en: 'Bright living area facing the sea' }, { zh: '适合双人短住', en: 'A compact stay for two' }],
     selfCheckIn: true,
@@ -61,7 +63,7 @@ export const listings: Listing[] = [
       { image: '/images/sanya-concept.jpg', caption: { zh: '庭院与泳池 · 视觉示意', en: 'Courtyard and pool · concept' } },
       { image: '/images/sanya-bedroom.jpg', caption: { zh: '卧室与庭院 · 视觉示意', en: 'Bedroom and courtyard · concept' } },
     ],
-    guests: 6, bedrooms: 3, bathrooms: 3, beds: 3, area: 220, terms: ['day'], management: 'operated', exchangeAuthorized: true, exchangeOpen: true,
+    guests: 6, bedrooms: 3, bathrooms: 3, beds: 3, area: 220, terms: ['day'], management: 'operated', exchangeAuthorized: false, exchangeOpen: false,
     price: 1680, currency: 'CNY', priceUnit: 'day', pinned: true, publishedAt: '2026-09-15', highlight: { zh: '独立庭院', en: 'Private courtyard' }, demo: true,
     features: [{ zh: '庭院与泳池连成开阔空间', en: 'Courtyard and pool open into one space' }, { zh: '三卧布局，适合结伴旅居', en: 'Three bedrooms for a shared stay' }],
     selfCheckIn: true,
@@ -75,7 +77,7 @@ export const listings: Listing[] = [
       { image: '/images/beihai-concept.jpg', caption: { zh: '卧室与海景 · 视觉示意', en: 'Bedroom and sea view · concept' } },
       { image: '/images/beihai-living.jpg', caption: { zh: '起居与餐厅 · 视觉示意', en: 'Living and dining area · concept' } },
     ],
-    guests: 4, bedrooms: 2, bathrooms: 1, beds: 2, area: 96, terms: ['halfYear', 'year'], management: 'leased', exchangeAuthorized: true, exchangeOpen: true,
+    guests: 4, bedrooms: 2, bathrooms: 1, beds: 2, area: 96, terms: ['halfYear', 'year'], management: 'leased', condition: 'standard', mandateType: 'exclusive', exchangeAuthorized: true, exchangeOpen: true,
     price: 3900, currency: 'CNY', priceUnit: 'month', pinned: true, publishedAt: '2026-09-20', highlight: { zh: '长租友好', en: 'Long-stay friendly' }, demo: true,
     features: [{ zh: '卧室与起居分区清晰', en: 'Separate rest and living areas' }, { zh: '按月计价，适合较长停留', en: 'Monthly pricing for longer stays' }],
     amenities: [{ zh: '海景窗景', en: 'Sea-facing windows' }, { zh: '起居室', en: 'Living room' }, { zh: '餐厅', en: 'Dining area' }, { zh: '空调', en: 'Air conditioning' }],
@@ -86,7 +88,7 @@ export const listings: Listing[] = [
     description: { zh: '双卧室与开阔阳台相连，适合结伴短住。房源与图片仅为页面示意。', en: 'Two bedrooms open onto an airy balcony for a shared short stay. Concept home and imagery only.' },
     type: { zh: '双卧公寓', en: 'Two-bedroom apartment' },
     gallery: [{ image: '/images/pattaya-north-two-bedroom.jpg', caption: { zh: '客厅与城市景观 · 视觉示意', en: 'Living room and skyline · concept' } }],
-    guests: 4, bedrooms: 2, bathrooms: 2, beds: 2, area: 102, terms: ['day'], management: 'operated', exchangeAuthorized: true, exchangeOpen: true,
+    guests: 4, bedrooms: 2, bathrooms: 2, beds: 2, area: 102, terms: ['day'], management: 'operated', exchangeAuthorized: false, exchangeOpen: false,
     price: 3500, currency: 'THB', priceUnit: 'day', pinned: false, publishedAt: '2026-10-02', highlight: { zh: '城市与海景', en: 'City and sea views' }, demo: true,
     features: [{ zh: '双卧室与独立起居区', en: 'Two bedrooms and a separate living space' }, { zh: '面向城市的阳台', en: 'Balcony overlooking the city' }],
     selfCheckIn: true,
@@ -98,7 +100,7 @@ export const listings: Listing[] = [
     description: { zh: '起居区连接热带庭院与泳池，适合家人朋友同住。房源与图片仅为页面示意。', en: 'Living spaces meet a tropical courtyard and pool for a shared stay. Concept home and imagery only.' },
     type: { zh: '泳池别墅', en: 'Pool villa' },
     gallery: [{ image: '/images/pattaya-jomtien-pool-villa.jpg', caption: { zh: '起居区与泳池 · 视觉示意', en: 'Living area and pool · concept' } }],
-    guests: 6, bedrooms: 3, bathrooms: 3, beds: 3, area: 235, terms: ['day'], management: 'operated', exchangeAuthorized: true, exchangeOpen: true,
+    guests: 6, bedrooms: 3, bathrooms: 3, beds: 3, area: 235, terms: ['day'], management: 'operated', exchangeAuthorized: false, exchangeOpen: false,
     price: 8900, currency: 'THB', priceUnit: 'day', pinned: false, publishedAt: '2026-09-29', highlight: { zh: '独立泳池', en: 'Private pool' }, demo: true,
     features: [{ zh: '室内空间连通庭院', en: 'Living area opens to the courtyard' }, { zh: '适合多人短住', en: 'Room for a shared short stay' }],
     selfCheckIn: true,
@@ -110,7 +112,7 @@ export const listings: Listing[] = [
     description: { zh: '山海之间的双卧公寓，起居空间延伸至露台。房源与图片仅为页面示意。', en: 'A two-bedroom apartment between green hills and the sea. Concept home and imagery only.' },
     type: { zh: '露台公寓', en: 'Terrace apartment' },
     gallery: [{ image: '/images/sanya-yalong-apartment.jpg', caption: { zh: '起居室与露台 · 视觉示意', en: 'Living area and terrace · concept' } }],
-    guests: 4, bedrooms: 2, bathrooms: 2, beds: 2, area: 118, terms: ['day'], management: 'operated', exchangeAuthorized: true, exchangeOpen: true,
+    guests: 4, bedrooms: 2, bathrooms: 2, beds: 2, area: 118, terms: ['day'], management: 'operated', exchangeAuthorized: false, exchangeOpen: false,
     price: 980, currency: 'CNY', priceUnit: 'day', pinned: false, publishedAt: '2026-10-01', highlight: { zh: '山海露台', en: 'Hillside terrace' }, demo: true,
     features: [{ zh: '露台衔接客餐厅', en: 'Terrace extends the living area' }, { zh: '适合双人或家庭', en: 'Flexible stay for couples or families' }],
     selfCheckIn: true,
@@ -122,7 +124,7 @@ export const listings: Listing[] = [
     description: { zh: '明亮的海岸起居空间，适合轻松的短住节奏。房源与图片仅为页面示意。', en: 'A bright coastal living space for an easy short stay. Concept home and imagery only.' },
     type: { zh: '海景公寓', en: 'Sea view apartment' },
     gallery: [{ image: '/images/beihai-qiaogang-stay.jpg', caption: { zh: '客厅与海景 · 视觉示意', en: 'Living room and sea view · concept' } }],
-    guests: 4, bedrooms: 2, bathrooms: 1, beds: 2, area: 88, terms: ['day'], management: 'operated', exchangeAuthorized: true, exchangeOpen: true,
+    guests: 4, bedrooms: 2, bathrooms: 1, beds: 2, area: 88, terms: ['day'], management: 'operated', exchangeAuthorized: false, exchangeOpen: false,
     price: 680, currency: 'CNY', priceUnit: 'day', pinned: false, publishedAt: '2026-09-30', highlight: { zh: '窗外海景', en: 'Coastal outlook' }, demo: true,
     features: [{ zh: '窗边阅读与休憩角落', en: 'A quiet corner by the window' }, { zh: '双卧短住布局', en: 'Two-bedroom short-stay layout' }],
     selfCheckIn: true,
@@ -134,7 +136,7 @@ export const listings: Listing[] = [
     description: { zh: '起居、用餐与卧室分区清楚，适合较长居住。房源与价格仅为页面示意。', en: 'A clear living, dining and sleeping layout for longer stays. Concept home and price only.' },
     type: { zh: '长租公寓', en: 'Monthly apartment' },
     gallery: [{ image: '/images/pattaya-north-monthly.jpg', caption: { zh: '客厅与阳台 · 视觉示意', en: 'Living room and balcony · concept' } }],
-    guests: 2, bedrooms: 1, bathrooms: 1, beds: 1, area: 55, terms: ['halfYear', 'year'], management: 'leased', exchangeAuthorized: false, exchangeOpen: false,
+    guests: 2, bedrooms: 1, bathrooms: 1, beds: 1, area: 55, terms: ['halfYear', 'year'], management: 'leased', condition: 'standard', mandateType: 'nonexclusive', exchangeAuthorized: true, exchangeOpen: true,
     price: 18000, currency: 'THB', priceUnit: 'month', pinned: false, publishedAt: '2026-10-03', highlight: { zh: '日常生活便利', en: 'Easy everyday living' }, demo: true,
     features: [{ zh: '独立卧室与客厅', en: 'Separate bedroom and living room' }, { zh: '适合一至两人长住', en: 'Suited to one or two long-stay guests' }],
     amenities: [{ zh: '阳台', en: 'Balcony' }, { zh: '起居室', en: 'Living area' }, { zh: '空调', en: 'Air conditioning' }, { zh: '无线网络', en: 'Wi-Fi' }],
@@ -145,7 +147,7 @@ export const listings: Listing[] = [
     description: { zh: '适合家庭长住的双卧公寓，窗外是绿意庭景。房源与价格仅为页面示意。', en: 'A two-bedroom family home with a green garden outlook. Concept home and price only.' },
     type: { zh: '家庭公寓', en: 'Family apartment' },
     gallery: [{ image: '/images/sanya-haitang-monthly.jpg', caption: { zh: '客厅与庭景 · 视觉示意', en: 'Living room and garden · concept' } }],
-    guests: 4, bedrooms: 2, bathrooms: 1, beds: 2, area: 89, terms: ['halfYear', 'year'], management: 'leased', exchangeAuthorized: false, exchangeOpen: false,
+    guests: 4, bedrooms: 2, bathrooms: 1, beds: 2, area: 89, terms: ['halfYear', 'year'], management: 'leased', condition: 'new', mandateType: 'exclusive', exchangeAuthorized: true, exchangeOpen: true,
     price: 6200, currency: 'CNY', priceUnit: 'month', pinned: false, publishedAt: '2026-10-02', highlight: { zh: '绿意庭景', en: 'Garden outlook' }, demo: true,
     features: [{ zh: '家庭友好的双卧布局', en: 'Two-bedroom family layout' }, { zh: '起居与用餐空间完整', en: 'Full living and dining areas' }],
     amenities: [{ zh: '庭景窗景', en: 'Garden outlook' }, { zh: '起居室', en: 'Living area' }, { zh: '空调', en: 'Air conditioning' }, { zh: '餐厅', en: 'Dining area' }],

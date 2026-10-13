@@ -34,8 +34,8 @@ test('filterListings applies long-stay detail filters', () => {
   assert.deepEqual(filterListings(typed, { guestsMin: '4', bedroomsMin: '2', areaMin: '80' }).map(item => item.id), ['b'])
 })
 
-test('canExchange accepts authorized leased or operated homes only when open', () => {
-  assert.equal(canExchange(sample[0]), true)
+test('canExchange accepts only authorized long-stay homes; operated stays stay separate', () => {
+  assert.equal(canExchange(sample[0]), false)
   assert.equal(canExchange(sample[1]), false)
   assert.equal(canExchange(sample[2]), false)
   assert.equal(canExchange({ ...sample[1], exchangeAuthorized: true, exchangeOpen: true }), true)

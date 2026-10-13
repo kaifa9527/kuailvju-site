@@ -1,6 +1,7 @@
 import type { Listing } from '../data.ts'
 import { canExchange } from './catalog.ts'
-import { validRange, type DateRange } from './testWorkflow.ts'
+import { readTestRequests, validRange, type DateRange, type TestRequest } from './testWorkflow.ts'
+import { propertyAvailable } from './inventory.ts'
 
 export type ExchangeSearch = {
   city: string; region: string; start: string; end: string; guests: number;
@@ -35,9 +36,9 @@ export function demoBlockedDates(listingId: string, today = localDate()): string
   return (offsets[listingId] || []).map(offset => new Date((base + offset) * dayMs).toISOString().slice(0, 10))
 }
 
-export function demoAvailable(listingId: string, range: DateRange, today = localDate()): boolean {
+export function demoAvailable(listingId: string, range: DateRange, today = localDate(), requests: readonly TestRequest[] = readTestRequests(), exceptRequestId?: string): boolean {
   if (!validRange(range) || range.start < today) return false
-  return demoBlockedDates(listingId, today).every(day => day < range.start || day >= range.end)
+  return demoBlockedDates(listingId, today).every(day => day < range.start || day >= range.end) && propertyAvailable(listingId, range, requests, exceptRequestId)
 }
 
 export function parseExchangeSearch(params: URLSearchParams): ExchangeSearch {

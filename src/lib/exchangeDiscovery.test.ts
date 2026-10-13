@@ -7,8 +7,10 @@ const today = '2026-10-04'
 const dateAfter = (offset: number) => new Date(Date.parse(`${today}T00:00:00Z`) + offset * 86_400_000).toISOString().slice(0, 10)
 
 test('exchange discovery applies capacity, type, amenities and destination together', () => {
-  const found = filterExchangeHomes(listings, { ...emptyExchangeSearch, city: 'sanya', guests: 5, type: 'villa', bedrooms: 3, amenities: ['pool'] }, today)
-  assert.deepEqual(found.map(item => item.id), ['sanya-garden-villa'])
+  const found = filterExchangeHomes(listings, { ...emptyExchangeSearch, city: 'beihai', guests: 4, type: 'apartment', bedrooms: 2, amenities: ['climate'] }, today)
+  assert.deepEqual(found.map(item => item.id), ['beihai-coastal-flat'])
+  assert.deepEqual(filterExchangeHomes(listings, { ...emptyExchangeSearch, city: 'sanya', guests: 5, type: 'villa', bedrooms: 3, amenities: ['pool'] }, today).map(item => item.id), [])
+  assert.deepEqual(filterExchangeHomes(listings, { ...emptyExchangeSearch, city: 'sanya', guests: 5, type: 'villa', bedrooms: 3, amenities: ['pool'] }, today, 'stays').map(item => item.id), ['sanya-garden-villa'])
 })
 
 test('demo date filtering excludes a home only when an occupied night intersects its blocks', () => {

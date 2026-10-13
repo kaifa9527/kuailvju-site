@@ -8,6 +8,7 @@ export type SearchFilters = {
   guestsMin?: string
   bedroomsMin?: string
   areaMin?: string
+  moveIn?: string
 }
 
 type SearchableListing = {
@@ -52,7 +53,7 @@ export function filterListings<T extends SearchableListing>(items: readonly T[],
 }
 
 export function canExchange(listing: ExchangeListing): boolean {
-  return ['operated', 'leased'].includes(listing.management) && listing.exchangeAuthorized && listing.exchangeOpen
+  return listing.management === 'leased' && listing.exchangeAuthorized && listing.exchangeOpen
 }
 
 export function longRentalMonthlyPrice(baseMonthlyRent: number, term: 'halfYear' | 'year'): number {

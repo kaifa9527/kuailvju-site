@@ -7,11 +7,13 @@ import { ExchangeRequestPage, RentalRequestPage, TestInbox } from './TestFlows'
 import { ManagementPage } from './ManagementPage'
 import { ManagementEntry } from './ManagementEntry'
 import { ExchangeCatalogPage, ExchangeDetailPage, SearchForm } from './ExchangeExperience'
-import { emptyExchangeSearch } from './lib/exchangeDiscovery'
+import { demoAvailable, emptyExchangeSearch, localDate } from './lib/exchangeDiscovery'
+import { handoverReady, leaseRange } from './lib/inventory'
+import { readTestRequests } from './lib/testWorkflow'
 
-type Filters = { city: string; region: string; type: string; term: string; guestsMin: string; bedroomsMin: string; areaMin: string }
+type Filters = { city: string; region: string; type: string; term: string; moveIn: string; guestsMin: string; bedroomsMin: string; areaMin: string }
 type Route = { page: string; id?: string; mode?: string; filters: Filters; query: string }
-const emptyFilters: Filters = { city: 'all', region: 'all', type: 'all', term: 'all', guestsMin: 'all', bedroomsMin: 'all', areaMin: 'all' }
+const emptyFilters: Filters = { city: 'all', region: 'all', type: 'all', term: 'all', moveIn: '', guestsMin: 'all', bedroomsMin: 'all', areaMin: 'all' }
 const asset = (path: string) => `${import.meta.env.BASE_URL}${path.replace(/^\//, '')}`
 
 const words = {
@@ -20,25 +22,25 @@ const words = {
     preview: '置换资格提示', menu: '菜单', search: '查找房源', city: '城市', area: '区域', stay: '租期',
     homeSearchTitle: '按需求找房', searchRentals: '查找长租房', searchStays: '查找民宿房', searchExchange: '查找可置换房源', demoNotice: '当前为站内体验：房源、价格和档期均为示意；真实申请需经平台核验。',
     rentLead: '半年或一年起租 · 租客免中介费', staysLead: '按晚选择委托经营房源',
-    exchangeWho: '业主先授权', exchangeWhoDetail: '长租房或民宿房业主，明确同意加入置换池。', exchangeHow: '双方匿名确认', exchangeHowDetail: '选择目标房源，各自确认房源与入住日期。', exchangeThen: '平台核验履约', exchangeThenDetail: '核对房态、对等价值与两次入住安排。',
-    exchangeFree: '住宿费', exchangeFreeValue: '对等互换可免', exchangeClean: '每次入住保洁', exchangeCleanValue: '¥600', exchangeDeposit: '入住押金', exchangeDepositValue: '按目标房源核定', exchangeUtilities: '水电费用', exchangeUtilitiesValue: '实际抄表自付', exchangeCostNote: '保洁费含入住前、退房后各一次；长租房押金等于目标房源月租金，民宿房为 ¥3,000–6,000。价值不等由平台报价、双方确认补差；芭提雅按确认时等值泰铢收取。', exchangeReference: '房源参考价 · 非置换应付', exchangeCardAction: '查看置换条件',
+    exchangeWho: '长租业主先授权', exchangeWhoDetail: '委托租赁业主自愿授权空置可交付档期。民宿不参与置换。', exchangeHow: '双方匿名确认', exchangeHowDetail: '对照天数、面积、卧室与装修，各自确认房源和日期。', exchangeThen: '平台核验履约', exchangeThenDetail: '双房源共用库存，核对两段日期与交付能力。',
+    exchangeFree: '住宿费', exchangeFreeValue: '对等互换可免', exchangeClean: '每次入住保洁', exchangeCleanValue: '¥600', exchangeDeposit: '入住押金', exchangeDepositValue: '目标房源月租', exchangeUtilities: '水电费用', exchangeUtilitiesValue: '实际抄表自付', exchangeCostNote: '仅已授权的委托租赁长租房参与。保洁费含入住前、退房后各一次；押金等于实际入住房源的一个月租金。面积、卧室、装修与各自实际入住天数用于推荐，地段和租金只作参考；芭提雅费用按确认时等值泰铢收取。', exchangeReference: '月租参考价 · 非置换应付', exchangeCardAction: '查看置换条件',
     allCities: '全部城市', allAreas: '全部区域', propertyType: '类型', allTypes: '全部类型', residential: '住宅', allTerms: '全部租期', moreOptions: '更多选项', moreFilters: '更多筛选', lessOptions: '收起选项', bedroomsFilter: '卧室数', allBedrooms: '不限卧室', areaFilter: '面积', allAreasMin: '不限面积', sort: '精选优先 · 最新补充', day: '日租', month: '月租', quarter: '季租', halfYear: '半年', year: '一年',
-    results: '精选房源', exchangeResults: '可置换房源', exchangeIntro: '已授权的长租房与民宿房业主均可发起双房源互换。', guestsFilter: '入住人数', allGuests: '不限人数', guestsAtLeast: '至少可住', reset: '清除筛选', noResult: '没有匹配的示意房源', noResultSub: '试试更换城市或租期。真实房源上线后，选择会持续增加。', exchangeNoResultSub: '试试更换城市、区域或入住人数。',
+    results: '精选房源', exchangeResults: '可置换房源', exchangeIntro: '仅已授权的委托租赁长租房，且只开放空置可交付日期；民宿独立经营。', guestsFilter: '入住人数', allGuests: '不限人数', guestsAtLeast: '至少可住', reset: '清除筛选', noResult: '没有匹配的示意房源', noResultSub: '试试更换城市或租期。真实房源上线后，选择会持续增加。', exchangeNoResultSub: '试试更换城市、区域或入住人数。',
     demo: '示意房源', price: '示意价格', contact: '咨询房源', apply: '申请置换',
-    ineligible: '此房源尚未获得业主的置换展示授权，不能发起互换申请。',
+    ineligible: '民宿独立经营，不参与置换；未获授权的长租房也不能发起互换申请。',
     understood: '我知道了', back: '返回房源', ready: '业主已授权 · 可申请置换', noExchange: '暂不开放置换',
     occupants: '可住', room: '卧室', rooms: '卧室', baths: '卫生间', beds: '床位', size: '面积', experience: '居住体验', terms: '可选租期',
     quickRent: '长租房', quickStays: '民宿房', quickExchange: '旅居置换', quickManage: '物业托管',
     sampleInventory: '以下房源及参数为页面示意，真实房源与可订日期待核验上线。',
     pinned: '置顶', exchangeBadge: '可置换 · 示意', exchangeMayWaive: '符合条件可免住宿费', exchangeCostsBrief: '保洁费 + 押金 + 水电',
-    exchangeSectionNote: '已授权的长租房与民宿房业主均可申请。每次入住收 ¥600 入住前后两次保洁费；长租房押金按其月租金，民宿房押金 ¥3,000–6,000，水电据实结算。芭提雅收等值泰铢。',
+    exchangeSectionNote: '仅已授权的委托租赁业主可申请。每次入住收 ¥600 入住前后保洁费；押金按目标长租房一个月租金，水电据实结算。已出租期间不可置换，芭提雅收等值泰铢。',
     homeManageNote: '委托租赁、委托经营、委托看护。选一种适合您房屋现状的方式。',
     registrationTitle: '登记房源意向', serviceScope: '服务与收费', registrationPreview: '可测试提交流程 · 不收集真实资料',
     registrationNotice: '选择房屋信息后可生成一条站内测试记录，保存在当前浏览器。电话与邮箱暂不填写，也不会发送给平台。',
     propertyCity: '房源城市', propertyRegion: '所在区域', propertySize: '建筑面积（m²）',
     contactPhone: '联系电话', contactEmail: '联系邮箱', apartment: '公寓', villa: '别墅', chooseOne: '请选择', registrationButton: '提交测试登记', registerAction: '查看登记信息', registrationDisabledPlaceholder: '正式开放后填写',
     leasingSteps: ['评估房源', '签约上架', '招租成交', '收租对账'],
-    operationSteps: ['评估授权', '运营出租', '收益对账', '符合条件后申请置换'],
+    operationSteps: ['评估授权', '民宿经营', '入住服务', '收益对账'],
     careSteps: ['选择服务', '每周巡检', '拍照留档', '查看报告'],
     viewPhotos: '查看示意图片', sampleSpecs: '配置示意', amenities: '空间与设施',
     feeTitle: '费用先看清', baseRent: '示意房费', zeroAgency: '租客中介费', utilitiesActual: '水电按实际用量结算',
@@ -47,28 +49,28 @@ const words = {
     oneTwo: '押一付二', twoOne: '押二付一', oneTwoNote: '1 个月押金 + 前 2 个月租金', twoOneNote: '2 个月押金 + 第 1 个月租金',
     paymentPending: '具体押付以当地核验与最终合同为准。',
     otherFees: '其他费用和取消规则待房源核验后公布，不在示意阶段给出虚假总价。',
-    exchangeMini: '已授权的长租房与民宿房业主均可申请。每次入住另收 ¥600 前后两次保洁费；长租房押金按月租金，民宿房押金 ¥3,000–6,000，水电据实自付。',
+    exchangeMini: '仅已授权的委托租赁业主可申请。每次入住另收 ¥600 前后两次保洁费；押金按入住房源一个月租金，水电据实自付。',
     exchangeThai: '芭提雅费用按确认时锁定的等值泰铢收取。',
     listingRules: '入住与房屋规则', listingRulesPending: '入住退房时间、宠物、吸烟及取消条款，在真实房源核验后逐项公布。',
     intro: '从一处好房，开启下一段生活。', homeNote: '选择城市与租期，先看好房。每一次入住，都有认真回应。',
     guide: '三种服务，一目了然',
     cityNote: '目前开放芭提雅、三亚、北海。更多城市将逐步加入。',
     rentalLine: '好房源，心服务。', exchangeLine: '一房托管，旅居世界。', manageLine: '专业、靠谱，知托付。',
-    eligibility: '谁可以置换？', eligibilityText: '长租房或民宿房业主明确授权后，房源可加入置换板块；双房源互换由双方匿名确认，平台核验后协调履约。',
-    twoHomes: '两套房源，并列比较', twoHomesSub: '房型、面积、配置与可住日期放在同一画面；双方只做同意、拒绝或修改时间的选择。',
+    eligibility: '谁可以置换？', eligibilityText: '仅已签委托租赁且明确授权的长租房业主，可在空置可交付日期互换；民宿不参与。',
+    twoHomes: '两套房源，并列比较', twoHomesSub: '实际入住天数、面积、卧室与装修同屏对照；地段、景观和租金只作参考，双方匿名确认。',
     step1: '选择目标房源', step2: '双方匿名确认', step3: '确定各自入住时间', step4: '支付服务费与押金',
-    fee: '每人每次入住', feeBody: '双方认可对等互换时免房费；各自每次入住付 ¥600 入住前后两次保洁费。长租房押金按入住房源月租金，民宿房押金 ¥3,000–6,000，芭提雅收等值泰铢。',
+    fee: '每人每次入住', feeBody: '双方认可相近条件后可免房费；各自每次入住付 ¥600 入住前后两次保洁费，押金按实际入住房源一个月租金收取；芭提雅收等值泰铢。',
     utility: '水电按入住前后实际抄表结算，由入住人承担；损坏或遗失按证据核算，多退少补。',
     separate: '双方入住日期可以不同', separateSub: '平台跟踪两个独立入住段，确认房源可用、交接与退房结算。',
     choose: '选择适合房屋的托管方式', manageIntro: '从稳定出租，到专业经营或定期看护，权责、收益与服务清晰可见。',
     lease: '委托租赁', operation: '委托经营', care: '委托看护',
     leaseBlurb: '免费展示与招租。租客免中介费，成交后由房东按租期支付佣金。',
-    operationBlurb: '平台负责经营与服务。日租扣除约定直接运营成本后，平台 30%，房东 70%。业主可申请旅居置换。',
+    operationBlurb: '平台负责民宿经营与服务。日租扣除约定直接运营成本后，平台 30%，房东 70%；不参与置换。',
     careBlurb: '空置房定期照看。每周通风、检查、电器通电保护，并留存拍照记录。',
     leaseDetail: '免费上架与招租，成交后由房东按租期支付约定佣金；带看、签约及租务进度可跟踪。',
     leaseFees: '房东付佣金：半年租为半个月租金，一年租为一个月租金；也可另议固定到手租金与平台出租差额。',
     leaseTerms: '租客免中介费；符合租期条件时可选押一付二或押二付一，水电由租客按实际使用承担。',
-    operationDetail: '平台负责出租经营、现场服务与收益对账。按日计价房源扣除约定直接成本后平台 30%、房东 70%；委托经营业主明确授权后可申请旅居置换。',
+    operationDetail: '平台负责民宿经营、现场服务与收益对账。按日计价房源的正常水电含在住宿费中；扣除约定且有凭证的直接成本后平台 30%、房东 70%。民宿不参与置换。',
     careDetail: '公寓与别墅分别报价。基础巡检之外，可按需组合升级项目。',
     careMenu: '可选升级服务', careItems: ['园林绿化修剪', '泳池维护', '深度清洁', '空调与除湿保养', '虫害防治', '软装与布草维护', '台风雨季专项巡检', '离家前封存与返家前准备'],
     termsNote: '具体价格、范围与服务记录，以当地方案和私密签约内容为准。',
@@ -79,25 +81,25 @@ const words = {
     preview: 'Exchange eligibility', menu: 'Menu', search: 'Search', city: 'City', area: 'Area', stay: 'Stay',
     homeSearchTitle: 'Find your kind of stay', searchRentals: 'Search long stays', searchStays: 'Search short stays', searchExchange: 'Search exchange homes', demoNotice: 'Interactive preview: homes, prices and dates are examples. Live requests require platform verification.',
     rentLead: 'Six or twelve months · no tenant agency fee', staysLead: 'Operated homes for nightly stays',
-    exchangeWho: 'Owner opt-in', exchangeWhoDetail: 'The long-stay or short-stay owner expressly joins the exchange pool.', exchangeHow: 'Both decide anonymously', exchangeHowDetail: 'Choose a home; each owner confirms the home and their own dates.', exchangeThen: 'Platform verifies', exchangeThenDetail: 'We check availability, equal value and both stays.',
-    exchangeFree: 'Accommodation', exchangeFreeValue: 'Waived if equal', exchangeClean: 'Cleaning per stay', exchangeCleanValue: '¥600', exchangeDeposit: 'Stay deposit', exchangeDepositValue: 'Based on target home', exchangeUtilities: 'Utilities', exchangeUtilitiesValue: 'Metered usage', exchangeCostNote: 'The cleaning fee covers one clean before and after each stay. Long-stay deposits equal the target monthly rent; short-stay deposits are ¥3,000–6,000. Unequal homes require a platform top-up quote and both owners’ consent. Pattaya collects the confirmed THB equivalent.', exchangeReference: 'Reference rent · not exchange due', exchangeCardAction: 'See exchange terms',
+    exchangeWho: 'Long-stay owner opt-in', exchangeWhoDetail: 'Entrusted-leasing owners offer vacant, deliverable dates. Short stays do not join exchange.', exchangeHow: 'Both decide anonymously', exchangeHowDetail: 'Compare actual nights, size, bedrooms and condition before confirming.', exchangeThen: 'Platform verifies', exchangeThenDetail: 'Both homes share inventory; we check both stays and delivery.',
+    exchangeFree: 'Accommodation', exchangeFreeValue: 'May be waived', exchangeClean: 'Cleaning per stay', exchangeCleanValue: '¥600', exchangeDeposit: 'Stay deposit', exchangeDepositValue: 'Target monthly rent', exchangeUtilities: 'Utilities', exchangeUtilitiesValue: 'Metered usage', exchangeCostNote: 'Only authorized entrusted long-stay homes may join. The fee covers one clean before and after a stay; the deposit equals one month of the home actually occupied. Nights, size, bedrooms and condition guide matching; location and rent are references only. Pattaya collects the confirmed THB equivalent.', exchangeReference: 'Monthly reference · not exchange due', exchangeCardAction: 'See exchange terms',
     allCities: 'All cities', allAreas: 'All areas', propertyType: 'Type', allTypes: 'All types', residential: 'Residential', allTerms: 'All stays', moreOptions: 'More options', moreFilters: 'More filters', lessOptions: 'Hide options', bedroomsFilter: 'Bedrooms', allBedrooms: 'Any bedrooms', areaFilter: 'Area', allAreasMin: 'Any area', sort: 'Featured first · newest next', day: 'Daily', month: 'Monthly', quarter: 'Quarterly', halfYear: '6 months', year: '1 year',
-    results: 'Featured homes', exchangeResults: 'Exchange homes', exchangeIntro: 'Authorized long-stay and short-stay owners can request a direct home exchange.', guestsFilter: 'Guests', allGuests: 'Any number', guestsAtLeast: 'Sleeps at least', reset: 'Clear filters', noResult: 'No concept homes match', noResultSub: 'Try a different city or stay length. More choices will appear when live inventory launches.', exchangeNoResultSub: 'Try another city, area or guest count.',
+    results: 'Featured homes', exchangeResults: 'Exchange homes', exchangeIntro: 'Only authorized entrusted long-stay homes on vacant, deliverable dates. Short stays operate separately.', guestsFilter: 'Guests', allGuests: 'Any number', guestsAtLeast: 'Sleeps at least', reset: 'Clear filters', noResult: 'No concept homes match', noResultSub: 'Try a different city or stay length. More choices will appear when live inventory launches.', exchangeNoResultSub: 'Try another city, area or guest count.',
     demo: 'Concept home', price: 'Sample price', contact: 'Ask about this home', apply: 'Request exchange',
-    ineligible: 'This home has not been authorized by its owner for the exchange pool, so exchange requests are unavailable.',
+    ineligible: 'Short stays operate separately and do not join exchange. An unauthorized long-stay home cannot receive an exchange request either.',
     understood: 'Got it', back: 'Back to homes', ready: 'Owner authorized · Exchange eligible', noExchange: 'Exchange unavailable',
     occupants: 'Sleeps', room: 'Bedroom', rooms: 'Bedrooms', baths: 'Bathrooms', beds: 'Beds', size: 'Area', experience: 'The space', terms: 'Stay options',
     quickRent: 'Long stays', quickStays: 'Short stays', quickExchange: 'Stay exchange', quickManage: 'Property care',
     sampleInventory: 'Homes and details below are illustrative. Live inventory and dates require verification.',
     pinned: 'Pinned', exchangeBadge: 'Exchange eligible · concept', exchangeMayWaive: 'Eligible stays may waive rent', exchangeCostsBrief: 'Cleaning + deposit + utilities',
-    exchangeSectionNote: 'Owners of authorized long-stay or operated homes may apply. Each stay has a ¥600 fee covering pre- and post-stay cleaning; deposits equal the target monthly rent for long stays or ¥3,000–6,000 for short stays. Utilities are metered. Pattaya charges the THB equivalent.',
+    exchangeSectionNote: 'Only authorized entrusted-leasing owners may apply. Each stay has a ¥600 pre/post-stay cleaning fee, a deposit equal to the occupied home’s monthly rent and metered utilities. Tenanted dates are unavailable. Pattaya charges the THB equivalent.',
     homeManageNote: 'Leasing, full management or home care. Choose the service that fits your property.',
     registrationTitle: 'Register a property enquiry', serviceScope: 'Service & fees', registrationPreview: 'Interactive workflow test · no real details collected',
     registrationNotice: 'Submit property choices to create a browser-only test record. Phone and email remain disabled; nothing is sent to the platform.',
     propertyCity: 'Property city', propertyRegion: 'Area', propertySize: 'Floor area (m²)',
     contactPhone: 'Phone', contactEmail: 'Email', apartment: 'Apartment', villa: 'Villa', chooseOne: 'Select', registrationButton: 'Submit test enquiry', registerAction: 'View registration fields', registrationDisabledPlaceholder: 'Available after launch',
     leasingSteps: ['Assess home', 'Sign & list', 'Find tenant', 'Reconcile rent'],
-    operationSteps: ['Assess & authorize', 'Operate stays', 'Review earnings', 'Unlock exchange if eligible'],
+    operationSteps: ['Assess & authorize', 'Operate short stays', 'Serve guests', 'Review earnings'],
     careSteps: ['Choose care', 'Weekly visit', 'Photo record', 'Review report'],
     viewPhotos: 'View concept images', sampleSpecs: 'Illustrative details', amenities: 'Space & amenities',
     feeTitle: 'See the costs first', baseRent: 'Sample rent', zeroAgency: 'Tenant agency fee', utilitiesActual: 'Utilities billed by actual use',
@@ -106,28 +108,28 @@ const words = {
     oneTwo: '1 + 2', twoOne: '2 + 1', oneTwoNote: '1 month deposit + first 2 months rent', twoOneNote: '2 months deposit + first month rent',
     paymentPending: 'Final payment options depend on local review and the contract.',
     otherFees: 'Other charges and cancellation terms will be published after property review. No invented total is shown in this preview.',
-    exchangeMini: 'Owners of authorized long-stay or operated homes may apply. Each stay has a ¥600 pre/post-stay cleaning fee, a deposit based on the target home, and metered utilities.',
+    exchangeMini: 'Only authorized entrusted-leasing owners may apply. Each stay has a ¥600 pre/post-stay cleaning fee, a deposit equal to the occupied home’s monthly rent, and metered utilities.',
     exchangeThai: 'Pattaya collects the locked THB equivalent at confirmation.',
     listingRules: 'Stay & house rules', listingRulesPending: 'Check-in/out times, pets, smoking and cancellation terms will be published after each real home is verified.',
     intro: 'A good home for the next chapter.', homeNote: 'Pick a city and stay length, then discover a place that feels right.',
     guide: 'Three clear ways to begin',
     cityNote: 'Now focusing on Pattaya, Sanya and Beihai. More cities will follow.',
     rentalLine: 'Good homes. Thoughtful service.', exchangeLine: 'One home entrusted. A world to stay in.', manageLine: 'Professional care. Trust well placed.',
-    eligibility: 'Who can exchange?', eligibilityText: 'Owners of long-stay or operated homes may opt into the exchange section. Both owners decide anonymously, then the platform verifies and coordinates the stays.',
-    twoHomes: 'Two homes, side by side', twoHomesSub: 'Compare layout, size, amenities and dates at a glance. Each owner may accept, decline or suggest new dates without sharing contact details.',
+    eligibility: 'Who can exchange?', eligibilityText: 'Only owners of entrusted long-stay homes with express authorization may exchange vacant, deliverable dates. Short stays do not join.',
+    twoHomes: 'Two homes, side by side', twoHomesSub: 'Compare actual nights, size, bedrooms and condition. Location, views and rent remain references; both owners decide anonymously.',
     step1: 'Choose a home', step2: 'Confirm anonymously', step3: 'Agree on both stay dates', step4: 'Pay fee and deposit',
-    fee: 'Per person, per stay', feeBody: 'When both owners approve an equivalent exchange, accommodation rent is waived. Each pays ¥600 for pre/post-stay cleaning. Deposits equal the target monthly rent for long stays or ¥3,000–6,000 for short stays. Pattaya collects the THB equivalent.',
+    fee: 'Per person, per stay', feeBody: 'When both owners approve a comparable exchange, accommodation rent may be waived. Each pays ¥600 for pre/post-stay cleaning and a deposit equal to one month of the occupied home’s rent. Pattaya collects the THB equivalent.',
     utility: 'Guests pay actual metered utilities. Evidence-based loss or damage charges are settled against the deposit, with any difference refunded or collected.',
     separate: 'Stay dates may differ', separateSub: 'The platform tracks two separate stays, including availability, handover and checkout.',
     choose: 'Choose the right care for your home', manageIntro: 'From stable leasing to active operation or regular care, understand the service and earning model at a glance.',
     lease: 'Leasing', operation: 'Managed operation', care: 'Home care',
     leaseBlurb: 'Free listing and leasing support. Tenants pay no agency fee; owners pay commission after a successful lease.',
-    operationBlurb: 'We operate the home and serve guests. For daily stays, net proceeds after agreed direct costs split 30% platform / 70% owner. Owners may exchange stays.',
+    operationBlurb: 'We operate short stays and serve guests. Net proceeds after agreed direct costs split 30% platform / 70% owner. These homes do not join exchange.',
     careBlurb: 'Routine visits to an idle home: weekly ventilation, checks, electrical protection and photo records.',
     leaseDetail: 'Free listing and leasing support. Owners pay the agreed commission only after a successful lease; viewing, signing and rent progress can be tracked.',
     leaseFees: 'Owner-paid commission: half a month for a six-month lease or one month for a one-year lease. A fixed take-home rent model can be agreed separately.',
     leaseTerms: 'Tenants pay no agency fee. Where the lease term permits, choose one-month deposit with two months’ rent or two-month deposit with one month’s rent. Tenants pay actual utilities.',
-    operationDetail: 'We manage rental operations, on-site service and earnings. For daily stays, agreed direct costs are deducted before the platform receives 30% and the owner 70%. Operated owners may opt into stay exchange.',
+    operationDetail: 'We manage short-stay operations, on-site service and earnings. Normal utilities are included in the guest rate; agreed, documented direct costs are deducted once before the platform receives 30% and the owner 70%. Short stays do not join exchange.',
     careDetail: 'Apartments and villas have different rates. Add services as needed beyond the basic weekly visit.',
     careMenu: 'Optional upgrades', careItems: ['Garden pruning', 'Pool care', 'Deep cleaning', 'AC and dehumidifier care', 'Pest prevention', 'Linen and furnishing care', 'Storm-season checks', 'Pre-arrival preparation'],
     termsNote: 'Final pricing, scope and records follow local proposals and private agreements.',
@@ -143,7 +145,7 @@ function parseRoute(): Route {
   return {
     page: parts[0] || 'home', id: parts[0] === 'listing' ? parts[1] : parts[0] === 'request' || (parts[0] === 'exchange' || parts[0] === 'stays') && parts[1] === 'home' ? parts[2] : undefined,
     mode: parts[0] === 'management' || parts[0] === 'request' ? parts[1] : undefined,
-    filters: { city: params.get('city') || 'all', region: params.get('region') || 'all', type: params.get('type') || 'all', term: params.get('term') || 'all', guestsMin: params.get('guests') || 'all', bedroomsMin: params.get('bedrooms') || 'all', areaMin: params.get('area') || 'all' },
+    filters: { city: params.get('city') || 'all', region: params.get('region') || 'all', type: params.get('type') || 'all', term: params.get('term') || 'all', moveIn: params.get('moveIn') || '', guestsMin: params.get('guests') || 'all', bedroomsMin: params.get('bedrooms') || 'all', areaMin: params.get('area') || 'all' },
     query,
   }
 }
@@ -154,6 +156,7 @@ function rentalsHash(filters: Filters) {
   if (filters.region !== 'all') params.set('region', filters.region)
   if (filters.type !== 'all') params.set('type', filters.type)
   if (filters.term !== 'all') params.set('term', filters.term)
+  if (filters.moveIn) params.set('moveIn', filters.moveIn)
   if (filters.guestsMin !== 'all') params.set('guests', filters.guestsMin)
   if (filters.bedroomsMin !== 'all') params.set('bedrooms', filters.bedroomsMin)
   if (filters.areaMin !== 'all') params.set('area', filters.areaMin)
@@ -188,7 +191,7 @@ function Header({ lang, setLang, route }: { lang: Language; setLang: (v: Languag
 function SearchPanel({ lang, initial, searchLabel }: { lang: Language; initial: Filters; searchLabel?: string }) {
   const t = words[lang]
   const [draft, setDraft] = useState(initial)
-  const [active, setActive] = useState<'where' | 'type' | 'term' | 'filters' | null>(null)
+  const [active, setActive] = useState<'where' | 'when' | 'term' | 'filters' | null>(null)
   const finder = useRef<HTMLDivElement>(null)
   const serialized = rentalsHash(initial)
   useEffect(() => { setDraft(initial) }, [serialized])
@@ -204,7 +207,6 @@ function SearchPanel({ lang, initial, searchLabel }: { lang: Language; initial: 
   const update = (part: Partial<Filters>) => setDraft(previous => ({ ...previous, ...part }))
   const commit = (next: Filters) => { setDraft(next); setActive(null); window.location.hash = rentalsHash(next) }
   const activeFilters = initial.type !== 'all' || initial.guestsMin !== 'all' || initial.bedroomsMin !== 'all' || initial.areaMin !== 'all'
-  const typeLabel = draft.type === 'villa' ? t.villa : draft.type === 'apartment' ? t.apartment : draft.type === 'residential' ? t.residential : t.allTypes
   const termLabel = draft.term === 'halfYear' ? t.halfYear : draft.term === 'year' ? t.year : t.allTerms
   const cityLabel = draft.city === 'all' ? t.allCities : city?.[lang] || t.allCities
   const regionLabel = draft.region === 'all' ? t.allAreas : city?.regions.find(item => item.id === draft.region)?.[lang] || t.allAreas
@@ -213,11 +215,11 @@ function SearchPanel({ lang, initial, searchLabel }: { lang: Language; initial: 
     <div className="compact-searchbar rental-searchbar" role="search">
       <button type="button" className={`compact-segment rental-city${active === 'where' ? ' is-open' : ''}`} onClick={() => setActive(active === 'where' ? null : 'where')} aria-expanded={active === 'where'}><LineIcon name="window" size={18}/><span><small>{t.city}</small><strong>{cityLabel}</strong></span></button>
       <button type="button" className={`compact-segment rental-area${active === 'where' ? ' is-open' : ''}`} onClick={() => setActive(active === 'where' ? null : 'where')} aria-expanded={active === 'where'}><LineIcon name="area" size={18}/><span><small>{t.area}</small><strong>{regionLabel}</strong></span></button>
-      <button type="button" className={`compact-segment rental-type${active === 'type' ? ' is-open' : ''}`} onClick={() => setActive(active === 'type' ? null : 'type')} aria-expanded={active === 'type'}><LineIcon name="living" size={18}/><span><small>{t.propertyType}</small><strong>{typeLabel}</strong></span></button>
+      <button type="button" className={`compact-segment rental-type${active === 'when' ? ' is-open' : ''}`} onClick={() => setActive(active === 'when' ? null : 'when')} aria-expanded={active === 'when'}><LineIcon name="calendar" size={18}/><span><small>{lang === 'zh' ? '计划起租' : 'Move in'}</small><strong>{draft.moveIn || (lang === 'zh' ? '选择日期' : 'Choose date')}</strong></span></button>
       <button type="button" className={`compact-segment rental-term${active === 'term' ? ' is-open' : ''}`} onClick={() => setActive(active === 'term' ? null : 'term')} aria-expanded={active === 'term'}><LineIcon name="calendar" size={18}/><span><small>{t.stay}</small><strong>{termLabel}</strong></span></button>
       <button type="button" className="compact-submit" onClick={() => commit(draft)} aria-label={searchLabel || t.search}><span>{searchLabel || t.search}</span><LineIcon name="arrow" size={18}/></button>
     </div>
-    <button type="button" className="compact-mobile-trigger" onClick={() => setActive(active ? null : 'where')} aria-expanded={active !== null}><LineIcon name="window" size={19}/><span><strong>{cityLabel}</strong><small>{regionLabel} · {typeLabel} · {termLabel}</small></span><LineIcon name="arrow" size={18}/></button>
+    <button type="button" className="compact-mobile-trigger" onClick={() => setActive(active ? null : 'where')} aria-expanded={active !== null}><LineIcon name="window" size={19}/><span><strong>{cityLabel}</strong><small>{regionLabel} · {draft.moveIn || (lang === 'zh' ? '待选起租日' : 'Any date')} · {termLabel}</small></span><LineIcon name="arrow" size={18}/></button>
     <div className="compact-quick-filters rental-quick-filters">
       <button type="button" className={`compact-filter-entry${active === 'filters' ? ' selected' : ''}`} onClick={() => setActive(active === 'filters' ? null : 'filters')} aria-expanded={active === 'filters'}><LineIcon name="check" size={17}/>{t.moreFilters}</button>
       <span className="compact-quick-rule" aria-hidden="true"/>
@@ -225,26 +227,26 @@ function SearchPanel({ lang, initial, searchLabel }: { lang: Language; initial: 
       <button type="button" className={initial.bedroomsMin === '2' ? 'selected' : ''} aria-pressed={initial.bedroomsMin === '2'} onClick={() => commit({ ...initial, bedroomsMin: initial.bedroomsMin === '2' ? 'all' : '2' })}>{lang === 'zh' ? '2 间卧室+' : '2+ bedrooms'}</button>
       <button type="button" className={initial.guestsMin === '4' ? 'selected' : ''} aria-pressed={initial.guestsMin === '4'} onClick={() => commit({ ...initial, guestsMin: initial.guestsMin === '4' ? 'all' : '4' })}>{lang === 'zh' ? '可住 4 人+' : 'Sleeps 4+'}</button>
       <button type="button" className={initial.areaMin === '80' ? 'selected' : ''} aria-pressed={initial.areaMin === '80'} onClick={() => commit({ ...initial, areaMin: initial.areaMin === '80' ? 'all' : '80' })}>{lang === 'zh' ? '80㎡+' : '80 m²+'}</button>
-      {(activeFilters || initial.city !== 'all' || initial.region !== 'all' || initial.term !== 'all') && <button type="button" className="compact-clear" onClick={clear}>{lang === 'zh' ? '清除' : 'Clear'} ×</button>}
+      {(activeFilters || initial.city !== 'all' || initial.region !== 'all' || initial.term !== 'all' || initial.moveIn) && <button type="button" className="compact-clear" onClick={clear}>{lang === 'zh' ? '清除' : 'Clear'} ×</button>}
     </div><p className="compact-quick-hint" aria-hidden="true">{lang === 'zh' ? '左右滑动查看更多筛选 →' : 'Swipe for more filters →'}</p>
     {active && <div className="compact-popover compact-popover-filters rental-popover" role="dialog" aria-label={t.moreFilters}>
-      <div className="compact-popover-top"><div className="compact-popover-tabs"><button type="button" className={active === 'where' ? 'selected' : ''} onClick={() => setActive('where')}>{t.city} / {t.area}</button><button type="button" className={active === 'type' ? 'selected' : ''} onClick={() => setActive('type')}>{t.propertyType}</button><button type="button" className={active === 'term' ? 'selected' : ''} onClick={() => setActive('term')}>{t.stay}</button><button type="button" className={active === 'filters' ? 'selected' : ''} onClick={() => setActive('filters')}>{t.moreFilters}</button></div><button type="button" className="compact-close" aria-label={lang === 'zh' ? '关闭搜索' : 'Close search'} onClick={() => setActive(null)}><LineIcon name="close" size={18}/></button></div>
+      <div className="compact-popover-top"><div className="compact-popover-tabs"><button type="button" className={active === 'where' ? 'selected' : ''} onClick={() => setActive('where')}>{t.city} / {t.area}</button><button type="button" className={active === 'when' ? 'selected' : ''} onClick={() => setActive('when')}>{lang === 'zh' ? '起租日期' : 'Move in'}</button><button type="button" className={active === 'term' ? 'selected' : ''} onClick={() => setActive('term')}>{t.stay}</button><button type="button" className={active === 'filters' ? 'selected' : ''} onClick={() => setActive('filters')}>{t.moreFilters}</button></div><button type="button" className="compact-close" aria-label={lang === 'zh' ? '关闭搜索' : 'Close search'} onClick={() => setActive(null)}><LineIcon name="close" size={18}/></button></div>
       {active === 'where' && <div className="compact-popover-body"><p className="compact-panel-label">{t.city}</p><div className="compact-choice-grid"><button type="button" className={draft.city === 'all' ? 'selected' : ''} onClick={() => update({ city: 'all', region: 'all' })}>{t.allCities}</button>{cities.map(item => <button type="button" key={item.id} className={draft.city === item.id ? 'selected' : ''} onClick={() => update({ city: item.id, region: 'all' })}>{item[lang]}</button>)}</div>{city && <><p className="compact-panel-label">{t.area}</p><div className="compact-choice-grid"><button type="button" className={draft.region === 'all' ? 'selected' : ''} onClick={() => update({ region: 'all' })}>{t.allAreas}</button>{city.regions.map(item => <button type="button" key={item.id} className={draft.region === item.id ? 'selected' : ''} onClick={() => update({ region: item.id })}>{item[lang]}</button>)}</div></>}</div>}
-      {active === 'type' && <div className="compact-popover-body"><p className="compact-panel-label">{t.propertyType}</p><div className="compact-choice-grid"><button type="button" className={draft.type === 'all' ? 'selected' : ''} onClick={() => update({ type: 'all' })}>{t.allTypes}</button><button type="button" className={draft.type === 'apartment' ? 'selected' : ''} onClick={() => update({ type: 'apartment' })}>{t.apartment}</button><button type="button" className={draft.type === 'villa' ? 'selected' : ''} onClick={() => update({ type: 'villa' })}>{t.villa}</button><button type="button" className={draft.type === 'residential' ? 'selected' : ''} onClick={() => update({ type: 'residential' })}>{t.residential}</button></div></div>}
+      {active === 'when' && <div className="compact-popover-body"><p className="compact-panel-label">{lang === 'zh' ? '计划起租日期' : 'Preferred move-in date'}</p><label className="compact-date-field"><input type="date" min={localDate()} value={draft.moveIn} onChange={event => update({ moveIn: event.target.value })}/></label><p className="micro-note">{lang === 'zh' ? '检查从该日起完整连续的半年或一年；未选日期时房态待核验。' : 'Checks the full continuous six-month or one-year lease. Without a date, availability needs review.'}</p></div>}
       {active === 'term' && <div className="compact-popover-body"><p className="compact-panel-label">{t.stay}</p><div className="compact-choice-grid"><button type="button" className={draft.term === 'all' ? 'selected' : ''} onClick={() => update({ term: 'all' })}>{t.allTerms}</button>{(['halfYear', 'year'] as Term[]).map(term => <button type="button" key={term} className={draft.term === term ? 'selected' : ''} onClick={() => update({ term })}>{t[term]}</button>)}</div></div>}
-      {active === 'filters' && <div className="compact-popover-body"><p className="compact-panel-label">{t.moreFilters}</p><div className="compact-number-filters"><label>{t.guestsFilter}<select value={draft.guestsMin} onChange={event => update({ guestsMin: event.target.value })}><option value="all">{t.allGuests}</option><option value="2">{t.guestsAtLeast} 2</option><option value="4">{t.guestsAtLeast} 4</option><option value="6">{t.guestsAtLeast} 6</option></select></label><label>{t.bedroomsFilter}<select value={draft.bedroomsMin} onChange={event => update({ bedroomsMin: event.target.value })}><option value="all">{t.allBedrooms}</option><option value="1">1+</option><option value="2">2+</option><option value="3">3+</option></select></label><label>{t.areaFilter}<select value={draft.areaMin} onChange={event => update({ areaMin: event.target.value })}><option value="all">{t.allAreasMin}</option><option value="60">60 m²+</option><option value="80">80 m²+</option><option value="100">100 m²+</option></select></label></div></div>}
+      {active === 'filters' && <div className="compact-popover-body"><p className="compact-panel-label">{t.propertyType}</p><div className="compact-choice-grid"><button type="button" className={draft.type === 'all' ? 'selected' : ''} onClick={() => update({ type: 'all' })}>{t.allTypes}</button><button type="button" className={draft.type === 'apartment' ? 'selected' : ''} onClick={() => update({ type: 'apartment' })}>{t.apartment}</button><button type="button" className={draft.type === 'villa' ? 'selected' : ''} onClick={() => update({ type: 'villa' })}>{t.villa}</button><button type="button" className={draft.type === 'residential' ? 'selected' : ''} onClick={() => update({ type: 'residential' })}>{t.residential}</button></div><p className="compact-panel-label">{t.moreFilters}</p><div className="compact-number-filters"><label>{t.guestsFilter}<select value={draft.guestsMin} onChange={event => update({ guestsMin: event.target.value })}><option value="all">{t.allGuests}</option><option value="2">{t.guestsAtLeast} 2</option><option value="4">{t.guestsAtLeast} 4</option><option value="6">{t.guestsAtLeast} 6</option></select></label><label>{t.bedroomsFilter}<select value={draft.bedroomsMin} onChange={event => update({ bedroomsMin: event.target.value })}><option value="all">{t.allBedrooms}</option><option value="1">1+</option><option value="2">2+</option><option value="3">3+</option></select></label><label>{t.areaFilter}<select value={draft.areaMin} onChange={event => update({ areaMin: event.target.value })}><option value="all">{t.allAreasMin}</option><option value="60">60 m²+</option><option value="80">80 m²+</option><option value="100">100 m²+</option></select></label></div></div>}
       <div className="compact-popover-actions"><button type="button" className="compact-text-action" onClick={clear}>{lang === 'zh' ? '清除全部' : 'Clear all'}</button><button type="button" className="button button-dark" onClick={() => commit(draft)}>{lang === 'zh' ? '应用筛选' : 'Apply'} <LineIcon name="arrow" size={17}/></button></div>
     </div>}
   </div>
 }
 
-function ListingCard({ listing, lang, context = 'rentals' }: { listing: Listing; lang: Language; context?: 'rentals' | 'stays' | 'exchange' }) {
+function ListingCard({ listing, lang, context = 'rentals', query = '', pendingInspection = false }: { listing: Listing; lang: Language; context?: 'rentals' | 'stays' | 'exchange'; query?: string; pendingInspection?: boolean }) {
   const t = words[lang]
   const city = cities.find(c => c.id === listing.city)!
   const region = city.regions.find(r => r.id === listing.region)!
-  return <a className={`listing-card ${context === 'exchange' ? 'listing-card-exchange' : ''}`} href={context === 'exchange' ? `#/exchange/home/${listing.id}` : context === 'stays' ? `#/stays/home/${listing.id}` : `#/listing/${listing.id}`}>
+  return <a className={`listing-card ${context === 'exchange' ? 'listing-card-exchange' : ''}`} href={context === 'exchange' ? `#/exchange/home/${listing.id}` : context === 'stays' ? `#/stays/home/${listing.id}` : `#/listing/${listing.id}${query ? `?${query}` : ''}`}>
     <div className="listing-image"><img src={asset(listing.gallery[0].image)} alt={`${listing.title[lang]} — ${t.demo}`} loading="lazy"/><span className="image-label">{t.demo}</span>{listing.pinned && <span className="listing-pinned">{t.pinned}</span>}</div>
-    <div className="listing-content"><div className="listing-eyebrow">{city[lang]} · {region[lang]} <span>/{listing.type[lang]}</span></div><h3>{listing.title[lang]}</h3><p>{listing.highlight[lang]} <span>·</span> {listing.bedrooms} {(listing.bedrooms === 1 ? t.room : t.rooms).toLowerCase()} <span>·</span> {listing.area} m²</p><div className="listing-terms">{context === 'exchange' ? <span>{t.exchangeBadge}</span> : context === 'stays' ? <span>{lang === 'zh' ? '按晚入住' : 'Nightly stays'}</span> : listing.terms.map(term => <span key={term}>{t[term]}</span>)}</div><div className="listing-bottom">{context === 'exchange' ? <><div><small>{t.exchangeReference}</small><span className="exchange-reference-price">{formatPrice(listing, lang)}</span></div><span className="exchange-card-action">{t.exchangeCardAction} <LineIcon name="arrow" size={16}/></span></> : <><div><small>{context === 'rentals' ? (lang === 'zh' ? '一年基础月租 · 半年上浮10%' : 'Annual base monthly rent · +10% for six months') : t.price}</small><strong>{formatPrice(listing, lang)}</strong></div><span className="circle-arrow" aria-hidden="true">↗</span></>}</div></div>
+    <div className="listing-content"><div className="listing-eyebrow">{city[lang]} · {region[lang]} <span>/{listing.type[lang]}</span></div><h3>{listing.title[lang]}</h3><p>{listing.highlight[lang]} <span>·</span> {listing.bedrooms} {(listing.bedrooms === 1 ? t.room : t.rooms).toLowerCase()} <span>·</span> {listing.area} m²</p><div className="listing-terms">{context === 'exchange' ? <span>{t.exchangeBadge}</span> : context === 'stays' ? <span>{lang === 'zh' ? '按晚入住' : 'Nightly stays'}</span> : listing.terms.map(term => <span key={term}>{t[term]}</span>)}{pendingInspection && <span className="listing-inspection-badge">{lang === 'zh' ? '预计可入住 · 待验房' : 'Estimated · inspection pending'}</span>}</div><div className="listing-bottom">{context === 'exchange' ? <><div><small>{t.exchangeReference}</small><span className="exchange-reference-price">{formatPrice(listing, lang)}</span></div><span className="exchange-card-action">{t.exchangeCardAction} <LineIcon name="arrow" size={16}/></span></> : <><div><small>{context === 'rentals' ? (lang === 'zh' ? '一年基础月租 · 半年上浮10%' : 'Annual base monthly rent · +10% for six months') : t.price}</small><strong>{formatPrice(listing, lang)}</strong></div><span className="circle-arrow" aria-hidden="true">↗</span></>}</div></div>
   </a>
 }
 
@@ -283,9 +285,13 @@ function HomePage({ lang }: { lang: Language }) {
 
 function RentalsPage({ lang, filters }: { lang: Language; filters: Filters }) {
   const t = words[lang]
+  const requests = readTestRequests()
   const longHomes = sortFeaturedListings(listings.filter(item => item.management === 'leased'))
-  const found = filterListings(longHomes, filters)
-  return <div className="page-shell page-top exchange-discovery rentals-catalog-page"><div className="page-title"><p className="eyebrow">01 / LONG STAYS</p><h1>{t.rent}</h1><p>{lang === 'zh' ? '半年或一年，安心长住。半年月租按一年基础月租上浮 10%。' : 'Stay for six months or a year. Six-month rent adds 10% to the annual base monthly rate.'}</p></div><SearchPanel lang={lang} initial={filters}/><div className="results-bar"><div><h2>{t.results}</h2><span>{String(found.length).padStart(2, '0')}</span></div><span className="exchange-sort-note">{t.sort}</span></div><p className="sample-inventory">{t.sampleInventory}</p>{found.length ? <div className="listing-grid">{found.map(item => <ListingCard key={item.id} listing={item} lang={lang}/>)}</div> : <div className="empty-state"><h3>{t.noResult}</h3><p>{t.noResultSub}</p><a className="button button-dark" href="#/rentals">{t.reset} ↗</a></div>}</div>
+  const found = filterListings(longHomes, filters).filter(item => !filters.moveIn || (filters.term === 'all' ? item.terms : [filters.term]).some(term => { const range = leaseRange(filters.moveIn, term); return range && demoAvailable(item.id, range) }))
+  const detailQuery = new URLSearchParams()
+  if (filters.moveIn) detailQuery.set('moveIn', filters.moveIn)
+  if (filters.term !== 'all') detailQuery.set('term', filters.term)
+  return <div className="page-shell page-top exchange-discovery rentals-catalog-page"><div className="page-title"><p className="eyebrow">01 / LONG STAYS</p><h1>{t.rent}</h1><p>{lang === 'zh' ? '半年或一年，安心长住。半年月租按一年基础月租上浮 10%。' : 'Stay for six months or a year. Six-month rent adds 10% to the annual base monthly rate.'}</p></div><SearchPanel lang={lang} initial={filters}/><div className="results-bar"><div><h2>{t.results}</h2><span>{String(found.length).padStart(2, '0')}</span></div><span className="exchange-sort-note">{t.sort}</span></div><p className="sample-inventory">{t.sampleInventory} {filters.moveIn ? (lang === 'zh' ? '以下档期为本机测试库存推算，非正式可订承诺。' : 'Dates are estimated from this browser’s test inventory, not a live booking promise.') : (lang === 'zh' ? '未指定起租日，具体可交付时间待核验。' : 'Select a move-in date to check the test calendar.')}</p>{found.length ? <div className="listing-grid">{found.map(item => <ListingCard key={item.id} listing={item} lang={lang} query={detailQuery.toString()} pendingInspection={Boolean(filters.moveIn && !handoverReady(item.id, filters.moveIn, requests))}/>)}</div> : <div className="empty-state"><h3>{t.noResult}</h3><p>{t.noResultSub}</p><a className="button button-dark" href="#/rentals">{t.reset} ↗</a></div>}</div>
 }
 
 function PropertyGallery({ listing, lang }: { listing: Listing; lang: Language }) {
@@ -298,9 +304,10 @@ function PropertyGallery({ listing, lang }: { listing: Listing; lang: Language }
   </div>
 }
 
-function ListingBookingCard({ listing, lang, onAction }: { listing: Listing; lang: Language; onAction: (message: string) => void }) {
+function ListingBookingCard({ listing, lang, onAction, query = '' }: { listing: Listing; lang: Language; onAction: (message: string) => void; query?: string }) {
   const t = words[lang]
-  const [term, setTerm] = useState<Term>('year')
+  const params = new URLSearchParams(query)
+  const [term, setTerm] = useState<Term>(params.get('term') === 'halfYear' ? 'halfYear' : 'year')
   const [payment, setPayment] = useState<LeasePaymentOption>('one-two')
   const termMonths = term === 'halfYear' ? 6 : term === 'year' ? 12 : 0
   const monthlyPrice = listing.priceUnit === 'month' ? longRentalMonthlyPrice(listing.price, term === 'halfYear' ? 'halfYear' : 'year') : listing.price
@@ -315,12 +322,12 @@ function ListingBookingCard({ listing, lang, onAction }: { listing: Listing; lan
       {estimate ? <><p className="field-label">{t.paymentChoice}</p><div className="payment-options"><button type="button" className={payment === 'one-two' ? 'selected' : ''} aria-pressed={payment === 'one-two'} onClick={() => setPayment('one-two')}>{t.oneTwo}</button><button type="button" className={payment === 'two-one' ? 'selected' : ''} aria-pressed={payment === 'two-one'} onClick={() => setPayment('two-one')}>{t.twoOne}</button></div><p className="micro-note">{payment === 'one-two' ? t.oneTwoNote : t.twoOneNote}</p><div className="estimate-lines"><div><span>{t.deposit}</span><strong>{money(estimate.deposit)}</strong></div><div><span>{t.prepaidRent}</span><strong>{money(estimate.prepaidRent)}</strong></div><div className="estimate-total"><span>{t.initialDue}</span><strong>{money(estimate.initialDue)}</strong></div></div></> : <p className="micro-note">{t.paymentPending}</p>}
     </div>}
     <p className="booking-disclaimer">{t.datePending} {t.otherFees}</p>
-    <a className="button button-dark" href={`#/request/rental/${listing.id}?term=${term}`}>{t.contact} <LineIcon name="arrow" size={17}/></a>
+    <a className="button button-dark" href={`#/request/rental/${listing.id}?term=${term}${params.get('moveIn') ? `&start=${params.get('moveIn')}` : ''}`}>{t.contact} <LineIcon name="arrow" size={17}/></a>
     {canExchange(listing) ? <div className="booking-exchange"><span>{t.ready}</span><p>{t.exchangeMini} {listing.city === 'pattaya' && t.exchangeThai}</p><a className="button button-light" href={`#/request/exchange/${listing.id}`}>{t.apply} <LineIcon name="arrow" size={17}/></a></div> : <button className="exchange-ineligible" onClick={() => onAction(t.ineligible)}>{t.noExchange} ⓘ</button>}
   </aside>
 }
 
-function ListingPage({ lang, id, onAction }: { lang: Language; id?: string; onAction: (message: string) => void }) {
+function ListingPage({ lang, id, onAction, query = '' }: { lang: Language; id?: string; onAction: (message: string) => void; query?: string }) {
   const t = words[lang]
   const listing = listings.find(item => item.id === id)
   if (!listing) return <div className="page-shell empty-state"><h1>{t.noResult}</h1><a href="#/rentals" className="button button-dark">{t.back}</a></div>
@@ -337,7 +344,7 @@ function ListingPage({ lang, id, onAction }: { lang: Language; id?: string; onAc
       <ul className="feature-list">{listing.features.map(feature => <li key={feature.zh}><LineIcon name="check" size={17}/>{feature[lang]}</li>)}</ul>
       <h3>{t.amenities}</h3><div className="amenity-list">{listing.amenities.map(amenity => <span key={amenity.zh}><LineIcon name={amenityIcon(amenity.zh)} size={21}/>{amenity[lang]}</span>)}</div>
       <div className="detail-secondary"><h3>{t.terms}</h3><div className="term-list">{listing.terms.map(value => <span key={value}><LineIcon name="calendar" size={16}/>{t[value]}</span>)}</div><details><summary><LineIcon name="shield" size={17}/>{t.listingRules}</summary><p>{t.listingRulesPending}</p></details></div>
-    </div><ListingBookingCard key={listing.id} listing={listing} lang={lang} onAction={onAction}/></div>
+    </div><ListingBookingCard key={`${listing.id}:${query}`} listing={listing} lang={lang} onAction={onAction} query={query}/></div>
   </div>
 }
 
@@ -357,7 +364,7 @@ export default function App() {
   const t = words[lang]
   const content = useMemo(() => {
     if (route.page === 'rentals') return <RentalsPage lang={lang} filters={route.filters}/>
-    if (route.page === 'listing') return listings.find(item => item.id === route.id)?.management === 'operated' ? <ExchangeDetailPage lang={lang} id={route.id} query={route.query} kind="stays"/> : <ListingPage lang={lang} id={route.id} onAction={setMessage}/>
+    if (route.page === 'listing') return listings.find(item => item.id === route.id)?.management === 'operated' ? <ExchangeDetailPage lang={lang} id={route.id} query={route.query} kind="stays"/> : <ListingPage lang={lang} id={route.id} query={route.query} onAction={setMessage}/>
     if (route.page === 'stays' && route.id) return <ExchangeDetailPage lang={lang} id={route.id} query={route.query} kind="stays"/>
     if (route.page === 'stays') return <ExchangeCatalogPage lang={lang} query={route.query} kind="stays"/>
     if (route.page === 'exchange' && route.id) return <ExchangeDetailPage lang={lang} id={route.id} query={route.query} kind="exchange"/>
