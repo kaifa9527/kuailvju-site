@@ -1,11 +1,13 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { ThemeSwitch } from './ThemeSwitch'
 import { cities, listings, type Listing, type Term } from './data'
 import { canExchange, estimateLeaseMoveIn, filterListings, formatPrice, longRentalMonthlyPrice, sortFeaturedListings, type Language, type LeasePaymentOption } from './lib/catalog'
 import { LineIcon, amenityIcon } from './components/LineIcon'
 import { ExchangeRequestPage, RentalRequestPage, TestInbox } from './TestFlows'
 import { ManagementPage } from './ManagementPage'
 import { ManagementEntry } from './ManagementEntry'
-import { ExchangeCatalogPage, ExchangeDetailPage } from './ExchangeExperience'
+import { ExchangeCatalogPage, ExchangeDetailPage, SearchForm } from './ExchangeExperience'
+import { emptyExchangeSearch } from './lib/exchangeDiscovery'
 
 type Filters = { city: string; region: string; type: string; term: string; guestsMin: string; bedroomsMin: string; areaMin: string }
 type Route = { page: string; id?: string; mode?: string; filters: Filters; query: string }
@@ -16,6 +18,10 @@ const words = {
   zh: {
     rent: '长租房', stays: '民宿房', exchange: '旅居置换', manage: '物业托管', explore: '探索房源', more: '了解详情',
     preview: '置换资格提示', menu: '菜单', search: '查找房源', city: '城市', area: '区域', stay: '租期',
+    homeSearchTitle: '按需求找房', searchRentals: '查找长租房', searchStays: '查找民宿房', searchExchange: '查找可置换房源', demoNotice: '当前为站内体验：房源、价格和档期均为示意；真实申请需经平台核验。',
+    rentLead: '半年或一年起租 · 租客免中介费', staysLead: '按晚选择委托经营房源',
+    exchangeWho: '业主先授权', exchangeWhoDetail: '长租房或民宿房业主，明确同意加入置换池。', exchangeHow: '双方匿名确认', exchangeHowDetail: '选择目标房源，各自确认房源与入住日期。', exchangeThen: '平台核验履约', exchangeThenDetail: '核对房态、对等价值与两次入住安排。',
+    exchangeFree: '住宿费', exchangeFreeValue: '对等互换可免', exchangeClean: '每次入住保洁', exchangeCleanValue: '¥600', exchangeDeposit: '入住押金', exchangeDepositValue: '按目标房源核定', exchangeUtilities: '水电费用', exchangeUtilitiesValue: '实际抄表自付', exchangeCostNote: '保洁费含入住前、退房后各一次；长租房押金等于目标房源月租金，民宿房为 ¥3,000–6,000。价值不等由平台报价、双方确认补差；芭提雅按确认时等值泰铢收取。', exchangeReference: '房源参考价 · 非置换应付', exchangeCardAction: '查看置换条件',
     allCities: '全部城市', allAreas: '全部区域', propertyType: '类型', allTypes: '全部类型', residential: '住宅', allTerms: '全部租期', moreOptions: '更多选项', moreFilters: '更多筛选', lessOptions: '收起选项', bedroomsFilter: '卧室数', allBedrooms: '不限卧室', areaFilter: '面积', allAreasMin: '不限面积', sort: '精选优先 · 最新补充', day: '日租', month: '月租', quarter: '季租', halfYear: '半年', year: '一年',
     results: '精选房源', exchangeResults: '可置换房源', exchangeIntro: '已授权的长租房与民宿房业主均可发起双房源互换。', guestsFilter: '入住人数', allGuests: '不限人数', guestsAtLeast: '至少可住', reset: '清除筛选', noResult: '没有匹配的示意房源', noResultSub: '试试更换城市或租期。真实房源上线后，选择会持续增加。', exchangeNoResultSub: '试试更换城市、区域或入住人数。',
     demo: '示意房源', price: '示意价格', contact: '咨询房源', apply: '申请置换',
@@ -71,6 +77,10 @@ const words = {
   en: {
     rent: 'Long stays', stays: 'Short stays', exchange: 'Stay Exchange', manage: 'Property Care', explore: 'Explore homes', more: 'View details',
     preview: 'Exchange eligibility', menu: 'Menu', search: 'Search', city: 'City', area: 'Area', stay: 'Stay',
+    homeSearchTitle: 'Find your kind of stay', searchRentals: 'Search long stays', searchStays: 'Search short stays', searchExchange: 'Search exchange homes', demoNotice: 'Interactive preview: homes, prices and dates are examples. Live requests require platform verification.',
+    rentLead: 'Six or twelve months · no tenant agency fee', staysLead: 'Operated homes for nightly stays',
+    exchangeWho: 'Owner opt-in', exchangeWhoDetail: 'The long-stay or short-stay owner expressly joins the exchange pool.', exchangeHow: 'Both decide anonymously', exchangeHowDetail: 'Choose a home; each owner confirms the home and their own dates.', exchangeThen: 'Platform verifies', exchangeThenDetail: 'We check availability, equal value and both stays.',
+    exchangeFree: 'Accommodation', exchangeFreeValue: 'Waived if equal', exchangeClean: 'Cleaning per stay', exchangeCleanValue: '¥600', exchangeDeposit: 'Stay deposit', exchangeDepositValue: 'Based on target home', exchangeUtilities: 'Utilities', exchangeUtilitiesValue: 'Metered usage', exchangeCostNote: 'The cleaning fee covers one clean before and after each stay. Long-stay deposits equal the target monthly rent; short-stay deposits are ¥3,000–6,000. Unequal homes require a platform top-up quote and both owners’ consent. Pattaya collects the confirmed THB equivalent.', exchangeReference: 'Reference rent · not exchange due', exchangeCardAction: 'See exchange terms',
     allCities: 'All cities', allAreas: 'All areas', propertyType: 'Type', allTypes: 'All types', residential: 'Residential', allTerms: 'All stays', moreOptions: 'More options', moreFilters: 'More filters', lessOptions: 'Hide options', bedroomsFilter: 'Bedrooms', allBedrooms: 'Any bedrooms', areaFilter: 'Area', allAreasMin: 'Any area', sort: 'Featured first · newest next', day: 'Daily', month: 'Monthly', quarter: 'Quarterly', halfYear: '6 months', year: '1 year',
     results: 'Featured homes', exchangeResults: 'Exchange homes', exchangeIntro: 'Authorized long-stay and short-stay owners can request a direct home exchange.', guestsFilter: 'Guests', allGuests: 'Any number', guestsAtLeast: 'Sleeps at least', reset: 'Clear filters', noResult: 'No concept homes match', noResultSub: 'Try a different city or stay length. More choices will appear when live inventory launches.', exchangeNoResultSub: 'Try another city, area or guest count.',
     demo: 'Concept home', price: 'Sample price', contact: 'Ask about this home', apply: 'Request exchange',
@@ -166,6 +176,7 @@ function Header({ lang, setLang, route }: { lang: Language; setLang: (v: Languag
         <a href="#/management" className={`nav-management ${route.page === 'management' ? 'is-current' : ''}`} onClick={() => setOpen(false)}>{t.manage}<span aria-hidden="true">↗</span></a>
       </nav>
       <div className="header-actions">
+        <ThemeSwitch lang={lang}/>
         <a className="test-desk-link" href="#/test-inbox">{t.testDesk}</a>
         <button className="language-switch" onClick={() => setLang(lang === 'zh' ? 'en' : 'zh')} aria-label={`${t.language}: ${lang === 'zh' ? 'English' : '中文'}`}>{lang === 'zh' ? 'EN' : '中'}</button>
         <button className="menu-button" aria-expanded={open} aria-label={t.menu} onClick={() => setOpen(v => !v)}><span></span><span></span></button>
@@ -174,12 +185,21 @@ function Header({ lang, setLang, route }: { lang: Language; setLang: (v: Languag
   </header>
 }
 
-function SearchPanel({ lang, initial }: { lang: Language; initial: Filters }) {
+function SearchPanel({ lang, initial, searchLabel }: { lang: Language; initial: Filters; searchLabel?: string }) {
   const t = words[lang]
   const [draft, setDraft] = useState(initial)
   const [active, setActive] = useState<'where' | 'type' | 'term' | 'filters' | null>(null)
+  const finder = useRef<HTMLDivElement>(null)
   const serialized = rentalsHash(initial)
   useEffect(() => { setDraft(initial) }, [serialized])
+  useEffect(() => {
+    if (!active) return
+    const closeOutside = (event: PointerEvent) => { if (!finder.current?.contains(event.target as Node)) setActive(null) }
+    const closeEscape = (event: KeyboardEvent) => { if (event.key === 'Escape') setActive(null) }
+    document.addEventListener('pointerdown', closeOutside)
+    document.addEventListener('keydown', closeEscape)
+    return () => { document.removeEventListener('pointerdown', closeOutside); document.removeEventListener('keydown', closeEscape) }
+  }, [active])
   const city = cities.find(item => item.id === draft.city)
   const update = (part: Partial<Filters>) => setDraft(previous => ({ ...previous, ...part }))
   const commit = (next: Filters) => { setDraft(next); setActive(null); window.location.hash = rentalsHash(next) }
@@ -189,13 +209,13 @@ function SearchPanel({ lang, initial }: { lang: Language; initial: Filters }) {
   const cityLabel = draft.city === 'all' ? t.allCities : city?.[lang] || t.allCities
   const regionLabel = draft.region === 'all' ? t.allAreas : city?.regions.find(item => item.id === draft.region)?.[lang] || t.allAreas
   const clear = () => commit(emptyFilters)
-  return <div className="compact-finder rental-finder">
+  return <div className="compact-finder rental-finder" ref={finder}>
     <div className="compact-searchbar rental-searchbar" role="search">
       <button type="button" className={`compact-segment rental-city${active === 'where' ? ' is-open' : ''}`} onClick={() => setActive(active === 'where' ? null : 'where')} aria-expanded={active === 'where'}><LineIcon name="window" size={18}/><span><small>{t.city}</small><strong>{cityLabel}</strong></span></button>
       <button type="button" className={`compact-segment rental-area${active === 'where' ? ' is-open' : ''}`} onClick={() => setActive(active === 'where' ? null : 'where')} aria-expanded={active === 'where'}><LineIcon name="area" size={18}/><span><small>{t.area}</small><strong>{regionLabel}</strong></span></button>
       <button type="button" className={`compact-segment rental-type${active === 'type' ? ' is-open' : ''}`} onClick={() => setActive(active === 'type' ? null : 'type')} aria-expanded={active === 'type'}><LineIcon name="living" size={18}/><span><small>{t.propertyType}</small><strong>{typeLabel}</strong></span></button>
       <button type="button" className={`compact-segment rental-term${active === 'term' ? ' is-open' : ''}`} onClick={() => setActive(active === 'term' ? null : 'term')} aria-expanded={active === 'term'}><LineIcon name="calendar" size={18}/><span><small>{t.stay}</small><strong>{termLabel}</strong></span></button>
-      <button type="button" className="compact-submit" onClick={() => commit(draft)} aria-label={t.search}><span>{t.search}</span><LineIcon name="arrow" size={18}/></button>
+      <button type="button" className="compact-submit" onClick={() => commit(draft)} aria-label={searchLabel || t.search}><span>{searchLabel || t.search}</span><LineIcon name="arrow" size={18}/></button>
     </div>
     <button type="button" className="compact-mobile-trigger" onClick={() => setActive(active ? null : 'where')} aria-expanded={active !== null}><LineIcon name="window" size={19}/><span><strong>{cityLabel}</strong><small>{regionLabel} · {typeLabel} · {termLabel}</small></span><LineIcon name="arrow" size={18}/></button>
     <div className="compact-quick-filters rental-quick-filters">
@@ -206,8 +226,8 @@ function SearchPanel({ lang, initial }: { lang: Language; initial: Filters }) {
       <button type="button" className={initial.guestsMin === '4' ? 'selected' : ''} aria-pressed={initial.guestsMin === '4'} onClick={() => commit({ ...initial, guestsMin: initial.guestsMin === '4' ? 'all' : '4' })}>{lang === 'zh' ? '可住 4 人+' : 'Sleeps 4+'}</button>
       <button type="button" className={initial.areaMin === '80' ? 'selected' : ''} aria-pressed={initial.areaMin === '80'} onClick={() => commit({ ...initial, areaMin: initial.areaMin === '80' ? 'all' : '80' })}>{lang === 'zh' ? '80㎡+' : '80 m²+'}</button>
       {(activeFilters || initial.city !== 'all' || initial.region !== 'all' || initial.term !== 'all') && <button type="button" className="compact-clear" onClick={clear}>{lang === 'zh' ? '清除' : 'Clear'} ×</button>}
-    </div>
-    {active && <div className="compact-popover compact-popover-filters rental-popover">
+    </div><p className="compact-quick-hint" aria-hidden="true">{lang === 'zh' ? '左右滑动查看更多筛选 →' : 'Swipe for more filters →'}</p>
+    {active && <div className="compact-popover compact-popover-filters rental-popover" role="dialog" aria-label={t.moreFilters}>
       <div className="compact-popover-top"><div className="compact-popover-tabs"><button type="button" className={active === 'where' ? 'selected' : ''} onClick={() => setActive('where')}>{t.city} / {t.area}</button><button type="button" className={active === 'type' ? 'selected' : ''} onClick={() => setActive('type')}>{t.propertyType}</button><button type="button" className={active === 'term' ? 'selected' : ''} onClick={() => setActive('term')}>{t.stay}</button><button type="button" className={active === 'filters' ? 'selected' : ''} onClick={() => setActive('filters')}>{t.moreFilters}</button></div><button type="button" className="compact-close" aria-label={lang === 'zh' ? '关闭搜索' : 'Close search'} onClick={() => setActive(null)}><LineIcon name="close" size={18}/></button></div>
       {active === 'where' && <div className="compact-popover-body"><p className="compact-panel-label">{t.city}</p><div className="compact-choice-grid"><button type="button" className={draft.city === 'all' ? 'selected' : ''} onClick={() => update({ city: 'all', region: 'all' })}>{t.allCities}</button>{cities.map(item => <button type="button" key={item.id} className={draft.city === item.id ? 'selected' : ''} onClick={() => update({ city: item.id, region: 'all' })}>{item[lang]}</button>)}</div>{city && <><p className="compact-panel-label">{t.area}</p><div className="compact-choice-grid"><button type="button" className={draft.region === 'all' ? 'selected' : ''} onClick={() => update({ region: 'all' })}>{t.allAreas}</button>{city.regions.map(item => <button type="button" key={item.id} className={draft.region === item.id ? 'selected' : ''} onClick={() => update({ region: item.id })}>{item[lang]}</button>)}</div></>}</div>}
       {active === 'type' && <div className="compact-popover-body"><p className="compact-panel-label">{t.propertyType}</p><div className="compact-choice-grid"><button type="button" className={draft.type === 'all' ? 'selected' : ''} onClick={() => update({ type: 'all' })}>{t.allTypes}</button><button type="button" className={draft.type === 'apartment' ? 'selected' : ''} onClick={() => update({ type: 'apartment' })}>{t.apartment}</button><button type="button" className={draft.type === 'villa' ? 'selected' : ''} onClick={() => update({ type: 'villa' })}>{t.villa}</button><button type="button" className={draft.type === 'residential' ? 'selected' : ''} onClick={() => update({ type: 'residential' })}>{t.residential}</button></div></div>}
@@ -224,7 +244,7 @@ function ListingCard({ listing, lang, context = 'rentals' }: { listing: Listing;
   const region = city.regions.find(r => r.id === listing.region)!
   return <a className={`listing-card ${context === 'exchange' ? 'listing-card-exchange' : ''}`} href={context === 'exchange' ? `#/exchange/home/${listing.id}` : context === 'stays' ? `#/stays/home/${listing.id}` : `#/listing/${listing.id}`}>
     <div className="listing-image"><img src={asset(listing.gallery[0].image)} alt={`${listing.title[lang]} — ${t.demo}`} loading="lazy"/><span className="image-label">{t.demo}</span>{listing.pinned && <span className="listing-pinned">{t.pinned}</span>}</div>
-    <div className="listing-content"><div className="listing-eyebrow">{city[lang]} · {region[lang]} <span>/{listing.type[lang]}</span></div><h3>{listing.title[lang]}</h3><p>{listing.highlight[lang]} <span>·</span> {listing.bedrooms} {(listing.bedrooms === 1 ? t.room : t.rooms).toLowerCase()} <span>·</span> {listing.area} m²</p><div className="listing-terms">{context === 'exchange' ? <span>{t.exchangeBadge}</span> : context === 'stays' ? <span>{lang === 'zh' ? '按晚入住' : 'Nightly stays'}</span> : listing.terms.map(term => <span key={term}>{t[term]}</span>)}</div><div className="listing-bottom"><div><small>{context === 'rentals' ? (lang === 'zh' ? '一年基础月租 · 半年上浮10%' : 'Annual base monthly rent · +10% for six months') : t.price}</small><strong>{formatPrice(listing, lang)}</strong></div><span className="circle-arrow" aria-hidden="true">↗</span></div></div>
+    <div className="listing-content"><div className="listing-eyebrow">{city[lang]} · {region[lang]} <span>/{listing.type[lang]}</span></div><h3>{listing.title[lang]}</h3><p>{listing.highlight[lang]} <span>·</span> {listing.bedrooms} {(listing.bedrooms === 1 ? t.room : t.rooms).toLowerCase()} <span>·</span> {listing.area} m²</p><div className="listing-terms">{context === 'exchange' ? <span>{t.exchangeBadge}</span> : context === 'stays' ? <span>{lang === 'zh' ? '按晚入住' : 'Nightly stays'}</span> : listing.terms.map(term => <span key={term}>{t[term]}</span>)}</div><div className="listing-bottom">{context === 'exchange' ? <><div><small>{t.exchangeReference}</small><span className="exchange-reference-price">{formatPrice(listing, lang)}</span></div><span className="exchange-card-action">{t.exchangeCardAction} <LineIcon name="arrow" size={16}/></span></> : <><div><small>{context === 'rentals' ? (lang === 'zh' ? '一年基础月租 · 半年上浮10%' : 'Annual base monthly rent · +10% for six months') : t.price}</small><strong>{formatPrice(listing, lang)}</strong></div><span className="circle-arrow" aria-hidden="true">↗</span></>}</div></div>
   </a>
 }
 
@@ -239,16 +259,24 @@ function ManagementCards({ lang }: { lang: Language }) {
 
 function HomePage({ lang }: { lang: Language }) {
   const t = words[lang]
+  const [searchMode, setSearchMode] = useState<'rentals' | 'stays' | 'exchange'>('rentals')
   const featured = sortFeaturedListings(listings.filter(item => item.management === 'leased')).slice(0, 6)
   const shortStayHomes = sortFeaturedListings(listings.filter(item => item.management === 'operated')).slice(0, 6)
   const exchangeHomes = sortFeaturedListings(listings.filter(canExchange)).slice(0, 6)
   return <>
     <div className="mobile-service-nav page-shell" aria-label={t.guide}><a href="#/rentals"><span>01</span>{t.quickRent}</a><a href="#/stays"><span>02</span>{t.quickStays}</a><a href="#/exchange"><span>03</span>{t.quickExchange}</a><a href="#/management"><span>04</span>{t.quickManage}</a></div>
-    <section className="hero page-shell"><div className="hero-copy"><p className="eyebrow">KUAI LÜ JU / HOMES & STAYS</p><h1>{t.rentalLine}</h1><p className="hero-description">{t.intro}<br/>{t.homeNote}</p><p className="city-note">{t.cityNote}</p></div><div className="hero-visual"><img src={asset('/images/pattaya-concept.jpg')} alt={t.demo}/><span>{t.demo} / PATTAYA</span></div></section>
-    <div className="search-wrap page-shell"><SearchPanel lang={lang} initial={emptyFilters}/></div>
-    <section className="section page-shell home-property-section" id="homes"><div className="section-heading"><div><p className="eyebrow">01 / LONG STAYS</p><h2>{t.rent}</h2></div><a className="text-link" href="#/rentals">{t.explore} <span>↗</span></a></div><p className="sample-inventory">{lang === 'zh' ? '半年或一年起租；半年租金为一年基础月租的 110%。' : 'Choose six months or one year. The six-month monthly rent is 110% of the annual base rate.'} {t.sampleInventory}</p><div className="listing-grid home-listing-grid">{featured.map(listing => <ListingCard key={listing.id} listing={listing} lang={lang}/>)}</div></section>
-    <section className="section page-shell home-stays-section"><div className="section-heading"><div><p className="eyebrow">02 / SHORT STAYS</p><h2>{t.stays}</h2></div><a className="text-link" href="#/stays">{t.explore} <span>↗</span></a></div><p className="sample-inventory">{lang === 'zh' ? '委托经营房源，按晚浏览与选择。' : 'Operated homes for nightly stays.'} {t.sampleInventory}</p><div className="listing-grid home-listing-grid">{shortStayHomes.map(listing => <ListingCard key={listing.id} listing={listing} lang={lang} context="stays"/>)}</div></section>
-    <section className="section home-exchange-section" id="exchange-homes"><div className="page-shell"><div className="section-heading"><div><p className="eyebrow">03 / STAY EXCHANGE</p><h2>{t.exchange}</h2></div><a className="text-link" href="#/exchange">{t.more} <span>↗</span></a></div><p className="sample-inventory">{t.exchangeSectionNote} {t.sampleInventory}</p><div className="listing-grid home-listing-grid">{exchangeHomes.map(listing => <ListingCard key={listing.id} listing={listing} lang={lang} context="exchange"/>)}</div></div></section>
+    <section className="hero page-shell"><div className="hero-copy"><p className="eyebrow">KUAI LÜ JU / HOMES & STAYS</p><h1>{t.rentalLine}</h1><p className="hero-description">{t.intro}</p></div><div className="hero-visual"><img src={asset('/images/pattaya-concept.jpg')} alt={t.demo}/><span>{t.demo} / PATTAYA</span></div></section>
+    <div className="search-wrap page-shell home-search-shell">
+      <div className="home-search-modes" aria-label={t.homeSearchTitle}><span>{t.homeSearchTitle}</span><div>{([['rentals', t.rent], ['stays', t.stays], ['exchange', t.exchange]] as const).map(([mode, label]) => <button key={mode} type="button" className={searchMode === mode ? 'is-active' : ''} aria-pressed={searchMode === mode} onClick={() => setSearchMode(mode)}>{label}</button>)}</div></div>
+      {searchMode === 'rentals' ? <SearchPanel lang={lang} initial={emptyFilters} searchLabel={t.searchRentals}/> : <SearchForm key={searchMode} lang={lang} initial={emptyExchangeSearch} kind={searchMode} searchLabel={searchMode === 'stays' ? t.searchStays : t.searchExchange}/>}
+      <p className="home-demo-notice"><LineIcon name="shield" size={16}/>{t.demoNotice}</p>
+    </div>
+    <section className="section page-shell home-property-section" id="homes"><div className="section-heading"><div><p className="eyebrow">01 / LONG STAYS</p><h2>{t.rent}</h2><p className="home-section-lead">{t.rentLead}</p></div><a className="text-link" href="#/rentals">{t.explore} <span>↗</span></a></div><div className="listing-grid home-listing-grid">{featured.map(listing => <ListingCard key={listing.id} listing={listing} lang={lang}/>)}</div></section>
+    <section className="section page-shell home-stays-section"><div className="section-heading"><div><p className="eyebrow">02 / SHORT STAYS</p><h2>{t.stays}</h2><p className="home-section-lead">{t.staysLead}</p></div><a className="text-link" href="#/stays">{t.explore} <span>↗</span></a></div><div className="listing-grid home-listing-grid">{shortStayHomes.map(listing => <ListingCard key={listing.id} listing={listing} lang={lang} context="stays"/>)}</div></section>
+    <section className="section home-exchange-section" id="exchange-homes"><div className="page-shell"><div className="section-heading"><div><p className="eyebrow">03 / STAY EXCHANGE</p><h2>{t.exchange}</h2><p className="home-section-lead">{t.exchangeLine}</p></div><a className="text-link" href="#/exchange">{t.more} <span>↗</span></a></div>
+      <div className="home-exchange-story"><div><span>01</span><strong>{t.exchangeWho}</strong><p>{t.exchangeWhoDetail}</p></div><div><span>02</span><strong>{t.exchangeHow}</strong><p>{t.exchangeHowDetail}</p></div><div><span>03</span><strong>{t.exchangeThen}</strong><p>{t.exchangeThenDetail}</p></div></div>
+      <div className="home-exchange-costs"><div><small>{t.exchangeFree}</small><strong>{t.exchangeFreeValue}</strong></div><div><small>{t.exchangeClean}</small><strong>{t.exchangeCleanValue}</strong></div><div><small>{t.exchangeDeposit}</small><strong>{t.exchangeDepositValue}</strong></div><div><small>{t.exchangeUtilities}</small><strong>{t.exchangeUtilitiesValue}</strong></div></div><p className="home-exchange-cost-note">{t.exchangeCostNote}</p>
+      <div className="listing-grid home-listing-grid">{exchangeHomes.map(listing => <ListingCard key={listing.id} listing={listing} lang={lang} context="exchange"/>)}</div></div></section>
     <section className="section page-shell home-management-section" id="property-management"><div className="section-heading"><div><p className="eyebrow">04 / PROPERTY MANAGEMENT</p><h2>{t.manage}</h2></div><a className="text-link" href="#/management">{t.more} <span>↗</span></a></div><p className="sample-inventory">{t.homeManageNote}</p><ManagementCards lang={lang}/></section>
   </>
 }

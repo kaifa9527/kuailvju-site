@@ -28,9 +28,9 @@
   --space-12: 48px;
   --space-16: 64px;
   --space-20: 80px;
-  --text-xs: 11px;
-  --text-sm: 13px;
-  --text-base: 15px;
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
   --text-lg: 18px;
   --text-xl: 24px;
   --text-2xl: clamp(32px, 4vw, 58px);
