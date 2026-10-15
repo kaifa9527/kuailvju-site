@@ -76,12 +76,17 @@ h1, h2, h3 { min-width: 0; overflow-wrap: anywhere; font-weight: 500; line-heigh
 .search-advanced label:last-child { border-right: 0; }
 .search-advanced select { min-height: 30px; font-size: 14px; }
 .section { padding-block: clamp(80px, 10vw, 150px); }
-.section-heading { display: flex; align-items: end; justify-content: space-between; gap: var(--space-12); margin-bottom: var(--space-10); }
-.section-heading .eyebrow { margin-bottom: var(--space-4); }
-.section-heading h2 { margin: 0; font-size: var(--text-2xl); }
+.section-heading { display: flex; align-items: end; justify-content: space-between; gap: var(--space-12); margin-bottom: var(--space-8); }
+.section-heading h2 { margin: 0; font-size: clamp(32px, 3.2vw, 46px); letter-spacing: -.04em; }
 .section-heading > p { max-width: 360px; margin: 0; color: var(--color-muted); }
 .sample-inventory { margin: -8px 0 var(--space-6); color: var(--color-muted); font-size: var(--text-xs); }
-.home-property-section, .home-exchange-section, .home-management-section { padding-block: clamp(40px, 4vw, 72px); }
+.home-property-section, .home-stays-section, .home-exchange-section, .home-management-section { padding-block: clamp(36px, 3.4vw, 52px); }
+.home-property-section { padding-bottom: var(--space-6); }
+.home-stays-section { padding-top: var(--space-6); }
+.home-section-title { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 var(--space-4); }
+.home-section-number { align-self: center; border-right: 1px solid var(--color-accent); padding-right: var(--space-3); color: var(--color-accent); font: 600 11px/1.2 var(--font-body); letter-spacing: .1em; }
+.home-section-english { color: var(--color-accent); font: 600 10px/1.4 var(--font-body); letter-spacing: .12em; white-space: nowrap; }
+.home-section-title + .home-section-lead { margin-top: var(--space-2); }
 .home-exchange-section { background: var(--color-cream); }
 .home-exchange-section .sample-inventory { max-width: 950px; }
 .home-listing-grid .listing-image { aspect-ratio: 1.35; }
@@ -103,7 +108,7 @@ h1, h2, h3 { min-width: 0; overflow-wrap: anywhere; font-weight: 500; line-heigh
 .home-exchange-costs > div:last-child { border-right: 0; }
 .home-exchange-costs small { color: var(--color-muted); font-size: var(--text-xs); }
 .home-exchange-costs strong { font-size: clamp(16px, 1.55vw, 21px); font-weight: 600; line-height: 1.25; }
-.home-exchange-cost-note { max-width: 1000px; margin: var(--space-3) 0 var(--space-8); color: var(--color-muted); font-size: var(--text-xs); line-height: 1.65; }
+.home-exchange-cost-note { max-width: 1000px; margin: var(--space-3) 0 0; color: var(--color-muted); font-size: var(--text-xs); line-height: 1.65; }
 .home-exchange-section .home-listing-grid .listing-card .listing-image { aspect-ratio: 1.6; }
 .listing-card-exchange .listing-bottom { align-items: center; }
 .exchange-reference-price { display: block; color: var(--color-muted); font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
@@ -143,9 +148,10 @@ h1, h2, h3 { min-width: 0; overflow-wrap: anywhere; font-weight: 500; line-heigh
 .footer-bottom { display: flex; align-items: start; justify-content: space-between; gap: var(--space-8); padding: var(--space-6) 0 var(--space-12); color: var(--color-footer-muted); font-size: 11px; }
 .footer-bottom p { max-width: 460px; margin: 0; }
 .page-top, .detail-page, .management-page { padding-block: var(--space-16) clamp(80px, 10vw, 140px); }
-.page-title { max-width: 740px; margin-bottom: var(--space-12); }
-.page-title h1 { margin-bottom: var(--space-5); font-size: clamp(48px, 7vw, 90px); letter-spacing: -.07em; }
-.page-title > p:last-child { max-width: 560px; color: var(--color-muted); font-size: var(--text-lg); }
+.page-title { max-width: 740px; margin-bottom: var(--space-8); }
+.page-title .eyebrow { margin-bottom: var(--space-3); }
+.page-title h1 { margin-bottom: var(--space-3); font-size: clamp(46px, 4.5vw, 68px); letter-spacing: -.045em; }
+.page-title > p:last-child { max-width: 560px; color: var(--color-muted); font-size: var(--text-sm); line-height: 1.6; }
 .exchange-catalog-page .page-title { max-width: 1120px; }
 .search-compact { margin-bottom: var(--space-16); box-shadow: none; }
 .results-bar { display: flex; align-items: end; justify-content: space-between; gap: var(--space-6); margin-bottom: var(--space-6); border-bottom: var(--rule-light); padding-bottom: var(--space-5); }
@@ -506,10 +512,15 @@ h1, h2, h3 { min-width: 0; overflow-wrap: anywhere; font-weight: 500; line-heigh
   .search-advanced label, .search-advanced label:last-child { min-height: 64px; border-right: 0; border-bottom: var(--rule-light); }
   .search-advanced label:last-child { border-bottom: 0; }
   .section { padding-block: 56px 78px; }
-  .home-property-section, .home-exchange-section, .home-management-section { padding-block: 56px 72px; }
+  .home-property-section, .home-stays-section, .home-exchange-section, .home-management-section { padding-block: 40px 48px; }
+  .home-property-section { padding-bottom: 22px; }
+  .home-stays-section { padding-top: 22px; }
   .section-heading { align-items: start; gap: var(--space-4); margin-bottom: var(--space-6); }
-  .section-heading h2 { font-size: 34px; }
+  .section-heading h2 { font-size: clamp(29px, 8vw, 34px); }
   .section-heading > p { display: none; }
+  .home-section-title { gap: 0 9px; }
+  .home-section-number { padding-right: 8px; font-size: 10px; }
+  .home-section-english { display: none; }
   .listing-grid { grid-template-columns: 1fr; gap: var(--space-4); }
   .home-listing-grid, .home-property-section .home-listing-grid { grid-auto-columns: min(76vw, 310px); grid-auto-flow: column; grid-template-columns: none; grid-template-rows: 1fr; gap: var(--space-3); margin-right: -18px; overflow-x: auto; overscroll-behavior-inline: contain; padding: 0 18px var(--space-3) 0; scroll-snap-type: x mandatory; scrollbar-width: thin; }
   .home-listing-grid .listing-card { scroll-snap-align: start; }
@@ -526,7 +537,7 @@ h1, h2, h3 { min-width: 0; overflow-wrap: anywhere; font-weight: 500; line-heigh
   .home-exchange-costs > div:nth-child(even) { border-right: 0; }
   .home-exchange-costs > div:nth-child(n+3) { border-top: var(--rule-light); }
   .home-exchange-costs strong { font-size: 15px; }
-  .home-exchange-cost-note { margin-bottom: var(--space-6); font-size: 11px; }
+  .home-exchange-cost-note { font-size: 11px; }
   .exchange-card-action { font-size: 11px; }
   .listing-image { aspect-ratio: 1.42; }
   .listing-content { padding: var(--space-5); }
@@ -538,9 +549,8 @@ h1, h2, h3 { min-width: 0; overflow-wrap: anywhere; font-weight: 500; line-heigh
   .footer-top nav { margin-top: var(--space-8); gap: var(--space-5); }
   .footer-bottom > * { display: block; margin-bottom: var(--space-3); }
   .page-top, .detail-page, .management-page { padding-block: var(--space-10) 80px; }
-  .page-title { margin-bottom: var(--space-8); }
-  .page-title h1 { font-size: clamp(45px, 11vw, 70px); }
-  .page-title > p:last-child { font-size: 15px; }
+  .page-title { margin-bottom: var(--space-6); }
+  .page-title h1 { font-size: clamp(38px, 9vw, 55px); }
   .search-compact { margin-bottom: var(--space-12); }
   .detail-heading { display: block; }
   .detail-heading h1 { font-size: 35px; }
@@ -635,9 +645,6 @@ h1, h2, h3 { min-width: 0; overflow-wrap: anywhere; font-weight: 500; line-heigh
 }
 /* Exchange discovery and stay detail: shared editorial language, separate stay paths. */
 .exchange-discovery { padding-top: var(--space-8); }
-.exchange-discovery .page-title { margin-bottom: var(--space-7); }
-.exchange-discovery .page-title h1 { margin-bottom: var(--space-3); font-size: clamp(48px, 5vw, 72px); }
-.exchange-discovery .page-title > p:last-child { font-size: var(--text-sm); line-height: 1.6; }
 .compact-finder { position: relative; z-index: 4; width: 100%; margin-bottom: var(--space-8); }
 .compact-searchbar { display: flex; align-items: stretch; width: min(100%, 780px); min-height: 68px; border: var(--rule-light); border-radius: 999px; background: var(--color-white); box-shadow: 0 8px 24px var(--color-soft-shadow); }
 .compact-segment { display: flex; flex: 1 1 0; align-items: center; gap: 12px; min-width: 0; margin: 8px 0; border: 0; border-right: var(--rule-light); padding: 4px 18px; background: transparent; color: var(--color-ink); text-align: left; transition: background .18s ease, color .18s ease; }
@@ -838,8 +845,6 @@ h1, h2, h3 { min-width: 0; overflow-wrap: anywhere; font-weight: 500; line-heigh
 }
 @media (max-width: 700px) {
   .exchange-discovery { padding-top: var(--space-5); }
-  .exchange-discovery .page-title { margin-bottom: var(--space-5); }
-  .exchange-discovery .page-title h1 { font-size: clamp(38px, 9vw, 55px); }
   .exchange-discovery .page-title > p:last-child { display: none; }
   .compact-finder { z-index: 60; margin-bottom: var(--space-6); }
   .compact-searchbar { display: none; }
