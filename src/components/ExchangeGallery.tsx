@@ -72,8 +72,8 @@ export function ExchangeGallery({ home, lang }: { home: Listing; lang: Language 
       <div><button type="button" onClick={share}><LineIcon name="share" size={18}/>{zh ? '分享' : 'Share'}</button><button type="button" onClick={toggleSave} aria-pressed={saved}><LineIcon name="heart" size={18}/>{saved ? (zh ? '已收藏' : 'Saved') : (zh ? '收藏' : 'Save')}</button></div>
     </div>
     {notice && <p className="exchange-gallery-notice" role="status">{notice}</p>}
-    <div className="exchange-gallery-mosaic" aria-label={zh ? '房源照片预览' : 'Home photo preview'}>
-      {Array.from({ length: 5 }, (_, index) => photos[index] ? <button key={photos[index].image} className={`exchange-gallery-tile tile-${index + 1}`} type="button" onClick={() => openGallery(index)} aria-label={`${zh ? '查看照片' : 'View photo'} ${index + 1}: ${photos[index].caption[lang]}`}><img src={asset(photos[index].image)} alt={photos[index].caption[lang]}/>{index === 0 && <span className="exchange-photo-caption">{photos[index].caption[lang]}</span>}</button> : <div className={`exchange-gallery-tile exchange-gallery-pending tile-${index + 1}`} key={`pending-${index}`}><LineIcon name="photos" size={25}/><span>{zh ? '更多角度待补充' : 'More views to come'}</span></div>)}
+    <div className={`exchange-gallery-mosaic photo-count-${Math.min(photos.length, 5)}`} aria-label={zh ? '房源照片预览' : 'Home photo preview'}>
+      {photos.slice(0, 5).map((photo, index) => <button key={photo.image} className={`exchange-gallery-tile tile-${index + 1}`} type="button" onClick={() => openGallery(index)} aria-label={`${zh ? '查看照片' : 'View photo'} ${index + 1}: ${photo.caption[lang]}`}><img src={asset(photo.image)} alt={photo.caption[lang]} loading={index === 0 ? 'eager' : 'lazy'}/>{index === 0 && <span className="exchange-photo-caption">{photo.caption[lang]}</span>}</button>)}
       <button className="exchange-show-photos" type="button" onClick={() => openGallery(0)}><LineIcon name="photos" size={17}/>{zh ? '查看所有照片' : 'View all photos'}</button>
     </div>
     {active !== null && <div ref={dialogRef} className="exchange-lightbox" role="dialog" aria-modal="true" aria-label={zh ? '房源照片' : 'Home photos'}>

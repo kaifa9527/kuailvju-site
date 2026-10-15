@@ -3,6 +3,7 @@ import { ThemeSwitch } from './ThemeSwitch'
 import { cities, listings, type Listing, type Term } from './data'
 import { canExchange, estimateLeaseMoveIn, filterListings, formatPrice, longRentalMonthlyPrice, sortFeaturedListings, type Language, type LeasePaymentOption } from './lib/catalog'
 import { LineIcon, amenityIcon } from './components/LineIcon'
+import { ExchangeGallery } from './components/ExchangeGallery'
 import { ExchangeRequestPage, RentalRequestPage, TestInbox } from './TestFlows'
 import { ManagementPage } from './ManagementPage'
 import { ManagementEntry } from './ManagementEntry'
@@ -294,16 +295,6 @@ function RentalsPage({ lang, filters }: { lang: Language; filters: Filters }) {
   return <div className="page-shell page-top exchange-discovery rentals-catalog-page"><div className="page-title"><p className="eyebrow">01 / LONG STAYS</p><h1>{t.rent}</h1><p>{lang === 'zh' ? '半年或一年，安心长住。半年月租按一年基础月租上浮 10%。' : 'Stay for six months or a year. Six-month rent adds 10% to the annual base monthly rate.'}</p></div><SearchPanel lang={lang} initial={filters}/><div className="results-bar"><div><h2>{t.results}</h2><span>{String(found.length).padStart(2, '0')}</span></div><span className="exchange-sort-note">{t.sort}</span></div><p className="sample-inventory">{t.sampleInventory} {filters.moveIn ? (lang === 'zh' ? '以下档期为本机测试库存推算，非正式可订承诺。' : 'Dates are estimated from this browser’s test inventory, not a live booking promise.') : (lang === 'zh' ? '未指定起租日，具体可交付时间待核验。' : 'Select a move-in date to check the test calendar.')}</p>{found.length ? <div className="listing-grid">{found.map(item => <ListingCard key={item.id} listing={item} lang={lang} query={detailQuery.toString()} pendingInspection={Boolean(filters.moveIn && !handoverReady(item.id, filters.moveIn, requests))}/>)}</div> : <div className="empty-state"><h3>{t.noResult}</h3><p>{t.noResultSub}</p><a className="button button-dark" href="#/rentals">{t.reset} ↗</a></div>}</div>
 }
 
-function PropertyGallery({ listing, lang }: { listing: Listing; lang: Language }) {
-  const t = words[lang]
-  const [active, setActive] = useState(0)
-  const photo = listing.gallery[active]
-  return <div className="property-gallery">
-    <div className="detail-image"><img src={asset(photo.image)} alt={`${listing.title[lang]} · ${photo.caption[lang]}`}/><span>{t.demo} · {active + 1}/{listing.gallery.length}</span></div>
-    <div className="gallery-foot"><p>{photo.caption[lang]}</p><div className="gallery-thumbs" aria-label={t.viewPhotos}>{listing.gallery.map((item, index) => <button key={item.image} type="button" className={active === index ? 'is-active' : ''} aria-label={`${t.viewPhotos} ${index + 1}: ${item.caption[lang]}`} aria-pressed={active === index} onClick={() => setActive(index)}><img src={asset(item.image)} alt="" loading="lazy"/></button>)}</div></div>
-  </div>
-}
-
 function ListingBookingCard({ listing, lang, onAction, query = '' }: { listing: Listing; lang: Language; onAction: (message: string) => void; query?: string }) {
   const t = words[lang]
   const params = new URLSearchParams(query)
@@ -337,13 +328,18 @@ function ListingPage({ lang, id, onAction, query = '' }: { lang: Language; id?: 
     <a className="back-link" href="#/rentals">← {t.back}</a>
     <div className="detail-heading"><div><p className="eyebrow">{city[lang]} / {region[lang]} / {t.demo}</p><h1>{listing.title[lang]}</h1><p>{listing.type[lang]} · {listing.highlight[lang]}</p></div><div className="detail-price"><span>{t.price}</span><strong>{formatPrice(listing, lang)}</strong></div></div>
     {canExchange(listing) && <div className="exchange-entry"><span>{t.ready}</span><a href={`#/exchange/home/${listing.id}`}>{t.apply} <LineIcon name="arrow" size={17}/></a></div>}
-    <PropertyGallery key={listing.id} listing={listing} lang={lang}/>
+    <ExchangeGallery key={listing.id} home={listing} lang={lang}/>
     <div className="detail-layout"><div className="detail-main">
-      <p className="eyebrow">THE SPACE / {t.sampleSpecs}</p><h2>{t.experience}</h2><p className="lead">{listing.description[lang]}</p>
+      <h2>{lang === 'zh' ? '房屋概况' : 'About this home'}</h2><p className="lead">{listing.description[lang]}</p>
       <div className="facts"><div><LineIcon name="guests"/><small>{t.occupants}</small><strong>{listing.guests}</strong></div><div><LineIcon name="bedroom"/><small>{t.rooms}</small><strong>{listing.bedrooms}</strong></div><div><LineIcon name="bed"/><small>{t.beds}</small><strong>{listing.beds}</strong></div><div><LineIcon name="bath"/><small>{t.baths}</small><strong>{listing.bathrooms}</strong></div><div><LineIcon name="area"/><small>{t.size}</small><strong>{listing.area} m²</strong></div></div>
       <ul className="feature-list">{listing.features.map(feature => <li key={feature.zh}><LineIcon name="check" size={17}/>{feature[lang]}</li>)}</ul>
       <h3>{t.amenities}</h3><div className="amenity-list">{listing.amenities.map(amenity => <span key={amenity.zh}><LineIcon name={amenityIcon(amenity.zh)} size={21}/>{amenity[lang]}</span>)}</div>
-      <div className="detail-secondary"><h3>{t.terms}</h3><div className="term-list">{listing.terms.map(value => <span key={value}><LineIcon name="calendar" size={16}/>{t[value]}</span>)}</div><details><summary><LineIcon name="shield" size={17}/>{t.listingRules}</summary><p>{t.listingRulesPending}</p></details></div>
+      <section className="rental-practical" aria-label={lang === 'zh' ? '位置与交付信息' : 'Location and handover'}>
+        <h3>{lang === 'zh' ? '位置与交付' : 'Location & handover'}</h3>
+        <div><LineIcon name="location" size={21}/><p><strong>{city[lang]} · {region[lang]}</strong><span>{lang === 'zh' ? '公开展示到区域；具体位置在房源核验与咨询阶段确认。' : 'The public listing shows the area. Confirm the exact location after property verification.'}</span></p></div>
+        <div><LineIcon name="calendar" size={21}/><p><strong>{lang === 'zh' ? '起租日需核验' : 'Move-in date requires confirmation'}</strong><span>{lang === 'zh' ? '提交意向后核对可交付档期；置换退房后预留至少一天保洁和验房。' : 'We confirm the handover window after your request. An exchange stay needs at least one day for cleaning and inspection before a lease starts.'}</span></p></div>
+        <div><LineIcon name="shield" size={21}/><p><strong>{t.listingRules}</strong><span>{lang === 'zh' ? '宠物、吸烟、装修和退租约定将在真实房源核验及私密签约前说明。' : 'Pet, smoking, alteration and move-out terms are confirmed before a private lease is signed.'}</span></p></div>
+      </section>
     </div><ListingBookingCard key={`${listing.id}:${query}`} listing={listing} lang={lang} onAction={onAction} query={query}/></div>
   </div>
 }

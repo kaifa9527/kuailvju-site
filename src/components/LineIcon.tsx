@@ -1,6 +1,6 @@
 import type { ReactNode, SVGProps } from 'react'
 
-export type IconName = 'guests' | 'bedroom' | 'bed' | 'bath' | 'area' | 'window' | 'garden' | 'pool' | 'climate' | 'wifi' | 'living' | 'dining' | 'balcony' | 'arrow' | 'calendar' | 'shield' | 'check' | 'utility' | 'kitchen' | 'workspace' | 'parking' | 'tv' | 'lift' | 'washer' | 'lock' | 'photos' | 'heart' | 'share' | 'close' | 'family'
+export type IconName = 'guests' | 'bedroom' | 'bed' | 'bath' | 'area' | 'window' | 'garden' | 'pool' | 'climate' | 'wifi' | 'living' | 'dining' | 'balcony' | 'arrow' | 'calendar' | 'location' | 'shield' | 'check' | 'utility' | 'kitchen' | 'workspace' | 'parking' | 'tv' | 'lift' | 'washer' | 'lock' | 'photos' | 'heart' | 'share' | 'close' | 'family'
 
 const paths: Record<IconName, ReactNode> = {
   guests: <><circle cx="9" cy="8" r="3"/><path d="M3.5 19v-1a5.5 5.5 0 0 1 11 0v1M17 5.5a3 3 0 0 1 0 5.8M17 14a4.5 4.5 0 0 1 3.5 4.4V19"/></>,
@@ -18,6 +18,7 @@ const paths: Record<IconName, ReactNode> = {
   balcony: <><path d="M3 20h18M5 17V9h14v8M9 9V4h6v5M5 13h14M9 13v4M15 13v4"/></>,
   arrow: <><path d="M5 19 19 5M9 5h10v10"/></>,
   calendar: <><rect x="3" y="5" width="18" height="16" rx="1"/><path d="M7 3v4M17 3v4M3 10h18M8 15h3"/></>,
+  location: <><path d="M12 22s7-7.1 7-12a7 7 0 1 0-14 0c0 4.9 7 12 7 12Z"/><circle cx="12" cy="10" r="2.5"/></>,
   shield: <><path d="m12 2 8 3v6c0 5-3.5 8.5-8 11-4.5-2.5-8-6-8-11V5l8-3Z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></>,
   check: <path d="m4 12 5 5L20 6"/>,
   utility: <><path d="M12 2c-3.8 4.7-7 8.2-7 12a7 7 0 0 0 14 0c0-3.8-3.2-7.3-7-12Z"/><path d="m13 8-3 5h3l-2 4"/></>,
