@@ -52,7 +52,7 @@ const words = {
     otherFees: '其他费用和取消规则待房源核验后公布，不在示意阶段给出虚假总价。',
     exchangeMini: '仅已授权的委托租赁业主可申请。每次入住另收 ¥600 前后两次保洁费；押金按入住房源一个月租金，水电据实自付。',
     exchangeThai: '芭提雅费用按确认时锁定的等值泰铢收取。',
-    listingRules: '入住与房屋规则', listingRulesPending: '入住退房时间、宠物、吸烟及取消条款，在真实房源核验后逐项公布。',
+    listingRules: '入住规则', listingRulesPending: '入住退房时间、宠物、吸烟及取消条款，在真实房源核验后逐项公布。',
     intro: '从一处好房，开启下一段生活。', homeNote: '选择城市与租期，先看好房。每一次入住，都有认真回应。',
     guide: '三种服务，一目了然',
     cityNote: '目前开放芭提雅、三亚、北海。更多城市将逐步加入。',
@@ -111,7 +111,7 @@ const words = {
     otherFees: 'Other charges and cancellation terms will be published after property review. No invented total is shown in this preview.',
     exchangeMini: 'Only authorized entrusted-leasing owners may apply. Each stay has a ¥600 pre/post-stay cleaning fee, a deposit equal to the occupied home’s monthly rent, and metered utilities.',
     exchangeThai: 'Pattaya collects the locked THB equivalent at confirmation.',
-    listingRules: 'Stay & house rules', listingRulesPending: 'Check-in/out times, pets, smoking and cancellation terms will be published after each real home is verified.',
+    listingRules: 'Stay rules', listingRulesPending: 'Check-in/out times, pets, smoking and cancellation terms will be published after each real home is verified.',
     intro: 'A good home for the next chapter.', homeNote: 'Pick a city and stay length, then discover a place that feels right.',
     guide: 'Three clear ways to begin',
     cityNote: 'Now focusing on Pattaya, Sanya and Beihai. More cities will follow.',
@@ -334,10 +334,9 @@ function ListingPage({ lang, id, onAction, query = '' }: { lang: Language; id?: 
       <div className="facts"><div><LineIcon name="guests"/><small>{t.occupants}</small><strong>{listing.guests}</strong></div><div><LineIcon name="bedroom"/><small>{t.rooms}</small><strong>{listing.bedrooms}</strong></div><div><LineIcon name="bed"/><small>{t.beds}</small><strong>{listing.beds}</strong></div><div><LineIcon name="bath"/><small>{t.baths}</small><strong>{listing.bathrooms}</strong></div><div><LineIcon name="area"/><small>{t.size}</small><strong>{listing.area} m²</strong></div></div>
       <ul className="feature-list">{listing.features.map(feature => <li key={feature.zh}><LineIcon name="check" size={17}/>{feature[lang]}</li>)}</ul>
       <h3>{t.amenities}</h3><div className="amenity-list">{listing.amenities.map(amenity => <span key={amenity.zh}><LineIcon name={amenityIcon(amenity.zh)} size={21}/>{amenity[lang]}</span>)}</div>
-      <section className="rental-practical" aria-label={lang === 'zh' ? '位置与交付信息' : 'Location and handover'}>
-        <h3>{lang === 'zh' ? '位置与交付' : 'Location & handover'}</h3>
+      <section className="rental-practical" aria-label={lang === 'zh' ? '位置与入住信息' : 'Location and stay information'}>
+        <h3>{lang === 'zh' ? '位置与入住' : 'Location & stay'}</h3>
         <div><LineIcon name="location" size={21}/><p><strong>{city[lang]} · {region[lang]}</strong><span>{lang === 'zh' ? '公开展示到区域；具体位置在房源核验与咨询阶段确认。' : 'The public listing shows the area. Confirm the exact location after property verification.'}</span></p></div>
-        <div><LineIcon name="calendar" size={21}/><p><strong>{lang === 'zh' ? '起租日需核验' : 'Move-in date requires confirmation'}</strong><span>{lang === 'zh' ? '提交意向后核对可交付档期；置换退房后预留至少一天保洁和验房。' : 'We confirm the handover window after your request. An exchange stay needs at least one day for cleaning and inspection before a lease starts.'}</span></p></div>
         <div><LineIcon name="shield" size={21}/><p><strong>{t.listingRules}</strong><span>{lang === 'zh' ? '宠物、吸烟、装修和退租约定将在真实房源核验及私密签约前说明。' : 'Pet, smoking, alteration and move-out terms are confirmed before a private lease is signed.'}</span></p></div>
       </section>
     </div><ListingBookingCard key={`${listing.id}:${query}`} listing={listing} lang={lang} onAction={onAction} query={query}/></div>
