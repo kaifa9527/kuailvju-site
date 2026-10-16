@@ -455,7 +455,8 @@ export default function App() {
     if (route.page === 'stays' && route.id) return <ExchangeDetailPage lang={lang} id={route.id} query={route.query} kind="stays"/>
     if (route.page === 'exchange' && route.id) return <ExchangeDetailPage lang={lang} id={route.id} query={route.query} kind="exchange"/>
     if (route.page === 'roam' && route.id) return <RoamPage lang={lang} id={route.id} query={route.query}/>
-    if (route.page === 'management' && !previewMember) return <AccountRequiredPage lang={lang} onLogin={() => setAccountOpen(true)}/>\n    if (route.page === 'management' && !route.mode) return <ManagementEntry lang={lang} suggested={new URLSearchParams(route.query).get('service') || undefined}/>
+    if (route.page === 'management' && !previewMember) return <AccountRequiredPage lang={lang} onLogin={() => setAccountOpen(true)}/>
+    if (route.page === 'management' && !route.mode) return <ManagementEntry lang={lang} suggested={new URLSearchParams(route.query).get('service') || undefined}/>
     if (route.page === 'management') return <ManagementPage lang={lang} mode={route.mode}/>
     if (route.page === 'request' && route.mode === 'rental') return <RentalRequestPage lang={lang} listingId={route.id} query={route.query}/>
     if (route.page === 'request' && route.mode === 'exchange') return <ExchangeRequestPage lang={lang} listingId={route.id} query={route.query}/>
