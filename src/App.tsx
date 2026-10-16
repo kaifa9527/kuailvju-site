@@ -17,7 +17,6 @@ import { leaseRange } from './lib/inventory'
 
 type Filters = { city: string; region: string; type: string; term: string; moveIn: string; guestsMin: string; bedroomsMin: string; areaMin: string }
 type Route = { page: string; id?: string; mode?: string; filters: Filters; query: string }
-const emptyFilters: Filters = { city: 'all', region: 'all', type: 'all', term: 'all', moveIn: '', guestsMin: 'all', bedroomsMin: 'all', areaMin: 'all' }
 const asset = (path: string) => `${import.meta.env.BASE_URL}${path.replace(/^\//, '')}`
 
 const words = {
@@ -156,19 +155,6 @@ function parseRoute(): Route {
   }
 }
 
-function rentalsHash(filters: Filters) {
-  const params = new URLSearchParams()
-  if (filters.city !== 'all') params.set('city', filters.city)
-  if (filters.region !== 'all') params.set('region', filters.region)
-  if (filters.type !== 'all') params.set('type', filters.type)
-  if (filters.term !== 'all') params.set('term', filters.term)
-  if (filters.moveIn) params.set('moveIn', filters.moveIn)
-  if (filters.guestsMin !== 'all') params.set('guests', filters.guestsMin)
-  if (filters.bedroomsMin !== 'all') params.set('bedrooms', filters.bedroomsMin)
-  if (filters.areaMin !== 'all') params.set('area', filters.areaMin)
-  return `#/rentals${params.size ? `?${params}` : ''}`
-}
-
 function Header({ lang, setLang, route, mode, onModeChange, onSearch }: {
   lang: Language; setLang: (v: Language) => void; route: Route;
   mode: HomeMode; onModeChange: (mode: HomeMode) => void; onSearch: (mode: HomeMode, query: string) => void
@@ -278,59 +264,6 @@ function Header({ lang, setLang, route, mode, onModeChange, onSearch }: {
       </div>}
     </header>
   </>
-}
-
-function SearchPanel({ lang, initial, searchLabel, onSummaryChange }: { lang: Language; initial: Filters; searchLabel?: string; onSummaryChange?: (summary: [string, string, string]) => void }) {
-  const t = words[lang]
-  const [draft, setDraft] = useState(initial)
-  const [active, setActive] = useState<'where' | 'when' | 'term' | 'filters' | null>(null)
-  const finder = useRef<HTMLDivElement>(null)
-  const serialized = rentalsHash(initial)
-  useEffect(() => { setDraft(initial) }, [serialized])
-  useEffect(() => {
-    if (!active) return
-    const closeOutside = (event: PointerEvent) => { if (!finder.current?.contains(event.target as Node)) setActive(null) }
-    const closeEscape = (event: KeyboardEvent) => { if (event.key === 'Escape') setActive(null) }
-    document.addEventListener('pointerdown', closeOutside)
-    document.addEventListener('keydown', closeEscape)
-    return () => { document.removeEventListener('pointerdown', closeOutside); document.removeEventListener('keydown', closeEscape) }
-  }, [active])
-  const city = cities.find(item => item.id === draft.city)
-  const update = (part: Partial<Filters>) => setDraft(previous => ({ ...previous, ...part }))
-  const commit = (next: Filters) => { setDraft(next); setActive(null); window.location.hash = rentalsHash(next) }
-  const activeFilters = initial.type !== 'all' || initial.guestsMin !== 'all' || initial.bedroomsMin !== 'all' || initial.areaMin !== 'all'
-  const termLabel = draft.term === 'halfYear' ? t.halfYear : draft.term === 'year' ? t.year : t.allTerms
-  const cityLabel = draft.city === 'all' ? t.allCities : city?.[lang] || t.allCities
-  const regionLabel = draft.region === 'all' ? t.allAreas : city?.regions.find(item => item.id === draft.region)?.[lang] || t.allAreas
-  useEffect(() => { onSummaryChange?.([cityLabel, draft.moveIn || (lang === 'zh' ? '选择日期' : 'Add dates'), termLabel]) }, [onSummaryChange, cityLabel, draft.moveIn, lang, termLabel])
-  const clear = () => commit(emptyFilters)
-  return <div className="compact-finder rental-finder" ref={finder}>
-    <div className="compact-searchbar rental-searchbar" role="search">
-      <button type="button" className={`compact-segment rental-city${active === 'where' ? ' is-open' : ''}`} onClick={() => setActive(active === 'where' ? null : 'where')} aria-expanded={active === 'where'}><LineIcon name="window" size={18}/><span><small>{t.city}</small><strong>{cityLabel}</strong></span></button>
-      <button type="button" className={`compact-segment rental-area${active === 'where' ? ' is-open' : ''}`} onClick={() => setActive(active === 'where' ? null : 'where')} aria-expanded={active === 'where'}><LineIcon name="area" size={18}/><span><small>{t.area}</small><strong>{regionLabel}</strong></span></button>
-      <button type="button" className={`compact-segment rental-type${active === 'when' ? ' is-open' : ''}`} onClick={() => setActive(active === 'when' ? null : 'when')} aria-expanded={active === 'when'}><LineIcon name="calendar" size={18}/><span><small>{lang === 'zh' ? '计划起租' : 'Move in'}</small><strong>{draft.moveIn || (lang === 'zh' ? '选择日期' : 'Choose date')}</strong></span></button>
-      <button type="button" className={`compact-segment rental-term${active === 'term' ? ' is-open' : ''}`} onClick={() => setActive(active === 'term' ? null : 'term')} aria-expanded={active === 'term'}><LineIcon name="calendar" size={18}/><span><small>{t.stay}</small><strong>{termLabel}</strong></span></button>
-      <button type="button" className="compact-submit" onClick={() => commit(draft)} aria-label={searchLabel || t.search}><span>{searchLabel || t.search}</span><LineIcon name="arrow" size={18}/></button>
-    </div>
-    <button type="button" className="compact-mobile-trigger" onClick={() => setActive(active ? null : 'where')} aria-expanded={active !== null}><LineIcon name="window" size={19}/><span><strong>{cityLabel}</strong><small>{regionLabel} · {draft.moveIn || (lang === 'zh' ? '待选起租日' : 'Any date')} · {termLabel}</small></span><LineIcon name="arrow" size={18}/></button>
-    <div className="compact-quick-filters rental-quick-filters">
-      <button type="button" className={`compact-filter-entry${active === 'filters' ? ' selected' : ''}`} onClick={() => setActive(active === 'filters' ? null : 'filters')} aria-expanded={active === 'filters'}><LineIcon name="check" size={17}/>{t.moreFilters}</button>
-      <span className="compact-quick-rule" aria-hidden="true"/>
-      <button type="button" className={initial.type === 'villa' ? 'selected' : ''} aria-pressed={initial.type === 'villa'} onClick={() => commit({ ...initial, type: initial.type === 'villa' ? 'all' : 'villa' })}>{t.villa}</button>
-      <button type="button" className={initial.bedroomsMin === '2' ? 'selected' : ''} aria-pressed={initial.bedroomsMin === '2'} onClick={() => commit({ ...initial, bedroomsMin: initial.bedroomsMin === '2' ? 'all' : '2' })}>{lang === 'zh' ? '2 间卧室+' : '2+ bedrooms'}</button>
-      <button type="button" className={initial.guestsMin === '4' ? 'selected' : ''} aria-pressed={initial.guestsMin === '4'} onClick={() => commit({ ...initial, guestsMin: initial.guestsMin === '4' ? 'all' : '4' })}>{lang === 'zh' ? '可住 4 人+' : 'Sleeps 4+'}</button>
-      <button type="button" className={initial.areaMin === '80' ? 'selected' : ''} aria-pressed={initial.areaMin === '80'} onClick={() => commit({ ...initial, areaMin: initial.areaMin === '80' ? 'all' : '80' })}>{lang === 'zh' ? '80㎡+' : '80 m²+'}</button>
-      {(activeFilters || initial.city !== 'all' || initial.region !== 'all' || initial.term !== 'all' || initial.moveIn) && <button type="button" className="compact-clear" onClick={clear}>{lang === 'zh' ? '清除' : 'Clear'} ×</button>}
-    </div><p className="compact-quick-hint" aria-hidden="true">{lang === 'zh' ? '左右滑动查看更多筛选 →' : 'Swipe for more filters →'}</p>
-    {active && <div className="compact-popover compact-popover-filters rental-popover" role="dialog" aria-label={t.moreFilters}>
-      <div className="compact-popover-top"><div className="compact-popover-tabs"><button type="button" className={active === 'where' ? 'selected' : ''} onClick={() => setActive('where')}>{t.city} / {t.area}</button><button type="button" className={active === 'when' ? 'selected' : ''} onClick={() => setActive('when')}>{lang === 'zh' ? '起租日期' : 'Move in'}</button><button type="button" className={active === 'term' ? 'selected' : ''} onClick={() => setActive('term')}>{t.stay}</button><button type="button" className={active === 'filters' ? 'selected' : ''} onClick={() => setActive('filters')}>{t.moreFilters}</button></div><button type="button" className="compact-close" aria-label={lang === 'zh' ? '关闭搜索' : 'Close search'} onClick={() => setActive(null)}><LineIcon name="close" size={18}/></button></div>
-      {active === 'where' && <div className="compact-popover-body"><p className="compact-panel-label">{t.city}</p><div className="compact-choice-grid"><button type="button" className={draft.city === 'all' ? 'selected' : ''} onClick={() => update({ city: 'all', region: 'all' })}>{t.allCities}</button>{cities.map(item => <button type="button" key={item.id} className={draft.city === item.id ? 'selected' : ''} onClick={() => update({ city: item.id, region: 'all' })}>{item[lang]}</button>)}</div>{city && <><p className="compact-panel-label">{t.area}</p><div className="compact-choice-grid"><button type="button" className={draft.region === 'all' ? 'selected' : ''} onClick={() => update({ region: 'all' })}>{t.allAreas}</button>{city.regions.map(item => <button type="button" key={item.id} className={draft.region === item.id ? 'selected' : ''} onClick={() => update({ region: item.id })}>{item[lang]}</button>)}</div></>}</div>}
-      {active === 'when' && <div className="compact-popover-body"><p className="compact-panel-label">{lang === 'zh' ? '计划起租日期' : 'Preferred move-in date'}</p><label className="compact-date-field"><input type="date" min={localDate()} value={draft.moveIn} onChange={event => update({ moveIn: event.target.value })}/></label><p className="micro-note">{lang === 'zh' ? '检查从该日起完整连续的半年或一年；未选日期时房态待核验。' : 'Checks the full continuous six-month or one-year lease. Without a date, availability needs review.'}</p></div>}
-      {active === 'term' && <div className="compact-popover-body"><p className="compact-panel-label">{t.stay}</p><div className="compact-choice-grid"><button type="button" className={draft.term === 'all' ? 'selected' : ''} onClick={() => update({ term: 'all' })}>{t.allTerms}</button>{(['halfYear', 'year'] as Term[]).map(term => <button type="button" key={term} className={draft.term === term ? 'selected' : ''} onClick={() => update({ term })}>{t[term]}</button>)}</div></div>}
-      {active === 'filters' && <div className="compact-popover-body"><p className="compact-panel-label">{t.propertyType}</p><div className="compact-choice-grid"><button type="button" className={draft.type === 'all' ? 'selected' : ''} onClick={() => update({ type: 'all' })}>{t.allTypes}</button><button type="button" className={draft.type === 'apartment' ? 'selected' : ''} onClick={() => update({ type: 'apartment' })}>{t.apartment}</button><button type="button" className={draft.type === 'villa' ? 'selected' : ''} onClick={() => update({ type: 'villa' })}>{t.villa}</button><button type="button" className={draft.type === 'residential' ? 'selected' : ''} onClick={() => update({ type: 'residential' })}>{t.residential}</button></div><p className="compact-panel-label">{t.moreFilters}</p><div className="compact-number-filters"><label>{t.guestsFilter}<select value={draft.guestsMin} onChange={event => update({ guestsMin: event.target.value })}><option value="all">{t.allGuests}</option><option value="2">{t.guestsAtLeast} 2</option><option value="4">{t.guestsAtLeast} 4</option><option value="6">{t.guestsAtLeast} 6</option></select></label><label>{t.bedroomsFilter}<select value={draft.bedroomsMin} onChange={event => update({ bedroomsMin: event.target.value })}><option value="all">{t.allBedrooms}</option><option value="1">1+</option><option value="2">2+</option><option value="3">3+</option></select></label><label>{t.areaFilter}<select value={draft.areaMin} onChange={event => update({ areaMin: event.target.value })}><option value="all">{t.allAreasMin}</option><option value="60">60 m²+</option><option value="80">80 m²+</option><option value="100">100 m²+</option></select></label></div></div>}
-      <div className="compact-popover-actions"><button type="button" className="compact-text-action" onClick={clear}>{lang === 'zh' ? '清除全部' : 'Clear all'}</button><button type="button" className="button button-dark" onClick={() => commit(draft)}>{lang === 'zh' ? '应用筛选' : 'Apply'} <LineIcon name="arrow" size={17}/></button></div>
-    </div>}
-  </div>
 }
 
 function ListingCard({ listing, lang, context = 'rentals', query = '', pendingInspection = false, serviceCaption = false }: { listing: Listing; lang: Language; context?: 'rentals' | 'stays' | 'exchange'; query?: string; pendingInspection?: boolean; serviceCaption?: boolean }) {
