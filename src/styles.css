@@ -1135,17 +1135,84 @@ h1, h2, h3 { min-width: 0; overflow-wrap: anywhere; font-weight: 500; line-heigh
 }
 
 
-/* Refined finder only: the five-entry navigation spacing remains unchanged. */
-.home-affixed .home-discovery-form {
-  width: min(100%, 900px);
-  max-width: 900px;
-  min-height: 72px;
-  border-radius: 20px;
+/* Compact 750px finder — only the expanded home search changes.
+   The five navigation links and their spacing stay untouched. */
+.home-affixed .home-discovery {
+  padding-top: 8px;
+  padding-bottom: 11px;
 }
-.home-affixed .home-discovery-submit { border-radius: 13px; }
+.home-affixed .home-discovery-form {
+  width: min(100%, 750px);
+  max-width: 750px;
+  min-height: 66px;
+  border-radius: 17px;
+}
+.home-affixed .home-discovery-field {
+  gap: 3px;
+  min-width: 0;
+  margin-block: 7px;
+  padding-inline: 10px;
+}
+.home-affixed .home-discovery-field > span {
+  font-size: 10px;
+  line-height: 1.2;
+  letter-spacing: .01em;
+  white-space: nowrap;
+}
+:root #root .home-affixed .home-discovery-field select {
+  min-height: 28px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.home-affixed .home-discovery-field input[type="date"] {
+  min-height: 28px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.home-affixed .home-discovery-field input[type="date"]::-webkit-calendar-picker-indicator {
+  width: 13px;
+  height: 13px;
+  margin-left: 2px;
+  opacity: .78;
+  cursor: pointer;
+}
+.home-affixed .home-discovery-submit {
+  gap: 6px;
+  min-height: 44px;
+  margin: 6px;
+  padding-inline: 13px;
+  border-radius: 11px;
+  font-size: 13px;
+}
+.home-affixed .home-discovery-submit svg { width: 17px; height: 17px; }
 .home-affixed .home-discovery-note,
-.home-affixed .home-discovery .form-error { max-width: 900px; }
+.home-affixed .home-discovery .form-error { max-width: 750px; }
+.home-affixed .home-discovery-note { margin-top: 7px; font-size: 10px; }
+@media (max-width: 930px) and (min-width: 761px) {
+  .home-affixed .home-discovery-field { padding-inline: 8px; }
+  .home-affixed .home-discovery-submit { padding-inline: 11px; }
+}
 @media (max-width: 760px) {
-  .home-affixed .home-discovery-form { width: 100%; border-radius: 17px; }
-  .home-affixed .home-discovery-submit { border-radius: 12px; }
+  .home-affixed .home-discovery { padding-top: 11px; padding-bottom: 15px; }
+  .home-affixed .home-discovery-form {
+    width: 100%;
+    min-height: auto;
+    border-radius: 17px;
+  }
+  .home-affixed .home-discovery-field {
+    gap: 5px;
+    min-height: 62px;
+    margin: 0;
+    padding: 9px 11px;
+  }
+  :root #root .home-affixed .home-discovery-field select,
+  .home-affixed .home-discovery-field input[type="date"] {
+    min-height: 38px;
+    font-size: 13px;
+  }
+  .home-affixed .home-discovery-submit {
+    min-height: 44px;
+    margin: 9px 0 0;
+    border-radius: 11px;
+  }
 }

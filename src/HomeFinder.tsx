@@ -7,7 +7,7 @@ import { LineIcon } from './components/LineIcon'
 
 const translations = {
   zh: {
-    city: '目的地', cityAny: '选择城市', region: '区域', regionAny: '全部区域', start: '入住 / 开始日期',
+    city: '目的地', cityAny: '选择城市', region: '区域', regionAny: '全部区域', start: '入住日期', moveIn: '起租日期', visit: '体验日期',
     end: '退房日期', term: '租期', guests: '人数', search: '搜索', anytime: '不限日期',
     halfYear: '半年', year: '一年', anyTerm: '半年或一年', category: '体验类型',
     all: '全部', attractions: '景点', tickets: '门票', experiences: '当地体验',
@@ -15,7 +15,7 @@ const translations = {
     demo: '当前为演示内容，房源、景点和档期尚未开放真实预订。',
   },
   en: {
-    city: 'Destination', cityAny: 'Choose a city', region: 'Area', regionAny: 'All areas', start: 'Check in / Start date',
+    city: 'Destination', cityAny: 'Choose a city', region: 'Area', regionAny: 'All areas', start: 'Check-in', moveIn: 'Move-in', visit: 'Visit date',
     end: 'Check out', term: 'Lease', guests: 'Guests', search: 'Search', anytime: 'Any date',
     halfYear: 'Six months', year: 'One year', anyTerm: '6 or 12 months', category: 'Explore',
     all: 'All', attractions: 'Attractions', tickets: 'Tickets', experiences: 'Local experiences',
@@ -32,6 +32,7 @@ export function HomeFinder({ lang, mode, onSummaryChange }: { lang: Language; mo
   }))
   const [error, setError] = useState('')
   const draft = draftByMode[mode]
+  const startLabel = mode === 'rentals' ? t.moveIn : mode === 'roam' ? t.visit : t.start
   const selectedCity = cities.find(entry => entry.id === draft.city)
   const destination = selectedCity?.[lang] || (lang === 'zh' ? '任何地方' : 'Anywhere')
   const dateSummary = draft.start ? (draft.end ? `${draft.start} — ${draft.end}` : draft.start) : (lang === 'zh' ? '任意时间' : 'Any date')
@@ -76,8 +77,8 @@ export function HomeFinder({ lang, mode, onSummaryChange }: { lang: Language; mo
         </select>
       </label>}
       <label className="home-discovery-field">
-        <span>{mode === 'rentals' ? t.start : mode === 'roam' ? t.start : t.start}</span>
-        <input aria-label={t.start} type="date" min={localDate()} value={draft.start} onChange={event => update({ start: event.target.value })}/>
+        <span>{startLabel}</span>
+        <input aria-label={startLabel} type="date" min={localDate()} value={draft.start} onChange={event => update({ start: event.target.value })}/>
       </label>
       {(mode === 'stays' || mode === 'exchange') && <label className="home-discovery-field">
         <span>{t.end}</span>
