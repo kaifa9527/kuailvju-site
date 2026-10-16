@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import type { Language } from './lib/catalog'
 import { LegalNoticeDialog, type NoticeKind } from './LegalNotices'
 
@@ -37,7 +37,7 @@ export function AccountDialog({ lang, onClose, onPreviewEnter, onPreviewExit, pr
     }
     onPreviewEnter()
   }
-  const submit = (event: React.FormEvent<HTMLFormElement>) => {
+  const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setStatus(zh
       ? '当前是静态预览站，尚未连接真实认证服务。没有发送验证码，也没有创建账户。可使用下方“进入演示会员”查看页面流程。'
