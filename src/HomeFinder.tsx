@@ -24,7 +24,7 @@ const translations = {
   },
 }
 
-export function HomeFinder({ lang, mode, onSummaryChange }: { lang: Language; mode: HomeMode; onSummaryChange?: (summary: [string, string, string]) => void }) {
+export function HomeFinder({ lang, mode, onSummaryChange, onSearch }: { lang: Language; mode: HomeMode; onSummaryChange?: (summary: [string, string, string]) => void; onSearch?: (mode: HomeMode, query: string) => void }) {
   const t = translations[lang]
   const [draftByMode, setDraftByMode] = useState<Record<HomeMode, HomeSearch>>(() => ({
     rentals: { ...initialHomeSearch }, stays: { ...initialHomeSearch },
@@ -55,7 +55,11 @@ export function HomeFinder({ lang, mode, onSummaryChange }: { lang: Language; mo
   }
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    try { window.location.hash = makeHomeSearchHash(mode, draft, localDate()) }
+    try {
+      const hash = makeHomeSearchHash(mode, draft, localDate())
+      if (onSearch) onSearch(mode, hash.split('?')[1] || '')
+      else window.location.hash = hash
+    }
     catch { setError(t.invalid) }
   }
   return <section className="home-discovery page-shell" aria-label={t.search}>
