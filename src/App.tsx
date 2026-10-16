@@ -334,13 +334,13 @@ function SearchPanel({ lang, initial, searchLabel, onSummaryChange }: { lang: La
   </div>
 }
 
-function ListingCard({ listing, lang, context = 'rentals', query = '', pendingInspection = false }: { listing: Listing; lang: Language; context?: 'rentals' | 'stays' | 'exchange'; query?: string; pendingInspection?: boolean }) {
+function ListingCard({ listing, lang, context = 'rentals', query = '', pendingInspection = false, serviceCaption = false }: { listing: Listing; lang: Language; context?: 'rentals' | 'stays' | 'exchange'; query?: string; pendingInspection?: boolean; serviceCaption?: boolean }) {
   const t = words[lang]
   const city = cities.find(c => c.id === listing.city)!
   const region = city.regions.find(r => r.id === listing.region)!
   return <a className={`listing-card ${context === 'exchange' ? 'listing-card-exchange' : ''}`} href={context === 'exchange' ? `#/exchange/home/${listing.id}` : context === 'stays' ? `#/stays/home/${listing.id}` : `#/listing/${listing.id}${query ? `?${query}` : ''}`}>
     <div className="listing-image"><img src={asset(listing.gallery[0].image)} alt={`${listing.title[lang]} — ${t.demo}`} loading="lazy"/><span className="image-label">{t.demo}</span>{listing.pinned && <span className="listing-pinned">{t.pinned}</span>}</div>
-    <div className="listing-content"><div className="listing-eyebrow">{city[lang]} · {region[lang]} <span>/{listing.type[lang]}</span></div><h3>{listing.title[lang]}</h3><p>{listing.highlight[lang]} <span>·</span> {listing.bedrooms} {(listing.bedrooms === 1 ? t.room : t.rooms).toLowerCase()} <span>·</span> {listing.area} m²</p><div className="listing-terms">{context === 'exchange' ? <span>{t.exchangeBadge}</span> : context === 'stays' ? <span>{lang === 'zh' ? '按晚入住' : 'Nightly stays'}</span> : listing.terms.map(term => <span key={term}>{t[term]}</span>)}{pendingInspection && <span className="listing-inspection-badge">{lang === 'zh' ? '预计可入住 · 待验房' : 'Estimated · inspection pending'}</span>}</div><div className="listing-bottom">{context === 'exchange' ? <><div><small>{t.exchangeReference}</small><span className="exchange-reference-price">{formatPrice(listing, lang)}</span></div><span className="exchange-card-action">{t.exchangeCardAction} <LineIcon name="arrow" size={16}/></span></> : <><div><small>{context === 'rentals' ? (lang === 'zh' ? '一年基础月租 · 半年上浮10%' : 'Annual base monthly rent · +10% for six months') : t.price}</small><strong>{formatPrice(listing, lang)}</strong></div><span className="circle-arrow" aria-hidden="true">↗</span></>}</div></div>
+    <div className="listing-content"><div className="listing-eyebrow">{city[lang]} · {region[lang]} <span>/{listing.type[lang]}</span></div><h3>{listing.title[lang]}</h3>{serviceCaption && context === 'stays' && <p className="listing-service-caption">{lang === 'zh' ? '提供日租/短租服务' : 'Daily stays · Short-term rentals'}</p>}<p>{listing.highlight[lang]} <span>·</span> {listing.bedrooms} {(listing.bedrooms === 1 ? t.room : t.rooms).toLowerCase()} <span>·</span> {listing.area} m²</p><div className="listing-terms">{context === 'exchange' ? <span>{t.exchangeBadge}</span> : context === 'stays' ? <span>{lang === 'zh' ? '按晚入住' : 'Nightly stays'}</span> : listing.terms.map(term => <span key={term}>{t[term]}</span>)}{pendingInspection && <span className="listing-inspection-badge">{lang === 'zh' ? '预计可入住 · 待验房' : 'Estimated · inspection pending'}</span>}</div><div className="listing-bottom">{context === 'exchange' ? <><div><small>{t.exchangeReference}</small><span className="exchange-reference-price">{formatPrice(listing, lang)}</span></div><span className="exchange-card-action">{t.exchangeCardAction} <LineIcon name="arrow" size={16}/></span></> : <><div><small>{context === 'rentals' ? (lang === 'zh' ? '一年基础月租 · 半年上浮10%' : 'Annual base monthly rent · +10% for six months') : t.price}</small><strong>{formatPrice(listing, lang)}</strong></div><span className="circle-arrow" aria-hidden="true">↗</span></>}</div></div>
   </a>
 }
 
@@ -358,17 +358,75 @@ function HomePage({ lang }: { lang: Language }) {
   const featured = sortFeaturedListings(listings.filter(item => item.management === 'leased')).slice(0, 6)
   const shortStayHomes = sortFeaturedListings(listings.filter(item => item.management === 'operated')).slice(0, 6)
   const exchangeHomes = sortFeaturedListings(listings.filter(canExchange)).slice(0, 6)
-  return <>
 
-    <section className="section page-shell home-property-section" id="homes"><div className="section-heading"><div><div className="home-section-title"><span className="home-section-number" aria-hidden="true">01</span><h2>{t.rent}</h2>{lang === 'zh' && <span className="home-section-english" aria-hidden="true">LONG STAYS</span>}</div></div><a className="text-link" href="#/rentals">{t.explore} <span>↗</span></a></div><div className="listing-grid home-listing-grid">{featured.map(listing => <ListingCard key={listing.id} listing={listing} lang={lang}/>)}</div></section>
-    <section className="section page-shell home-stays-section"><div className="section-heading"><div><div className="home-section-title"><span className="home-section-number" aria-hidden="true">02</span><h2>{t.stays}</h2>{lang === 'zh' && <span className="home-section-english" aria-hidden="true">SHORT STAYS</span>}</div><p className="home-section-lead">{t.staysLead}</p></div><a className="text-link" href="#/stays">{t.explore} <span>↗</span></a></div><div className="listing-grid home-listing-grid">{shortStayHomes.map(listing => <ListingCard key={listing.id} listing={listing} lang={lang} context="stays"/>)}</div></section>
-    <section className="section home-exchange-section" id="exchange-homes"><div className="page-shell"><div className="section-heading"><div><div className="home-section-title"><span className="home-section-number" aria-hidden="true">03</span><h2>{t.exchange}</h2>{lang === 'zh' && <span className="home-section-english" aria-hidden="true">STAY EXCHANGE</span>}</div><p className="home-section-lead">{t.exchangeLine}</p></div><a className="text-link" href="#/exchange">{t.more} <span>↗</span></a></div>
-      <div className="listing-grid home-listing-grid">{exchangeHomes.map(listing => <ListingCard key={listing.id} listing={listing} lang={lang} context="exchange"/>)}</div>
-      <div className="home-exchange-story"><div><span>01</span><strong>{t.exchangeWho}</strong><p>{t.exchangeWhoDetail}</p></div><div><span>02</span><strong>{t.exchangeHow}</strong><p>{t.exchangeHowDetail}</p></div><div><span>03</span><strong>{t.exchangeThen}</strong><p>{t.exchangeThenDetail}</p></div></div>
-      <div className="home-exchange-costs"><div><small>{t.exchangeFree}</small><strong>{t.exchangeFreeValue}</strong></div><div><small>{t.exchangeClean}</small><strong>{t.exchangeCleanValue}</strong></div><div><small>{t.exchangeDeposit}</small><strong>{t.exchangeDepositValue}</strong></div><div><small>{t.exchangeUtilities}</small><strong>{t.exchangeUtilitiesValue}</strong></div></div><p className="home-exchange-cost-note">{t.exchangeCostNote}</p>
-      </div></section>
-    <section className="section page-shell home-roam-section" id="roam"><div className="section-heading"><div><div className="home-section-title"><span className="home-section-number" aria-hidden="true">04</span><h2>{t.roam}</h2>{lang === 'zh' && <span className="home-section-english" aria-hidden="true">LOCAL EXPERIENCES</span>}</div><p className="home-section-lead">{t.roamLead}</p></div><a className="text-link" href="#/roam">{t.more} <span>↗</span></a></div><div className="home-roam-strip"><LineIcon name="compass" size={31}/><p>{t.roamNote}</p><div>{cities.map(city => <a key={city.id} href={`#/roam?city=${city.id}`}>{city[lang]} ↗</a>)}</div></div></section>
-    <section className="section page-shell home-management-section" id="property-management"><div className="section-heading"><div><div className="home-section-title"><span className="home-section-number" aria-hidden="true">05</span><h2>{t.manage}</h2>{lang === 'zh' && <span className="home-section-english" aria-hidden="true">PROPERTY CARE</span>}</div><p className="home-section-lead">{t.homeManageNote}</p></div><a className="text-link" href="#/management">{t.more} <span>↗</span></a></div><ManagementCards lang={lang}/></section>
+  return <>
+    <section className="section page-shell home-property-section" id="homes">
+      <div className="section-heading">
+        <h2>{t.rent}</h2>
+        <a className="text-link" href="#/rentals">{t.explore} <span>↗</span></a>
+      </div>
+      <div className="listing-grid home-listing-grid">
+        {featured.map(listing => <ListingCard key={listing.id} listing={listing} lang={lang}/>)}
+      </div>
+    </section>
+
+    <section className="section page-shell home-stays-section">
+      <div className="section-heading">
+        <h2>{t.stays}</h2>
+        <a className="text-link" href="#/stays">{t.explore} <span>↗</span></a>
+      </div>
+      <div className="listing-grid home-listing-grid">
+        {shortStayHomes.map((listing, index) =>
+          <ListingCard key={listing.id} listing={listing} lang={lang} context="stays" serviceCaption={index === 0}/>
+        )}
+      </div>
+    </section>
+
+    <section className="section home-exchange-section" id="exchange-homes">
+      <div className="page-shell">
+        <div className="section-heading">
+          <h2>{t.exchange}</h2>
+          <a className="text-link" href="#/exchange">{t.more} <span>↗</span></a>
+        </div>
+        <div className="listing-grid home-listing-grid">
+          {exchangeHomes.map(listing =>
+            <ListingCard key={listing.id} listing={listing} lang={lang} context="exchange"/>
+          )}
+        </div>
+        <div className="home-exchange-story">
+          <div><span>01</span><strong>{t.exchangeWho}</strong><p>{t.exchangeWhoDetail}</p></div>
+          <div><span>02</span><strong>{t.exchangeHow}</strong><p>{t.exchangeHowDetail}</p></div>
+          <div><span>03</span><strong>{t.exchangeThen}</strong><p>{t.exchangeThenDetail}</p></div>
+        </div>
+        <div className="home-exchange-costs">
+          <div><small>{t.exchangeFree}</small><strong>{t.exchangeFreeValue}</strong></div>
+          <div><small>{t.exchangeClean}</small><strong>{t.exchangeCleanValue}</strong></div>
+          <div><small>{t.exchangeDeposit}</small><strong>{t.exchangeDepositValue}</strong></div>
+          <div><small>{t.exchangeUtilities}</small><strong>{t.exchangeUtilitiesValue}</strong></div>
+        </div>
+        <p className="home-exchange-cost-note">{t.exchangeCostNote}</p>
+      </div>
+    </section>
+
+    <section className="section page-shell home-roam-section" id="roam">
+      <div className="section-heading">
+        <h2>{t.roam}</h2>
+        <a className="text-link" href="#/roam">{t.more} <span>↗</span></a>
+      </div>
+      <div className="home-roam-strip">
+        <LineIcon name="compass" size={31}/>
+        <p>{t.roamNote}</p>
+        <div>{cities.map(city => <a key={city.id} href={`#/roam?city=${city.id}`}>{city[lang]} ↗</a>)}</div>
+      </div>
+    </section>
+
+    <section className="section page-shell home-management-section" id="property-management">
+      <div className="section-heading">
+        <h2>{t.manage}</h2>
+        <a className="text-link" href="#/management">{t.more} <span>↗</span></a>
+      </div>
+      <ManagementCards lang={lang}/>
+    </section>
   </>
 }
 
