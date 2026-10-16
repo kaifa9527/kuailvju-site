@@ -24,26 +24,6 @@
   --leading-body: 1.65;
   --leading-caption: 1.5;
 }
-:root[data-theme="dark"] {
-  color-scheme: dark;
-  --color-paper: #202120;
-  --color-cream: #343735;
-  --color-sand: #3D403E;
-  --color-white: #2A2C2B;
-  --color-ink: #F2F3EF;
-  --color-muted: #B5BCB6;
-  --color-accent: #A8CDBB;
-  --color-accent-light: #35423B;
-  --color-rule: #505651;
-  --color-soft-shadow: rgb(0 0 0 / .12);
-  --color-menu-shadow: rgb(0 0 0 / .2);
-  --color-dialog-shadow: rgb(0 0 0 / .3);
-  --color-success: #ACD3AF;
-  --color-error: #FFB4AB;
-  --color-disabled: #9CA39D;
-  --color-footer: #1B1D1C;
-}
-
 body { line-height: var(--leading-body); }
 button, input, select, textarea { font-family: var(--font-body); color: var(--color-ink); }
 h1, h2 { line-height: var(--leading-heading); letter-spacing: -.035em; }
