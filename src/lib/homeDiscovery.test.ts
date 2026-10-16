@@ -17,7 +17,7 @@ test('short stay and exchange keep both dates and guest counts', () => {
 
 test('Roam searches by city and product category without rental-only filters', () => {
   const href = makeHomeSearchHash('roam', { ...initialHomeSearch, city: 'pattaya', region: 'jomtien', category: 'tickets', start: '2026-10-20' }, date)
-  assert.equal(href, '#/roam?city=pattaya&category=tickets')
+  assert.equal(href, '#/roam?city=pattaya&category=tickets&date=2026-10-20')
 })
 
 test('no dates remain optional for browsing but partial, expired or impossible dates fail', () => {
