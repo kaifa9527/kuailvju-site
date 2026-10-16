@@ -12,9 +12,12 @@ const experiences: Experience[] = [
 ]
 
 export function RoamPage({ lang, id, query }: { lang: Language; id?: string; query: string }) {
-  const selectedCity = new URLSearchParams(query).get('city') || 'all'
+  const searchParams = new URLSearchParams(query)
+  const selectedCity = searchParams.get('city') || 'all'
+  const selectedCategory = searchParams.get('category') || 'all'
+  const selectedDate = searchParams.get('date') || ''
   const [city, setCity] = useState(selectedCity)
-  const [date, setDate] = useState('')
+  const [date, setDate] = useState(selectedDate)
   const [guests, setGuests] = useState(1)
   const [receipt, setReceipt] = useState('')
   const item = experiences.find(entry => entry.id === id)
@@ -23,7 +26,7 @@ export function RoamPage({ lang, id, query }: { lang: Language; id?: string; que
   } : {
     eyebrow: '04 / ROAM', title: 'Stay longer. Roam deeper.', lead: 'Local experiences that bring you closer to each city.', city: 'Destination', all: 'All cities', explore: 'Explore experiences', example: 'Concept activity', duration: 'Approximate duration', details: 'View experience', back: 'Back to Roam', date: 'Experience date', guests: 'Participants', reserve: 'Submit browser-only test request', submitted: 'Test request saved in this browser', notice: 'Activities and flow are illustrative. There are no live dates, prices or payments yet. Content and providers require verification before launch. Do not enter personal details.', nearby: 'Find a place nearby', find: 'See short stays', required: 'Choose an experience date.',
   }
-  const filter = (event: React.FormEvent<HTMLFormElement>) => { event.preventDefault(); window.location.hash = city === 'all' ? '#/roam' : `#/roam?city=${city}` }
+  const filter = (event: React.FormEvent<HTMLFormElement>) => { event.preventDefault(); const p = new URLSearchParams(); if (city !== 'all') p.set('city', city); if (selectedCategory !== 'all') p.set('category', selectedCategory); if (selectedDate) p.set('date', selectedDate); window.location.hash = `#/roam${p.size ? `?${p}` : ''}` }
   const submit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const chosenDate = String(new FormData(event.currentTarget).get('date') || '')
@@ -35,10 +38,11 @@ export function RoamPage({ lang, id, query }: { lang: Language; id?: string; que
   }
   return <div className="roam-page page-shell page-top">
     <div className="roam-intro"><p className="eyebrow">{copy.eyebrow}</p><h1>{item ? item.title[lang] : copy.title}</h1><p>{item ? item.detail[lang] : copy.lead}</p></div>
+    {!item && selectedCategory !== 'all' && <p className="roam-notice" role="status">{lang === 'zh' ? `“${{ attractions: '景点', tickets: '门票', experiences: '当地体验' }[selectedCategory as 'attractions' | 'tickets' | 'experiences'] || selectedCategory}”产品仍待核验上架，当前没有可购买的真实商品。` : 'Selected products are pending supplier verification. No live tickets or experiences are available for purchase.'}</p>}
     {item ? <>
       <a className="text-link roam-back" href="#/roam">← {copy.back}</a>
       <div className="roam-detail"><div className="roam-detail-story"><div className="roam-symbol"><LineIcon name="compass" size={62}/><span>{item.theme[lang]}</span></div><div className="roam-details-list"><div><LineIcon name="location"/>{cities.find(cityItem => cityItem.id === item.city)?.[lang]}</div><div><LineIcon name="calendar"/>{copy.duration}：{item.duration[lang]}</div></div><p className="roam-notice">{copy.notice}</p><a className="text-link" href={`#/stays?city=${item.city}`}>{copy.find} ↗</a></div>
-      <form className="roam-request" onSubmit={submit}><span className="eyebrow">{copy.example} / TEST</span><label>{copy.date}<input name="date" type="date" value={date} min={new Date().toISOString().slice(0, 10)} onChange={event => setDate(event.target.value)} required/></label><label>{copy.guests}<select value={guests} onChange={event => setGuests(Number(event.target.value))}>{[1, 2, 3, 4, 5, 6].map(n => <option key={n} value={n}>{n}</option>)}</select></label><button className="button button-dark" type="submit">{copy.reserve} ↗</button>{receipt && <p className="roam-receipt" role="status">{receipt}</p>}</form></div>
-    </> : <><form className="roam-filter" onSubmit={filter}><label>{copy.city}<select value={city} onChange={event => setCity(event.target.value)}><option value="all">{copy.all}</option>{cities.map(entry => <option key={entry.id} value={entry.id}>{entry[lang]}</option>)}</select></label><button type="submit" className="button button-dark">{copy.explore} <LineIcon name="arrow" size={17}/></button></form><p className="roam-notice">{copy.notice}</p><div className="roam-grid">{experiences.filter(entry => selectedCity === 'all' || entry.city === selectedCity).map((entry, index) => <a className="roam-card" href={`#/roam/${entry.id}`} key={entry.id}><span className="roam-card-top"><LineIcon name="compass" size={34}/><small>{String(index + 1).padStart(2, '0')} / {copy.example}</small></span><span className="roam-card-city">{cities.find(cityItem => cityItem.id === entry.city)?.[lang]}</span><strong>{entry.title[lang]}</strong><span className="roam-card-bottom"><span>{entry.theme[lang]} · {entry.duration[lang]}</span><LineIcon name="arrow" size={20}/></span></a>)}</div></>}
+      <form className="roam-request" onSubmit={submit}><span className="eyebrow">{copy.example} / TEST</span><label>{copy.date}<input name="date" type="date" value={date} min={new Date().toLocaleDateString("en-CA")} onChange={event => setDate(event.target.value)} required/></label><label>{copy.guests}<select value={guests} onChange={event => setGuests(Number(event.target.value))}>{[1, 2, 3, 4, 5, 6].map(n => <option key={n} value={n}>{n}</option>)}</select></label><button className="button button-dark" type="submit">{copy.reserve} ↗</button>{receipt && <p className="roam-receipt" role="status">{receipt}</p>}</form></div>
+    </> : <><form className="roam-filter" onSubmit={filter}><label>{copy.city}<select value={city} onChange={event => setCity(event.target.value)}><option value="all">{copy.all}</option>{cities.map(entry => <option key={entry.id} value={entry.id}>{entry[lang]}</option>)}</select></label><button type="submit" className="button button-dark">{copy.explore} <LineIcon name="arrow" size={17}/></button></form><p className="roam-notice">{copy.notice}</p><div className="roam-grid">{experiences.filter(entry => (selectedCity === 'all' || entry.city === selectedCity) && (selectedCategory === 'all' || selectedCategory === 'experiences')).map((entry, index) => <a className="roam-card" href={`#/roam/${entry.id}`} key={entry.id}><span className="roam-card-top"><LineIcon name="compass" size={34}/><small>{String(index + 1).padStart(2, '0')} / {copy.example}</small></span><span className="roam-card-city">{cities.find(cityItem => cityItem.id === entry.city)?.[lang]}</span><strong>{entry.title[lang]}</strong><span className="roam-card-bottom"><span>{entry.theme[lang]} · {entry.duration[lang]}</span><LineIcon name="arrow" size={20}/></span></a>)}</div></>}
   </div>
 }
