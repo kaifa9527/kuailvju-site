@@ -13,8 +13,7 @@ import { ManagementEntry } from './ManagementEntry'
 import { RoamPage } from './RoamPage'
 import { ExchangeDetailPage } from './ExchangeExperience'
 import { demoAvailable, filterExchangeHomes, parseExchangeSearch, localDate } from './lib/exchangeDiscovery'
-import { handoverReady, leaseRange } from './lib/inventory'
-import { readTestRequests } from './lib/testWorkflow'
+import { leaseRange } from './lib/inventory'
 
 type Filters = { city: string; region: string; type: string; term: string; moveIn: string; guestsMin: string; bedroomsMin: string; areaMin: string }
 type Route = { page: string; id?: string; mode?: string; filters: Filters; query: string }
@@ -359,10 +358,9 @@ function HomePage({ lang, mode, query }: { lang: Language; mode: HomeMode; query
   const exchangeHomes = sortFeaturedListings(filterExchangeHomes(listings, exchangeSearch, localDate(), 'exchange'))
   const headings = { rentals: t.rent, stays: t.stays, exchange: t.exchange, roam: t.roam }
   const homes = mode === 'rentals' ? filteredLong : mode === 'stays' ? shortStayHomes : exchangeHomes
-  const validRoamCategory = params.get('category') === 'all' || !params.get('category') || params.get('category') === 'experiences'
   const empty = lang === 'zh' ? '暂无符合条件的演示结果，请尝试调整搜索条件。' : 'No demo results match. Try different filters.'
   return <section className="section page-shell home-property-section home-active-results" aria-label={headings[mode]}>
-    <div className="section-heading"><h2>{headings[mode]}</h2><span className="home-results-count">{mode === 'roam' ? (validRoamCategory ? '03' : '00') : String(homes.length).padStart(2, '0')}</span></div>
+    <div className="section-heading"><h2>{headings[mode]}</h2></div>
     {mode === 'roam'
       ? <RoamPage lang={lang} query={query} embedded hideSearch/>
       : homes.length
