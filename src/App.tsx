@@ -2,10 +2,11 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { ThemeSwitch } from './ThemeSwitch'
 import { HomeFinder } from './HomeFinder'
 import { previewListings } from './lib/homePresentation'
+import { findCategoryListings } from './lib/categoryDiscovery'
 import { parseSortMode, sortDiscoveryListings, supportsPriceSort } from './lib/recommendation'
 import type { HomeMode } from './lib/homeDiscovery'
 import { cities, listings, type Listing, type Term } from './data'
-import { canExchange, estimateLeaseMoveIn, filterListings, formatPrice, longRentalMonthlyPrice, sortFeaturedListings, type Language, type LeasePaymentOption } from './lib/catalog'
+import { canExchange, estimateLeaseMoveIn, formatPrice, longRentalMonthlyPrice, type Language, type LeasePaymentOption } from './lib/catalog'
 import { LineIcon, amenityIcon } from './components/LineIcon'
 import { NavGlyph } from './components/NavGlyph'
 import { ExchangeGallery } from './components/ExchangeGallery'
@@ -14,8 +15,6 @@ import { ManagementPage } from './ManagementPage'
 import { ManagementEntry } from './ManagementEntry'
 import { RoamPage } from './RoamPage'
 import { ExchangeDetailPage } from './ExchangeExperience'
-import { demoAvailable, filterExchangeHomes, parseExchangeSearch, localDate } from './lib/exchangeDiscovery'
-import { leaseRange } from './lib/inventory'
 
 type Filters = { city: string; region: string; type: string; term: string; moveIn: string; guestsMin: string; bedroomsMin: string; areaMin: string }
 type Route = { page: string; id?: string; mode?: string; filters: Filters; query: string }
@@ -294,15 +293,7 @@ const categoryHeading = (mode: HomeMode, lang: Language): { title: string; subti
 }
 
 function availableByMode(mode: CardContext, query = ''): Listing[] {
-  const params = new URLSearchParams(query)
-  if (mode === 'rentals') return sortFeaturedListings(filterListings(
-    listings.filter(item => item.management === 'leased'),
-    { city: params.get('city') || 'all', region: params.get('region') || 'all', term: params.get('term') || 'all' },
-  )).filter(item => !params.get('moveIn') || (params.get('term') === 'all' ? item.terms : [params.get('term')!]).some(term => {
-    const range = leaseRange(params.get('moveIn')!, term)
-    return Boolean(range && demoAvailable(item.id, range))
-  }))
-  return sortFeaturedListings(filterExchangeHomes(listings, parseExchangeSearch(params), localDate(), mode))
+  return findCategoryListings(mode, query, listings)
 }
 
 function ManagementCards({ lang }: { lang: Language }) {
@@ -352,7 +343,7 @@ function SiteOverview({ lang }: { lang: Language }) {
 function CategoryPage({ lang, mode, query }: { lang: Language; mode: HomeMode; query: string }) {
   const heading = categoryHeading(mode, lang)
   const [sortMode, setSortMode] = useState(() => parseSortMode(new URLSearchParams(query).get('sort')))
-  const candidates = mode === 'roam' ? [] : availableByMode(mode)
+  const candidates = mode === 'roam' ? [] : availableByMode(mode, query)
   const priceComparable = supportsPriceSort(candidates)
   const sorted = sortDiscoveryListings(candidates, sortMode)
   const activeSort = !priceComparable && (sortMode === 'price-asc' || sortMode === 'price-desc') ? 'recommended' : sortMode
