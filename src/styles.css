@@ -1148,10 +1148,40 @@ h1, h2, h3 { min-width: 0; overflow-wrap: anywhere; font-weight: 500; line-heigh
   border-radius: 17px;
 }
 .home-affixed .home-discovery-field {
+  position: relative;
   min-width: 0;
   gap: 3px;
   margin-block: 8px;
   padding-inline: 9px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background-color 200ms ease, border-color 180ms ease, box-shadow 200ms ease, transform 200ms ease;
+}
+/* Keyboard focus remains discoverable without lingering mouse selection outlines. */
+.home-affixed .home-discovery-field:focus-within {
+  border-right-color: transparent;
+  background: var(--color-cream);
+}
+.home-affixed .home-discovery-field:has(+ .home-discovery-field:focus-within) {
+  border-right-color: transparent;
+}
+@media (hover: hover) and (pointer: fine) {
+  .home-affixed .home-discovery-field:hover {
+    border-right-color: transparent;
+    background: var(--color-cream);
+    box-shadow: 0 5px 14px var(--color-soft-shadow);
+    transform: translateY(-1px);
+  }
+  .home-affixed .home-discovery-field:hover > span {
+    color: var(--color-accent);
+  }
+  .home-affixed .home-discovery-field:has(+ .home-discovery-field:hover) {
+    border-right-color: transparent;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-affixed .home-discovery-field { transition: none; }
+  .home-affixed .home-discovery-field:hover { transform: none; }
 }
 .home-affixed .home-discovery-field:first-child {
   padding-left: 19px;
