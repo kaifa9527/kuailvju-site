@@ -33,6 +33,10 @@ export function makeHomeSearchHash(mode: HomeMode, search: HomeSearch, today: st
     if (search.term !== 'all') params.set('term', search.term)
   } else if (mode === 'roam') {
     if (search.category !== 'all') params.set('category', search.category)
+    if (search.start) {
+      if (!validDay(search.start) || search.start < today) throw new Error('invalid-date')
+      params.set('date', search.start)
+    }
   } else {
     if (search.start || search.end) {
       if (!validDay(search.start) || !validDay(search.end) || search.start < today || search.end <= search.start) {
