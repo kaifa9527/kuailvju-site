@@ -1366,3 +1366,22 @@ h1, h2, h3 { min-width: 0; overflow-wrap: anywhere; font-weight: 500; line-heigh
   .home-management-section .section-heading h2 { font-size: 25px; }
   .listing-content .listing-service-caption { margin: -2px 0 9px; font-size: 13px; }
 }
+
+/* Unified discovery: shared finder stays fixed; only the selected journey's content changes. */
+.home-active-results {
+  padding-top: 18px;
+  min-height: 42vh;
+}
+.home-active-results .section-heading { margin-bottom: 14px; }
+.home-active-results .roam-page-inline { padding: 0; margin: 0; max-width: none; }
+.home-active-results .roam-page-inline .roam-notice { margin-block: 0 15px; }
+.home-active-results .roam-page-inline .roam-grid { margin-top: 0; }
+.home-discovery-results-note {
+  margin: 13px 0 0;
+  color: var(--color-muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+@media (max-width: 760px) {
+  .home-active-results { padding-top: 20px; }
+}
