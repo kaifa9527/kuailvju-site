@@ -11,7 +11,7 @@ import { ExchangeRequestPage, RentalRequestPage, TestInbox } from './TestFlows'
 import { ManagementPage } from './ManagementPage'
 import { ManagementEntry } from './ManagementEntry'
 import { RoamPage } from './RoamPage'
-import { ExchangeCatalogPage, ExchangeDetailPage } from './ExchangeExperience'
+import { ExchangeDetailPage } from './ExchangeExperience'
 import { demoAvailable, filterExchangeHomes, parseExchangeSearch, localDate } from './lib/exchangeDiscovery'
 import { handoverReady, leaseRange } from './lib/inventory'
 import { readTestRequests } from './lib/testWorkflow'
@@ -175,7 +175,7 @@ function Header({ lang, setLang, route, mode, onModeChange, onSearch }: {
   mode: HomeMode; onModeChange: (mode: HomeMode) => void; onSearch: (mode: HomeMode, query: string) => void
 }) {
   const t = words[lang]
-  const isHome = route.page === 'home'
+  const isHome = route.page === 'home' || (['rentals', 'stays', 'exchange', 'roam'].includes(route.page) && !route.id)
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(() => window.scrollY > 180)
   const [searchOpen, setSearchOpen] = useState(false)
@@ -246,7 +246,7 @@ function Header({ lang, setLang, route, mode, onModeChange, onSearch }: {
             aria-current={isHome ? undefined : route.page === item.key ? 'page' : undefined}
             className={(isHome ? mode === item.key : route.page === item.key) ? 'is-current' : ''}
             onClick={event => {
-              if (isHome) { event.preventDefault(); onModeChange(item.key) }
+              if (isHome) { event.preventDefault(); onModeChange(item.key); if (route.page !== 'home') window.location.hash = '#/' }
               setOpen(false)
             }}><NavGlyph name={item.key} size={22}/><span>{item.label}</span></a>)}
           <a href="#/management" className={'nav-owner-service' + (route.page === 'management' ? ' is-current' : '')}
@@ -344,15 +344,6 @@ function ListingCard({ listing, lang, context = 'rentals', query = '', pendingIn
   </a>
 }
 
-function ManagementCards({ lang }: { lang: Language }) {
-  const t = words[lang]
-  return <div className="management-grid">
-    <a className="management-card" href="#/management?service=leasing"><span>01 / SERVICE</span><h3>{t.lease}</h3><p>{t.leaseBlurb}</p><b>{t.more} ↗</b></a>
-    <a className="management-card" href="#/management?service=operation"><span>02 / SERVICE</span><h3>{t.operation}</h3><p>{t.operationBlurb}</p><b>{t.more} ↗</b></a>
-    <a className="management-card" href="#/management?service=care"><span>03 / SERVICE</span><h3>{t.care}</h3><p>{t.careBlurb}</p><b>{t.more} ↗</b></a>
-  </div>
-}
-
 function HomePage({ lang, mode, query }: { lang: Language; mode: HomeMode; query: string }) {
   const t = words[lang]
   const params = new URLSearchParams(query)
@@ -382,17 +373,6 @@ function HomePage({ lang, mode, query }: { lang: Language; mode: HomeMode; query
         : <div className="empty-state"><p>{empty}</p></div>}
     <p className="home-discovery-results-note">{lang === 'zh' ? '仅供站内演示，真实可订房态、价格及档期以核验为准。' : 'Preview inventory only; real pricing and availability require verification.'}</p>
   </section>
-}
-
-function RentalsPage({ lang, filters }: { lang: Language; filters: Filters }) {
-  const t = words[lang]
-  const requests = readTestRequests()
-  const longHomes = sortFeaturedListings(listings.filter(item => item.management === 'leased'))
-  const found = filterListings(longHomes, filters).filter(item => !filters.moveIn || (filters.term === 'all' ? item.terms : [filters.term]).some(term => { const range = leaseRange(filters.moveIn, term); return range && demoAvailable(item.id, range) }))
-  const detailQuery = new URLSearchParams()
-  if (filters.moveIn) detailQuery.set('moveIn', filters.moveIn)
-  if (filters.term !== 'all') detailQuery.set('term', filters.term)
-  return <div className="page-shell page-top exchange-discovery rentals-catalog-page"><div className="page-title"><p className="eyebrow">01 / LONG STAYS</p><h1>{t.rent}</h1><p>{lang === 'zh' ? '半年或一年，安心长住。半年月租按一年基础月租上浮 10%。' : 'Stay for six months or a year. Six-month rent adds 10% to the annual base monthly rate.'}</p></div><SearchPanel lang={lang} initial={filters}/><div className="results-bar"><div><h2>{t.results}</h2><span>{String(found.length).padStart(2, '0')}</span></div><span className="exchange-sort-note">{t.sort}</span></div><p className="sample-inventory">{t.sampleInventory} {filters.moveIn ? (lang === 'zh' ? '以下档期为本机测试库存推算，非正式可订承诺。' : 'Dates are estimated from this browser’s test inventory, not a live booking promise.') : (lang === 'zh' ? '未指定起租日，具体可交付时间待核验。' : 'Select a move-in date to check the test calendar.')}</p>{found.length ? <div className="listing-grid">{found.map(item => <ListingCard key={item.id} listing={item} lang={lang} query={detailQuery.toString()} pendingInspection={Boolean(filters.moveIn && !handoverReady(item.id, filters.moveIn, requests))}/>)}</div> : <div className="empty-state"><h3>{t.noResult}</h3><p>{t.noResultSub}</p><a className="button button-dark" href="#/rentals">{t.reset} ↗</a></div>}</div>
 }
 
 function ListingBookingCard({ listing, lang, onAction, query = '' }: { listing: Listing; lang: Language; onAction: (message: string) => void; query?: string }) {
@@ -461,13 +441,13 @@ export default function App() {
   const setLang = (next: Language) => { setLangState(next); localStorage.setItem('kuailvju-lang', next) }
   const t = words[lang]
   const content = useMemo(() => {
-    if (route.page === 'rentals') return <HomePage lang={lang} mode="rentals" query={route.query}/>
+    if (route.page === 'rentals') return <HomePage lang={lang} mode="rentals" query={homeQueries.rentals || route.query}/>
     if (route.page === 'listing') return listings.find(item => item.id === route.id)?.management === 'operated' ? <ExchangeDetailPage lang={lang} id={route.id} query={route.query} kind="stays"/> : <ListingPage lang={lang} id={route.id} query={route.query} onAction={setMessage}/>
     if (route.page === 'stays' && route.id) return <ExchangeDetailPage lang={lang} id={route.id} query={route.query} kind="stays"/>
-    if (route.page === 'stays') return <HomePage lang={lang} mode="stays" query={route.query}/>
+    if (route.page === 'stays') return <HomePage lang={lang} mode="stays" query={homeQueries.stays || route.query}/>
     if (route.page === 'exchange' && route.id) return <ExchangeDetailPage lang={lang} id={route.id} query={route.query} kind="exchange"/>
-    if (route.page === 'exchange') return <HomePage lang={lang} mode="exchange" query={route.query}/>
-    if (route.page === 'roam') return route.id ? <RoamPage lang={lang} id={route.id} query={route.query}/> : <HomePage lang={lang} mode="roam" query={route.query}/>
+    if (route.page === 'exchange') return <HomePage lang={lang} mode="exchange" query={homeQueries.exchange || route.query}/>
+    if (route.page === 'roam') return route.id ? <RoamPage lang={lang} id={route.id} query={route.query}/> : <HomePage lang={lang} mode="roam" query={homeQueries.roam || route.query}/>
     if (route.page === 'management' && !route.mode) return <ManagementEntry lang={lang} suggested={new URLSearchParams(route.query).get('service') || undefined}/>
     if (route.page === 'management') return <ManagementPage lang={lang} mode={route.mode}/>
     if (route.page === 'request' && route.mode === 'rental') return <RentalRequestPage lang={lang} listingId={route.id} query={route.query}/>
