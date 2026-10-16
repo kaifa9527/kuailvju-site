@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { cities } from './data'
 import type { Language } from './lib/catalog'
 import { localDate } from './lib/exchangeDiscovery'
@@ -31,6 +31,17 @@ export function HomeFinder({ lang, mode, onSummaryChange }: { lang: Language; mo
     exchange: { ...initialHomeSearch }, roam: { ...initialHomeSearch },
   }))
   const [error, setError] = useState('')
+  // Pointer users should not see an orphaned focus ring after choosing an option.
+  // Preserve keyboard focus, which remains necessary for accessible tab navigation.
+  const pointerSelection = useRef(false)
+  const releasePointerFocus = (target: EventTarget) => {
+    if (!pointerSelection.current) return
+    if (target instanceof HTMLSelectElement || (target instanceof HTMLInputElement && target.type === 'date')) {
+      window.requestAnimationFrame(() => {
+        if (document.activeElement === target) target.blur()
+      })
+    }
+  }
   const draft = draftByMode[mode]
   const startLabel = mode === 'rentals' ? t.moveIn : mode === 'roam' ? t.visit : t.start
   const selectedCity = cities.find(entry => entry.id === draft.city)
@@ -48,7 +59,10 @@ export function HomeFinder({ lang, mode, onSummaryChange }: { lang: Language; mo
     catch { setError(t.invalid) }
   }
   return <section className="home-discovery page-shell" aria-label={t.search}>
-    <form className="home-discovery-form" onSubmit={submit} role="search">
+    <form className="home-discovery-form" onSubmit={submit} role="search"
+      onPointerDownCapture={() => { pointerSelection.current = true }}
+      onKeyDownCapture={() => { pointerSelection.current = false }}
+      onChangeCapture={event => releasePointerFocus(event.target)}>
       <label className="home-discovery-field home-discovery-destination">
         <span>{t.city}</span>
         <select value={draft.city} onChange={event => update({ city: event.target.value, region: 'all' })} aria-label={t.city}>
