@@ -1133,3 +1133,19 @@ h1, h2, h3 { min-width: 0; overflow-wrap: anywhere; font-weight: 500; line-heigh
 @media (prefers-reduced-motion: reduce) {
   .home-affixed *, .home-affixed *::before, .home-affixed *::after { transition-duration: .01ms !important; }
 }
+
+
+/* Refined finder only: the five-entry navigation spacing remains unchanged. */
+.home-affixed .home-discovery-form {
+  width: min(100%, 900px);
+  max-width: 900px;
+  min-height: 72px;
+  border-radius: 20px;
+}
+.home-affixed .home-discovery-submit { border-radius: 13px; }
+.home-affixed .home-discovery-note,
+.home-affixed .home-discovery .form-error { max-width: 900px; }
+@media (max-width: 760px) {
+  .home-affixed .home-discovery-form { width: 100%; border-radius: 17px; }
+  .home-affixed .home-discovery-submit { border-radius: 12px; }
+}

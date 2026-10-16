@@ -5,6 +5,7 @@ import type { HomeMode } from './lib/homeDiscovery'
 import { cities, listings, type Listing, type Term } from './data'
 import { canExchange, estimateLeaseMoveIn, filterListings, formatPrice, longRentalMonthlyPrice, sortFeaturedListings, type Language, type LeasePaymentOption } from './lib/catalog'
 import { LineIcon, amenityIcon } from './components/LineIcon'
+import { NavGlyph } from './components/NavGlyph'
 import { ExchangeGallery } from './components/ExchangeGallery'
 import { ExchangeRequestPage, RentalRequestPage, TestInbox } from './TestFlows'
 import { ManagementPage } from './ManagementPage'
@@ -188,10 +189,10 @@ function Header({ lang, setLang, route, mode, onModeChange }: {
   const expanded = !scrolled || searchOpen
   const modeLabel = mode === 'rentals' ? t.navRent : mode === 'stays' ? t.navStays : mode === 'exchange' ? t.navExchange : t.roam
   const nav = [
-    { href: '#/rentals', label: t.navRent, key: 'rentals' as const, icon: 'window' as const },
-    { href: '#/stays', label: t.navStays, key: 'stays' as const, icon: 'bed' as const },
-    { href: '#/exchange', label: t.navExchange, key: 'exchange' as const, icon: 'share' as const },
-    { href: '#/roam', label: t.roam, key: 'roam' as const, icon: 'compass' as const },
+    { href: '#/rentals', label: t.navRent, key: 'rentals' as const },
+    { href: '#/stays', label: t.navStays, key: 'stays' as const },
+    { href: '#/exchange', label: t.navExchange, key: 'exchange' as const },
+    { href: '#/roam', label: t.roam, key: 'roam' as const },
   ]
 
   useEffect(() => {
@@ -247,10 +248,10 @@ function Header({ lang, setLang, route, mode, onModeChange }: {
             onClick={event => {
               if (isHome) { event.preventDefault(); onModeChange(item.key) }
               setOpen(false)
-            }}><LineIcon name={item.icon} size={19}/><span>{item.label}</span></a>)}
+            }}><NavGlyph name={item.key} size={22}/><span>{item.label}</span></a>)}
           <a href="#/management" className={'nav-owner-service' + (route.page === 'management' ? ' is-current' : '')}
             aria-label={t.manage} title={t.manage} onClick={() => setOpen(false)}>
-            <LineIcon name="shield" size={18}/><span>{lang === 'zh' ? '委托' : 'Owners'}</span>
+            <NavGlyph name="management" size={22}/><span>{lang === 'zh' ? '委托' : 'Owners'}</span>
           </a>
         </nav>
         {isHome && <button type="button" className="home-compact-search" aria-controls="home-search-panel"
