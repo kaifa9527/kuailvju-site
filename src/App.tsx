@@ -472,7 +472,8 @@ export default function App() {
       </div>
       <div className="footer-bottom"><span>{t.footer}</span><p>{t.legal}</p><span>© {new Date().getFullYear()} KUAI LÜ JU</span></div>
     </div></footer>
-    {accountOpen && <AccountDialog lang={lang} onClose={() => setAccountOpen(false)} previewMember={previewMember} onPreviewEnter={() => { try { sessionStorage.setItem('kuailvju-preview-member', '1') } catch { /* session-only preview */ } setPreviewMember(true); setAccountOpen(false) }} onPreviewExit={() => { try { sessionStorage.removeItem('kuailvju-preview-member') } catch { /* session-only preview */ } setPreviewMember(false); setAccountOpen(false); if (route.page === 'management') window.location.hash = '#/' }}/>}\n    {message && <div className="modal-backdrop" onClick={() => setMessage(null)}><div className="modal" role="dialog" aria-modal="true" aria-label={t.preview} onClick={e => e.stopPropagation()}>
+    {accountOpen && <AccountDialog lang={lang} onClose={() => setAccountOpen(false)} previewMember={previewMember} onPreviewEnter={() => { try { sessionStorage.setItem('kuailvju-preview-member', '1') } catch { /* session-only preview */ } setPreviewMember(true); setAccountOpen(false) }} onPreviewExit={() => { try { sessionStorage.removeItem('kuailvju-preview-member') } catch { /* session-only preview */ } setPreviewMember(false); setAccountOpen(false); if (route.page === 'management') window.location.hash = '#/' }}/>}
+    {message && <div className="modal-backdrop" onClick={() => setMessage(null)}><div className="modal" role="dialog" aria-modal="true" aria-label={t.preview} onClick={e => e.stopPropagation()}>
       <button className="modal-close" onClick={() => setMessage(null)} aria-label={t.close}>×</button><span className="eyebrow">PREVIEW NOTICE</span>
       <h2>{t.preview}</h2><p>{message}</p><button className="button button-dark" onClick={() => setMessage(null)}>{t.understood} ↗</button>
     </div></div>}
