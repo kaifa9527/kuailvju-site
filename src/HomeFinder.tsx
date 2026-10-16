@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { cities } from './data'
 import type { Language } from './lib/catalog'
 import { localDate } from './lib/exchangeDiscovery'
@@ -24,7 +24,7 @@ const translations = {
   },
 }
 
-export function HomeFinder({ lang, mode }: { lang: Language; mode: HomeMode }) {
+export function HomeFinder({ lang, mode, onSummaryChange }: { lang: Language; mode: HomeMode; onSummaryChange?: (summary: [string, string, string]) => void }) {
   const t = translations[lang]
   const [draftByMode, setDraftByMode] = useState<Record<HomeMode, HomeSearch>>(() => ({
     rentals: { ...initialHomeSearch }, stays: { ...initialHomeSearch },
@@ -33,6 +33,10 @@ export function HomeFinder({ lang, mode }: { lang: Language; mode: HomeMode }) {
   const [error, setError] = useState('')
   const draft = draftByMode[mode]
   const selectedCity = cities.find(entry => entry.id === draft.city)
+  const destination = selectedCity?.[lang] || (lang === 'zh' ? '任何地方' : 'Anywhere')
+  const dateSummary = draft.start ? (draft.end ? `${draft.start} — ${draft.end}` : draft.start) : (lang === 'zh' ? '任意时间' : 'Any date')
+  const optionSummary = mode === 'rentals' ? (draft.term === 'halfYear' ? t.halfYear : draft.term === 'year' ? t.year : t.anyTerm) : mode === 'roam' ? ({ all: t.all, attractions: t.attractions, tickets: t.tickets, experiences: t.experiences }[draft.category]) : `${draft.guests} ${t.guests}`
+  useEffect(() => { onSummaryChange?.([destination, dateSummary, optionSummary]) }, [onSummaryChange, destination, dateSummary, optionSummary])
   const update = (change: Partial<HomeSearch>) => {
     setError('')
     setDraftByMode(current => ({ ...current, [mode]: { ...current[mode], ...change } }))
