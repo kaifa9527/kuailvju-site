@@ -1385,3 +1385,49 @@ h1, h2, h3 { min-width: 0; overflow-wrap: anywhere; font-weight: 500; line-heigh
 @media (max-width: 760px) {
   .home-active-results { padding-top: 20px; }
 }
+
+/* Editorial four-column catalog shared by homepage previews and city result rows. */
+.home-overview-section { padding-block: 25px 30px; }
+.home-overview-heading { align-items: baseline; margin-bottom: 14px; }
+.home-heading-copy { display: flex; align-items: baseline; flex-wrap: wrap; gap: 10px 18px; }
+.home-heading-copy h2 { margin: 0; font-size: clamp(24px, 2vw, 32px); letter-spacing: -.035em; }
+.home-heading-copy > span { color: var(--color-muted); font-size: 13px; font-weight: 450; }
+.home-four-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 18px; }
+.home-four-grid .listing-card { display: flex; flex-direction: column; min-height: 0; overflow: hidden; border-radius: 14px; }
+.home-four-grid .listing-image, .home-property-section .home-four-grid .listing-image { aspect-ratio: 4/3; min-height: 0; height: auto; }
+.home-four-grid .listing-image img { width: 100%; height: 100%; object-fit: cover; }
+.home-four-grid .listing-content, .home-property-section .home-four-grid .listing-content { padding: 15px 16px 17px; }
+.home-four-grid .listing-content h3 { font-size: clamp(17px,1.35vw,22px); line-height: 1.35; margin-bottom: 7px; }
+.home-four-grid .listing-eyebrow { margin-bottom: 8px; }
+.home-four-grid .listing-content p { margin: 0 0 13px; font-size: 12px; }
+.home-four-grid .listing-terms { margin: 0 0 13px; }
+.home-four-grid .listing-bottom { margin-top: auto; padding-top: 12px; }
+.home-four-grid .listing-bottom strong { font-size: clamp(16px,1.35vw,21px); }
+.home-category-view { padding-top: 22px; padding-bottom: 50px; }
+.city-listing-section { margin: 22px 0 30px; }
+.city-listing-heading { display: flex; align-items: baseline; gap: 12px; padding-bottom: 11px; margin-bottom: 16px; border-bottom: var(--rule-light); }
+.city-listing-heading h3 { margin: 0; font-size: 20px; }
+.city-listing-heading span { color: var(--color-muted); font-size: 12px; }
+.home-inline-empty { color: var(--color-muted); font-size: 13px; }
+.home-owner-overview .management-card { min-height: 190px; }
+.home-category-view .roam-page-inline, .home-overview-section .roam-page-inline { padding: 0; margin: 0; max-width: none; }
+.home-overview-section .roam-grid, .home-category-view .roam-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 18px; margin: 0; }
+@media (max-width: 1080px) {
+  .home-four-grid, .home-overview-section .roam-grid, .home-category-view .roam-grid { grid-template-columns: repeat(3,minmax(0,1fr)); }
+}
+@media (max-width: 760px) {
+  .home-overview-section { padding-block: 20px 25px; }
+  .home-overview-heading { align-items: flex-start; gap: 12px; margin-bottom: 12px; }
+  .home-heading-copy { gap: 4px 9px; }
+  .home-heading-copy h2 { font-size: 24px; }
+  .home-heading-copy > span { font-size: 12px; }
+  .home-four-grid, .home-overview-section .roam-grid, .home-category-view .roam-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 11px; grid-auto-flow: row; grid-auto-columns: auto; overflow: visible; margin: 0; padding: 0; }
+  .home-four-grid .listing-content { padding: 11px; }
+  .home-four-grid .listing-content h3 { font-size: 16px; }
+  .home-four-grid .listing-content p { font-size: 11px; }
+  .home-four-grid .listing-bottom strong { font-size: 16px; }
+  .home-category-view { padding-top: 18px; }
+}
+@media (max-width: 390px) {
+  .home-four-grid, .home-overview-section .roam-grid, .home-category-view .roam-grid { grid-template-columns: 1fr; }
+}
