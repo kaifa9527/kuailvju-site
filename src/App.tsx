@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { ThemeSwitch } from './ThemeSwitch'
 import { HomeFinder } from './HomeFinder'
+import { groupListingsByCity, previewListings } from './lib/homePresentation'
 import type { HomeMode } from './lib/homeDiscovery'
 import { cities, listings, type Listing, type Term } from './data'
 import { canExchange, estimateLeaseMoveIn, filterListings, formatPrice, longRentalMonthlyPrice, sortFeaturedListings, type Language, type LeasePaymentOption } from './lib/catalog'
@@ -155,9 +156,9 @@ function parseRoute(): Route {
   }
 }
 
-function Header({ lang, setLang, route, mode, onModeChange, onSearch }: {
+function Header({ lang, setLang, route, mode, onSearch }: {
   lang: Language; setLang: (v: Language) => void; route: Route;
-  mode: HomeMode; onModeChange: (mode: HomeMode) => void; onSearch: (mode: HomeMode, query: string) => void
+  mode: HomeMode; onSearch: (mode: HomeMode, query: string) => void
 }) {
   const t = words[lang]
   const isHome = route.page === 'home' || (['rentals', 'stays', 'exchange', 'roam'].includes(route.page) && !route.id)
@@ -223,15 +224,14 @@ function Header({ lang, setLang, route, mode, onModeChange, onSearch }: {
     {isHome && <div className="home-header-space" style={{ height: homeHeight }} aria-hidden="true"/>}
     <header ref={headerRef} className={'site-header clear-site-header' + (isHome ? ' home-affixed' + (expanded ? ' home-expanded' : ' home-collapsed') : '')}>
       <div className="header-inner">
-        <a className="brand" href="#/" aria-label={lang === 'zh' ? '快旅居首页' : 'Kuai Lü Ju home'}>
+        <a className="brand" href="#/" onClick={() => { if (route.page === 'home') window.scrollTo({ top: 0, behavior: 'smooth' }) }} aria-label={lang === 'zh' ? '快旅居首页' : 'Kuai Lü Ju home'}>
           <span className="brand-mark">快</span><span className="brand-name">快旅居<span>KUAI LÜ JU</span></span>
         </a>
         <nav className="primary-nav clear-primary-nav" aria-label={t.menu}>
           {nav.map(item => <a key={item.key} href={item.href}
-            aria-current={isHome ? undefined : route.page === item.key ? 'page' : undefined}
-            className={(isHome ? mode === item.key : route.page === item.key) ? 'is-current' : ''}
-            onClick={event => {
-              if (isHome) { event.preventDefault(); onModeChange(item.key); if (route.page !== 'home') window.location.hash = '#/' }
+            aria-current={route.page === item.key ? 'page' : undefined}
+            className={route.page === item.key ? 'is-current' : ''}
+            onClick={() => {
               setOpen(false)
             }}><NavGlyph name={item.key} size={22}/><span>{item.label}</span></a>)}
           <a href="#/management" className={'nav-owner-service' + (route.page === 'management' ? ' is-current' : '')}
@@ -276,34 +276,98 @@ function ListingCard({ listing, lang, context = 'rentals', query = '', pendingIn
   </a>
 }
 
-function HomePage({ lang, mode, query }: { lang: Language; mode: HomeMode; query: string }) {
-  const t = words[lang]
+type CardContext = 'rentals' | 'stays' | 'exchange'
+const categoryHeading = (mode: HomeMode, lang: Language): { title: string; subtitle: string } => {
+  if (lang === 'zh') return {
+    rentals: { title: '长租房', subtitle: '可选半年或一年租期' },
+    stays: { title: '短租房', subtitle: '居住天数灵活任选' },
+    exchange: { title: '换旅居', subtitle: '一房托管，旅居全球' },
+    roam: { title: '漫游', subtitle: '平价景点、门票一触即发' },
+  }[mode]
+  return {
+    rentals: { title: 'Long stays', subtitle: 'Choose a six- or twelve-month lease' },
+    stays: { title: 'Short stays', subtitle: 'Flexible stays by the night' },
+    exchange: { title: 'Stay exchange', subtitle: 'One managed home, explore more places' },
+    roam: { title: 'Roam', subtitle: 'Discover attractions, tickets and local experiences' },
+  }[mode]
+}
+
+function availableByMode(mode: CardContext, query = ''): Listing[] {
   const params = new URLSearchParams(query)
-  const filteredLong = sortFeaturedListings(filterListings(listings.filter(item => item.management === 'leased'), {
-    city: params.get('city') || 'all', region: params.get('region') || 'all',
-    term: params.get('term') || 'all',
-  })).filter(item => !params.get('moveIn') || (params.get('term') === 'all' ? item.terms : [params.get('term')!]).some(term => {
+  if (mode === 'rentals') return sortFeaturedListings(filterListings(
+    listings.filter(item => item.management === 'leased'),
+    { city: params.get('city') || 'all', region: params.get('region') || 'all', term: params.get('term') || 'all' },
+  )).filter(item => !params.get('moveIn') || (params.get('term') === 'all' ? item.terms : [params.get('term')!]).some(term => {
     const range = leaseRange(params.get('moveIn')!, term)
     return Boolean(range && demoAvailable(item.id, range))
   }))
-  const exchangeSearch = parseExchangeSearch(params)
-  const shortStayHomes = sortFeaturedListings(filterExchangeHomes(listings, exchangeSearch, localDate(), 'stays'))
-  const exchangeHomes = sortFeaturedListings(filterExchangeHomes(listings, exchangeSearch, localDate(), 'exchange'))
-  const headings = { rentals: t.rent, stays: t.stays, exchange: t.exchange, roam: t.roam }
-  const homes = mode === 'rentals' ? filteredLong : mode === 'stays' ? shortStayHomes : exchangeHomes
-  const empty = lang === 'zh' ? '暂无符合条件的演示结果，请尝试调整搜索条件。' : 'No demo results match. Try different filters.'
-  return <section className="section page-shell home-property-section home-active-results" aria-label={headings[mode]}>
-    <div className="section-heading"><h2>{headings[mode]}</h2></div>
+  return sortFeaturedListings(filterExchangeHomes(listings, parseExchangeSearch(params), localDate(), mode))
+}
+
+function ManagementCards({ lang }: { lang: Language }) {
+  const t = words[lang]
+  return <div className="management-grid">
+    <a className="management-card" href="#/management?service=leasing"><span>01 / SERVICE</span><h3>{t.lease}</h3><p>{t.leaseBlurb}</p><b>{t.more} ↗</b></a>
+    <a className="management-card" href="#/management?service=operation"><span>02 / SERVICE</span><h3>{t.operation}</h3><p>{t.operationBlurb}</p><b>{t.more} ↗</b></a>
+    <a className="management-card" href="#/management?service=care"><span>03 / SERVICE</span><h3>{t.care}</h3><p>{t.careBlurb}</p><b>{t.more} ↗</b></a>
+  </div>
+}
+
+function SiteOverview({ lang }: { lang: Language }) {
+  const t = words[lang]
+  const sections: CardContext[] = ['rentals', 'stays', 'exchange']
+  return <div className="home-overview">
+    {sections.map(mode => {
+      const heading = categoryHeading(mode, lang)
+      const items = previewListings(availableByMode(mode))
+      return <section className="section page-shell home-overview-section" key={mode} aria-label={heading.title}>
+        <div className="section-heading home-overview-heading">
+          <div className="home-heading-copy"><h2>{heading.title}</h2><span>{heading.subtitle}</span></div>
+          <a className="text-link" href={`#/${mode}`}>{t.more} <span aria-hidden="true">↗</span></a>
+        </div>
+        {items.length
+          ? <div className="listing-grid home-four-grid">{items.map(item => <ListingCard key={item.id} listing={item} lang={lang} context={mode}/>)}</div>
+          : <p className="home-inline-empty">{lang === 'zh' ? '该分类暂无演示房源。' : 'No demo homes in this category yet.'}</p>}
+      </section>
+    })}
+    <section className="section page-shell home-overview-section" aria-label={categoryHeading('roam', lang).title}>
+      <div className="section-heading home-overview-heading">
+        <div className="home-heading-copy"><h2>{categoryHeading('roam', lang).title}</h2><span>{categoryHeading('roam', lang).subtitle}</span></div>
+        <a className="text-link" href="#/roam">{t.more} <span aria-hidden="true">↗</span></a>
+      </div>
+      <RoamPage lang={lang} query="" embedded hideSearch previewLimit={8}/>
+    </section>
+    <section className="section page-shell home-overview-section home-owner-overview" aria-label={lang === 'zh' ? '房源委托' : 'Property management'}>
+      <div className="section-heading home-overview-heading">
+        <div className="home-heading-copy"><h2>{lang === 'zh' ? '房源委托' : 'Property management'}</h2></div>
+        <a className="text-link" href="#/management">{t.more} <span aria-hidden="true">↗</span></a>
+      </div>
+      <ManagementCards lang={lang}/>
+    </section>
+    <p className="home-discovery-results-note page-shell">{lang === 'zh' ? '当前为站内演示：房源、价格、景点及档期均待核验，暂不开放真实预订。' : 'Demonstration only: homes, rates, attractions and dates require verification; no live bookings.'}</p>
+  </div>
+}
+
+function CategoryPage({ lang, mode, query }: { lang: Language; mode: HomeMode; query: string }) {
+  const heading = categoryHeading(mode, lang)
+  const listingsByCity = mode === 'roam' ? [] : groupListingsByCity(availableByMode(mode), cities)
+  const noResults = lang === 'zh' ? '暂无符合条件的演示房源，请调整上方搜索条件。' : 'No demo homes match; try changing your search.'
+  return <div className="home-category-view page-shell">
+    <div className="section-heading home-overview-heading">
+      <div className="home-heading-copy"><h2>{heading.title}</h2><span>{heading.subtitle}</span></div>
+      <a className="text-link" href="#/">{lang === 'zh' ? '返回首页' : 'Home'} <span aria-hidden="true">↗</span></a>
+    </div>
     {mode === 'roam'
-      ? <RoamPage lang={lang} query={query} embedded hideSearch/>
-      : homes.length
-        ? <div className="listing-grid home-listing-grid">
-            {homes.map((listing, index) => <ListingCard key={listing.id} listing={listing} lang={lang}
-              context={mode} serviceCaption={mode === 'stays' && index === 0}/>)}
-          </div>
-        : <div className="empty-state"><p>{empty}</p></div>}
-    <p className="home-discovery-results-note">{lang === 'zh' ? '仅供站内演示，真实可订房态、价格及档期以核验为准。' : 'Preview inventory only; real pricing and availability require verification.'}</p>
-  </section>
+      ? <RoamPage lang={lang} query={query} embedded hideSearch groupCities/>
+      : listingsByCity.length ? listingsByCity.map(group => {
+          const city = cities.find(item => item.id === group.city)!
+          return <section className="city-listing-section" key={group.city} aria-label={city[lang]}>
+            <div className="city-listing-heading"><h3>{city[lang]}</h3><span>{group.listings.length} {lang === 'zh' ? '套房源' : 'homes'}</span></div>
+            <div className="listing-grid home-four-grid">{group.listings.map(item => <ListingCard key={item.id} listing={item} lang={lang} context={mode}/>)}</div>
+          </section>
+        }) : <div className="empty-state"><p>{noResults}</p></div>}
+    <p className="home-discovery-results-note">{lang === 'zh' ? '演示房源、价格和档期不是可预订承诺，实际信息仍需核验。' : 'Demo inventory and dates are not live bookings. Verification is required.'}</p>
+  </div>
 }
 
 function ListingBookingCard({ listing, lang, onAction, query = '' }: { listing: Listing; lang: Language; onAction: (message: string) => void; query?: string }) {
@@ -356,12 +420,13 @@ function ListingPage({ lang, id, onAction, query = '' }: { lang: Language; id?: 
 
 export default function App() {
   const [route, setRoute] = useState<Route>(parseRoute)
-  const [homeMode, setHomeMode] = useState<HomeMode>('rentals')
-  const [homeQueries, setHomeQueries] = useState<Record<HomeMode, string>>({ rentals: '', stays: '', exchange: '', roam: '' })
-  const onHomeSearch = (mode: HomeMode, query: string) => { setHomeQueries(current => ({ ...current, [mode]: query })); window.scrollTo({ top: 0, behavior: 'smooth' }) }
   const [lang, setLangState] = useState<Language>(() => (localStorage.getItem('kuailvju-lang') as Language) || (navigator.language.toLowerCase().startsWith('zh') ? 'zh' : 'en'))
   const [message, setMessage] = useState<string | null>(null)
-  useEffect(() => { const update = () => { setRoute(parseRoute()); setMessage(null); window.scrollTo({ top: 0, behavior: 'instant' }) }; window.addEventListener('hashchange', update); return () => window.removeEventListener('hashchange', update) }, [])
+  useEffect(() => {
+    const update = () => { setRoute(parseRoute()); setMessage(null); window.scrollTo({ top: 0, behavior: 'instant' }) }
+    window.addEventListener('hashchange', update)
+    return () => window.removeEventListener('hashchange', update)
+  }, [])
   useEffect(() => {
     document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en'
     document.title = lang === 'zh' ? '快旅居｜好房源，心服务' : 'Kuai Lü Ju | Good homes. Thoughtful service.'
@@ -371,20 +436,41 @@ export default function App() {
   }, [lang])
   const setLang = (next: Language) => { setLangState(next); localStorage.setItem('kuailvju-lang', next) }
   const t = words[lang]
+  const category = ['rentals', 'stays', 'exchange', 'roam'].includes(route.page) && !route.id
+  const activeMode: HomeMode = category ? route.page as HomeMode : 'rentals'
+  const onHomeSearch = (mode: HomeMode, query: string) => {
+    const hash = `#/${mode}${query ? `?${query}` : ''}`
+    if (window.location.hash !== hash) window.location.hash = hash
+    else window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
   const content = useMemo(() => {
-    if (route.page === 'rentals') return <HomePage lang={lang} mode="rentals" query={homeQueries.rentals || route.query}/>
-    if (route.page === 'listing') return listings.find(item => item.id === route.id)?.management === 'operated' ? <ExchangeDetailPage lang={lang} id={route.id} query={route.query} kind="stays"/> : <ListingPage lang={lang} id={route.id} query={route.query} onAction={setMessage}/>
+    if (category) return <CategoryPage lang={lang} mode={route.page as HomeMode} query={route.query}/>
+    if (route.page === 'listing') return listings.find(item => item.id === route.id)?.management === 'operated'
+      ? <ExchangeDetailPage lang={lang} id={route.id} query={route.query} kind="stays"/>
+      : <ListingPage lang={lang} id={route.id} query={route.query} onAction={setMessage}/>
     if (route.page === 'stays' && route.id) return <ExchangeDetailPage lang={lang} id={route.id} query={route.query} kind="stays"/>
-    if (route.page === 'stays') return <HomePage lang={lang} mode="stays" query={homeQueries.stays || route.query}/>
     if (route.page === 'exchange' && route.id) return <ExchangeDetailPage lang={lang} id={route.id} query={route.query} kind="exchange"/>
-    if (route.page === 'exchange') return <HomePage lang={lang} mode="exchange" query={homeQueries.exchange || route.query}/>
-    if (route.page === 'roam') return route.id ? <RoamPage lang={lang} id={route.id} query={route.query}/> : <HomePage lang={lang} mode="roam" query={homeQueries.roam || route.query}/>
+    if (route.page === 'roam' && route.id) return <RoamPage lang={lang} id={route.id} query={route.query}/>
     if (route.page === 'management' && !route.mode) return <ManagementEntry lang={lang} suggested={new URLSearchParams(route.query).get('service') || undefined}/>
     if (route.page === 'management') return <ManagementPage lang={lang} mode={route.mode}/>
     if (route.page === 'request' && route.mode === 'rental') return <RentalRequestPage lang={lang} listingId={route.id} query={route.query}/>
     if (route.page === 'request' && route.mode === 'exchange') return <ExchangeRequestPage lang={lang} listingId={route.id} query={route.query}/>
     if (route.page === 'test-inbox') return <TestInbox lang={lang}/>
-    return <HomePage lang={lang} mode={homeMode} query={homeQueries[homeMode]}/>
-  }, [route, lang, homeMode, homeQueries])
-  return <><Header lang={lang} setLang={setLang} route={route} mode={route.page === 'rentals' || route.page === 'stays' || route.page === 'exchange' || route.page === 'roam' && !route.id ? route.page as HomeMode : homeMode} onModeChange={setHomeMode} onSearch={onHomeSearch}/><main id="main-content">{content}</main><footer className="site-footer"><div className="page-shell"><div className="footer-top"><a className="footer-brand" href="#/">快旅居 <span>KUAI LÜ JU</span></a><nav aria-label="Footer"><a href="#/rentals">{t.rent}</a><a href="#/stays">{t.stays}</a><a href="#/exchange">{t.exchange}</a><a href="#/roam">{t.roam}</a><a href="#/management">{t.manage}</a></nav></div><div className="footer-bottom"><span>{t.footer}</span><p>{t.legal}</p><span>© {new Date().getFullYear()} KUAI LÜ JU</span></div></div></footer>{message && <div className="modal-backdrop" onClick={() => setMessage(null)}><div className="modal" role="dialog" aria-modal="true" aria-label={t.preview} onClick={e => e.stopPropagation()}><button className="modal-close" onClick={() => setMessage(null)} aria-label={t.close}>×</button><span className="eyebrow">PREVIEW NOTICE</span><h2>{t.preview}</h2><p>{message}</p><button className="button button-dark" onClick={() => setMessage(null)}>{t.understood} ↗</button></div></div>}</>
+    return <SiteOverview lang={lang}/>
+  }, [route, lang, category])
+  return <>
+    <Header lang={lang} setLang={setLang} route={route} mode={activeMode} onSearch={onHomeSearch}/>
+    <main id="main-content">{content}</main>
+    <footer className="site-footer"><div className="page-shell">
+      <div className="footer-top"><a className="footer-brand" href="#/">快旅居 <span>KUAI LÜ JU</span></a>
+        <nav aria-label="Footer"><a href="#/rentals">{t.rent}</a><a href="#/stays">{t.stays}</a>
+          <a href="#/exchange">{t.exchange}</a><a href="#/roam">{t.roam}</a><a href="#/management">{t.manage}</a></nav>
+      </div>
+      <div className="footer-bottom"><span>{t.footer}</span><p>{t.legal}</p><span>© {new Date().getFullYear()} KUAI LÜ JU</span></div>
+    </div></footer>
+    {message && <div className="modal-backdrop" onClick={() => setMessage(null)}><div className="modal" role="dialog" aria-modal="true" aria-label={t.preview} onClick={e => e.stopPropagation()}>
+      <button className="modal-close" onClick={() => setMessage(null)} aria-label={t.close}>×</button><span className="eyebrow">PREVIEW NOTICE</span>
+      <h2>{t.preview}</h2><p>{message}</p><button className="button button-dark" onClick={() => setMessage(null)}>{t.understood} ↗</button>
+    </div></div>}
+  </>
 }
