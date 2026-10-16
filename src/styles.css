@@ -1059,7 +1059,7 @@ h1, h2, h3 { min-width: 0; overflow-wrap: anywhere; font-weight: 500; line-heigh
   .clear-site-header .brand { min-height: 60px; margin-right: auto; }
   .clear-header-actions { min-height: 60px; }
   .clear-header-actions .menu-button { display: block; }
-  .clear-primary-nav { display: grid; flex: 0 0 100%; order: 4; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; justify-self: stretch; padding: 0; border-top: 1px solid var(--color-rule); }
+  .clear-site-header .clear-primary-nav { position: static; inset: auto; display: grid; flex: 0 0 100%; order: 4; width: 100%; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; justify-self: stretch; padding: 0; border-top: 1px solid var(--color-rule); background: transparent; }
   .clear-primary-nav > a { display: flex; justify-content: center; min-width: 0; min-height: 53px; padding: 4px; font-size: 14px; }
   .clear-primary-nav > a.is-current::after { bottom: 0; }
   .clear-site-header .owner-service-link { min-height: 35px; padding-inline: 10px; font-size: 12px; }
