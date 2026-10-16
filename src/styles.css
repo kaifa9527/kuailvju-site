@@ -1259,3 +1259,23 @@ h1, h2, h3 { min-width: 0; overflow-wrap: anywhere; font-weight: 500; line-heigh
     margin: 9px 11px 7px 0;
   }
 }
+
+/* Navigation rhythm: reduce space between adjacent entries by one third. */
+@media (min-width: 1101px) {
+  .clear-site-header .clear-primary-nav { gap: clamp(7px, 1.27vw, 19px); }
+}
+@media (min-width: 761px) and (max-width: 1100px) {
+  .clear-site-header .clear-primary-nav { gap: 7px; }
+}
+.clear-site-header .clear-primary-nav > a svg {
+  stroke-width: 1.5px;
+  transition: transform 180ms ease, opacity 180ms ease;
+}
+.clear-site-header .clear-primary-nav > a:hover svg { transform: translateY(-2px) scale(1.04); }
+.clear-site-header .clear-primary-nav > a:active svg { transform: translateY(0) scale(.98); }
+/* Prevent pointer-focus rectangles from lingering inside the editorial search. */
+.home-affixed .home-discovery-field select:focus:not(:focus-visible),
+.home-affixed .home-discovery-field input:focus:not(:focus-visible) {
+  outline: none;
+  box-shadow: none;
+}
