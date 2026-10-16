@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { ThemeSwitch } from './ThemeSwitch'
+import { HomeFinder } from './HomeFinder'
+import type { HomeMode } from './lib/homeDiscovery'
 import { cities, listings, type Listing, type Term } from './data'
 import { canExchange, estimateLeaseMoveIn, filterListings, formatPrice, longRentalMonthlyPrice, sortFeaturedListings, type Language, type LeasePaymentOption } from './lib/catalog'
 import { LineIcon, amenityIcon } from './components/LineIcon'
@@ -167,72 +169,46 @@ function rentalsHash(filters: Filters) {
   return `#/rentals${params.size ? `?${params}` : ''}`
 }
 
-function Header({ lang, setLang, route }: { lang: Language; setLang: (v: Language) => void; route: Route }) {
+function Header({ lang, setLang, route, mode, onModeChange }: {
+  lang: Language; setLang: (v: Language) => void; route: Route;
+  mode: HomeMode; onModeChange: (mode: HomeMode) => void
+}) {
   const t = words[lang]
   const [open, setOpen] = useState(false)
   const isHome = route.page === 'home'
-  const [scrolled, setScrolled] = useState(() => window.scrollY > 170)
-  const [searchOpen, setSearchOpen] = useState(false)
-  const [searchMode, setSearchMode] = useState<'rentals' | 'stays' | 'exchange'>('rentals')
-  const [modeMenuOpen, setModeMenuOpen] = useState(false)
-  const [searchSummary, setSearchSummary] = useState<[string, string, string]>([t.allCities, lang === 'zh' ? '选择日期' : 'Add dates', t.allTerms])
-  const header = useRef<HTMLElement>(null)
-  useEffect(() => {
-    if (!isHome) return
-    const update = () => setScrolled(window.scrollY > 170)
-    update()
-    window.addEventListener('scroll', update, { passive: true })
-    return () => window.removeEventListener('scroll', update)
-  }, [isHome])
-  useEffect(() => { setSearchOpen(false); setModeMenuOpen(false); setOpen(false) }, [route.page])
-  useEffect(() => {
-    if (!isHome || !searchOpen) return
-    const closeOutside = (event: PointerEvent) => { if (!header.current?.contains(event.target as Node)) setSearchOpen(false) }
-    const closeEscape = (event: KeyboardEvent) => { if (event.key === 'Escape') setSearchOpen(false) }
-    document.addEventListener('pointerdown', closeOutside)
-    document.addEventListener('keydown', closeEscape)
-    return () => { document.removeEventListener('pointerdown', closeOutside); document.removeEventListener('keydown', closeEscape) }
-  }, [isHome, searchOpen])
-  useEffect(() => {
-    if (!modeMenuOpen) return
-    const closeOutside = (event: PointerEvent) => { if (!header.current?.querySelector('.home-search-modes')?.contains(event.target as Node)) setModeMenuOpen(false) }
-    const closeEscape = (event: KeyboardEvent) => { if (event.key === 'Escape') setModeMenuOpen(false) }
-    document.addEventListener('pointerdown', closeOutside)
-    document.addEventListener('keydown', closeEscape)
-    return () => { document.removeEventListener('pointerdown', closeOutside); document.removeEventListener('keydown', closeEscape) }
-  }, [modeMenuOpen])
-  useEffect(() => { if (scrolled && !searchOpen) setModeMenuOpen(false) }, [scrolled, searchOpen])
-  const expanded = !scrolled || searchOpen
-  const modeLabel = searchMode === 'rentals' ? t.rent : searchMode === 'stays' ? t.stays : t.exchange
   const nav = [
-    { href: '#/rentals', label: t.navRent, key: 'rentals', icon: 'window' as const },
-    { href: '#/stays', label: t.navStays, key: 'stays', icon: 'bed' as const },
-    { href: '#/exchange', label: t.navExchange, key: 'exchange', icon: 'share' as const },
-    { href: '#/roam', label: t.roam, key: 'roam', icon: 'compass' as const },
+    { href: '#/rentals', label: t.navRent, key: 'rentals' as const },
+    { href: '#/stays', label: t.navStays, key: 'stays' as const },
+    { href: '#/exchange', label: t.navExchange, key: 'exchange' as const },
+    { href: '#/roam', label: t.roam, key: 'roam' as const },
   ]
-  return <>{isHome && <div className="home-header-space" aria-hidden="true"/>}<header ref={header} className={`site-header${isHome ? ` home-header${expanded ? ' is-expanded' : ' is-compact'}${open ? ' has-menu' : ''}` : ''}`}>
+  useEffect(() => { setOpen(false) }, [route.page])
+  return <header className="site-header clear-site-header">
     <div className="header-inner">
-      <a className="brand" href="#/" aria-label={lang === 'zh' ? '快旅居首页' : 'Kuai Lü Ju home'}><span className="brand-mark">快</span><span className="brand-name">快旅居<span>KUAI LÜ JU</span></span></a>
-      <nav className={`primary-nav ${open ? 'is-open' : ''}`} aria-label={t.menu}>
-        {nav.map(item => <a key={item.key} href={item.href} className={route.page === item.key || isHome && searchMode === item.key ? 'is-current' : ''} onClick={() => setOpen(false)}><LineIcon name={item.icon} size={19}/><span>{item.label}</span></a>)}
-        <a href="#/management" className={`nav-management${isHome ? ' home-management-menu-link' : ''}${route.page === 'management' ? ' is-current' : ''}`} onClick={() => setOpen(false)}>{t.manage}<span aria-hidden="true">↗</span></a>
-        {isHome && <a className="mobile-test-link" href="#/test-inbox" onClick={() => setOpen(false)}>{t.testDesk}</a>}
+      <a className="brand" href="#/" aria-label={lang === 'zh' ? '快旅居首页' : 'Kuai Lü Ju home'}>
+        <span className="brand-mark">快</span><span className="brand-name">快旅居<span>KUAI LÜ JU</span></span>
+      </a>
+      <nav className="primary-nav clear-primary-nav" aria-label={t.menu}>
+        {nav.map(item => <a key={item.key} href={item.href}
+          aria-current={isHome ? undefined : route.page === item.key ? 'page' : undefined}
+          className={isHome ? mode === item.key ? 'is-current' : '' : route.page === item.key ? 'is-current' : ''}
+          onClick={event => {
+            if (isHome) { event.preventDefault(); onModeChange(item.key) }
+            setOpen(false)
+          }}>{item.label}</a>)}
       </nav>
-      {isHome && <button type="button" className="home-compact-search" aria-expanded={expanded} aria-label={`${t.search}：${modeLabel} · ${searchSummary.join(' · ')}`} onClick={() => { setSearchOpen(true); setOpen(false) }}><LineIcon name="search" size={18}/><span className="home-compact-mode">{modeLabel}</span><span className="home-compact-detail">{searchSummary[0]}</span><span className="home-compact-detail">{searchSummary[1]}</span><span className="home-compact-detail">{searchSummary[2]}</span></button>}
-      <div className="header-actions">
-        {isHome && <a className="home-management-action" href="#/management">{t.manage} <LineIcon name="arrow" size={14}/></a>}
+      <div className="header-actions clear-header-actions">
+        <a className="owner-service-link" href="#/management">{t.manage}<span aria-hidden="true">↗</span></a>
         <ThemeSwitch lang={lang}/>
-        <a className="test-desk-link" href="#/test-inbox">{t.testDesk}</a>
         <button className="language-switch" onClick={() => setLang(lang === 'zh' ? 'en' : 'zh')} aria-label={`${t.language}: ${lang === 'zh' ? 'English' : '中文'}`}>{lang === 'zh' ? 'EN' : '中'}</button>
-        <button className="menu-button" aria-expanded={open} aria-label={t.menu} onClick={() => { setOpen(v => !v); setSearchOpen(false) }}><span></span><span></span></button>
+        <button className="menu-button" aria-expanded={open} aria-label={t.menu} onClick={() => setOpen(v => !v)}><span></span><span></span></button>
       </div>
     </div>
-    {isHome && <div className="home-search-stage"><div className="home-search-stage-inner">
-      <div className="home-search-modes"><button type="button" className="home-search-mode-trigger" aria-expanded={modeMenuOpen} aria-label={`${t.homeSearchTitle}：${modeLabel}`} onClick={() => setModeMenuOpen(value => !value)}><span>{modeLabel}</span><span aria-hidden="true">⌄</span></button>{modeMenuOpen && <div className="home-search-mode-options" role="group" aria-label={t.homeSearchTitle}>{([['rentals', t.rent], ['stays', t.stays], ['exchange', t.exchange]] as const).map(([mode, label]) => <button key={mode} type="button" className={searchMode === mode ? 'is-active' : ''} aria-pressed={searchMode === mode} onClick={() => { setSearchMode(mode); setModeMenuOpen(false) }}>{label}{searchMode === mode && <LineIcon name="check" size={16}/>}</button>)}</div>}</div>
-      <div className="home-search-control">{searchMode === 'rentals' ? <SearchPanel lang={lang} initial={emptyFilters} searchLabel={t.searchRentals} onSummaryChange={setSearchSummary}/> : <SearchForm key={searchMode} lang={lang} initial={emptyExchangeSearch} kind={searchMode} searchLabel={searchMode === 'stays' ? t.searchStays : t.searchExchange} onSummaryChange={setSearchSummary}/>}</div>
-      {scrolled && <button className="home-search-dismiss" type="button" aria-label={t.close} onClick={() => setSearchOpen(false)}><LineIcon name="close" size={17}/></button>}
-    </div></div>}
-  </header></>
+    {open && <nav className="mobile-utility-menu" aria-label={t.menu}>
+      <a href="#/management" onClick={() => setOpen(false)}>{t.manage} ↗</a>
+      <a href="#/test-inbox" onClick={() => setOpen(false)}>{t.testDesk}</a>
+    </nav>}
+  </header>
 }
 
 function SearchPanel({ lang, initial, searchLabel, onSummaryChange }: { lang: Language; initial: Filters; searchLabel?: string; onSummaryChange?: (summary: [string, string, string]) => void }) {
@@ -307,15 +283,13 @@ function ManagementCards({ lang }: { lang: Language }) {
   </div>
 }
 
-function HomePage({ lang }: { lang: Language }) {
+function HomePage({ lang, mode }: { lang: Language; mode: HomeMode }) {
   const t = words[lang]
   const featured = sortFeaturedListings(listings.filter(item => item.management === 'leased')).slice(0, 6)
   const shortStayHomes = sortFeaturedListings(listings.filter(item => item.management === 'operated')).slice(0, 6)
   const exchangeHomes = sortFeaturedListings(listings.filter(canExchange)).slice(0, 6)
   return <>
-    <div className="mobile-service-nav page-shell" aria-label={t.guide}><a href="#/rentals"><span>01</span>{t.quickRent}</a><a href="#/stays"><span>02</span>{t.quickStays}</a><a href="#/exchange"><span>03</span>{t.quickExchange}</a><a href="#/roam"><span>04</span>{t.quickManage}</a></div>
-    <section className="hero page-shell"><div className="hero-copy"><p className="eyebrow">KUAI LÜ JU / HOMES & STAYS</p><h1>{t.rentalLine}</h1><p className="hero-description">{t.intro}</p></div><div className="hero-visual"><img src={asset('/images/pattaya-concept.jpg')} alt={t.demo}/><span>{t.demo} / PATTAYA</span></div></section>
-    <p className="home-demo-notice page-shell"><LineIcon name="shield" size={16}/>{t.demoNotice}</p>
+    <HomeFinder lang={lang} mode={mode}/>
     <section className="section page-shell home-property-section" id="homes"><div className="section-heading"><div><div className="home-section-title"><span className="home-section-number" aria-hidden="true">01</span><h2>{t.rent}</h2>{lang === 'zh' && <span className="home-section-english" aria-hidden="true">LONG STAYS</span>}</div><p className="home-section-lead">{t.rentLead}</p></div><a className="text-link" href="#/rentals">{t.explore} <span>↗</span></a></div><div className="listing-grid home-listing-grid">{featured.map(listing => <ListingCard key={listing.id} listing={listing} lang={lang}/>)}</div></section>
     <section className="section page-shell home-stays-section"><div className="section-heading"><div><div className="home-section-title"><span className="home-section-number" aria-hidden="true">02</span><h2>{t.stays}</h2>{lang === 'zh' && <span className="home-section-english" aria-hidden="true">SHORT STAYS</span>}</div><p className="home-section-lead">{t.staysLead}</p></div><a className="text-link" href="#/stays">{t.explore} <span>↗</span></a></div><div className="listing-grid home-listing-grid">{shortStayHomes.map(listing => <ListingCard key={listing.id} listing={listing} lang={lang} context="stays"/>)}</div></section>
     <section className="section home-exchange-section" id="exchange-homes"><div className="page-shell"><div className="section-heading"><div><div className="home-section-title"><span className="home-section-number" aria-hidden="true">03</span><h2>{t.exchange}</h2>{lang === 'zh' && <span className="home-section-english" aria-hidden="true">STAY EXCHANGE</span>}</div><p className="home-section-lead">{t.exchangeLine}</p></div><a className="text-link" href="#/exchange">{t.more} <span>↗</span></a></div>
@@ -389,6 +363,7 @@ function ListingPage({ lang, id, onAction, query = '' }: { lang: Language; id?: 
 
 export default function App() {
   const [route, setRoute] = useState<Route>(parseRoute)
+  const [homeMode, setHomeMode] = useState<HomeMode>('rentals')
   const [lang, setLangState] = useState<Language>(() => (localStorage.getItem('kuailvju-lang') as Language) || (navigator.language.toLowerCase().startsWith('zh') ? 'zh' : 'en'))
   const [message, setMessage] = useState<string | null>(null)
   useEffect(() => { const update = () => { setRoute(parseRoute()); setMessage(null); window.scrollTo({ top: 0, behavior: 'instant' }) }; window.addEventListener('hashchange', update); return () => window.removeEventListener('hashchange', update) }, [])
@@ -414,7 +389,7 @@ export default function App() {
     if (route.page === 'request' && route.mode === 'rental') return <RentalRequestPage lang={lang} listingId={route.id} query={route.query}/>
     if (route.page === 'request' && route.mode === 'exchange') return <ExchangeRequestPage lang={lang} listingId={route.id} query={route.query}/>
     if (route.page === 'test-inbox') return <TestInbox lang={lang}/>
-    return <HomePage lang={lang}/>
-  }, [route, lang])
-  return <><Header lang={lang} setLang={setLang} route={route}/><main id="main-content">{content}</main><footer className="site-footer"><div className="page-shell"><div className="footer-top"><a className="footer-brand" href="#/">快旅居 <span>KUAI LÜ JU</span></a><nav aria-label="Footer"><a href="#/rentals">{t.rent}</a><a href="#/stays">{t.stays}</a><a href="#/exchange">{t.exchange}</a><a href="#/roam">{t.roam}</a><a href="#/management">{t.manage}</a></nav></div><div className="footer-bottom"><span>{t.footer}</span><p>{t.legal}</p><span>© {new Date().getFullYear()} KUAI LÜ JU</span></div></div></footer>{message && <div className="modal-backdrop" onClick={() => setMessage(null)}><div className="modal" role="dialog" aria-modal="true" aria-label={t.preview} onClick={e => e.stopPropagation()}><button className="modal-close" onClick={() => setMessage(null)} aria-label={t.close}>×</button><span className="eyebrow">PREVIEW NOTICE</span><h2>{t.preview}</h2><p>{message}</p><button className="button button-dark" onClick={() => setMessage(null)}>{t.understood} ↗</button></div></div>}</>
+    return <HomePage lang={lang} mode={homeMode}/>
+  }, [route, lang, homeMode])
+  return <><Header lang={lang} setLang={setLang} route={route} mode={homeMode} onModeChange={setHomeMode}/><main id="main-content">{content}</main><footer className="site-footer"><div className="page-shell"><div className="footer-top"><a className="footer-brand" href="#/">快旅居 <span>KUAI LÜ JU</span></a><nav aria-label="Footer"><a href="#/rentals">{t.rent}</a><a href="#/stays">{t.stays}</a><a href="#/exchange">{t.exchange}</a><a href="#/roam">{t.roam}</a><a href="#/management">{t.manage}</a></nav></div><div className="footer-bottom"><span>{t.footer}</span><p>{t.legal}</p><span>© {new Date().getFullYear()} KUAI LÜ JU</span></div></div></footer>{message && <div className="modal-backdrop" onClick={() => setMessage(null)}><div className="modal" role="dialog" aria-modal="true" aria-label={t.preview} onClick={e => e.stopPropagation()}><button className="modal-close" onClick={() => setMessage(null)} aria-label={t.close}>×</button><span className="eyebrow">PREVIEW NOTICE</span><h2>{t.preview}</h2><p>{message}</p><button className="button button-dark" onClick={() => setMessage(null)}>{t.understood} ↗</button></div></div>}</>
 }
