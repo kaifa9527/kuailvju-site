@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { ThemeSwitch } from './ThemeSwitch'
+import { AccountDialog } from './AccountDialog'
 import { HomeFinder } from './HomeFinder'
 import { previewListings } from './lib/homePresentation'
 import { findCategoryListings } from './lib/categoryDiscovery'
@@ -156,9 +156,9 @@ function parseRoute(): Route {
   }
 }
 
-function Header({ lang, setLang, route, mode, onSearch }: {
+function Header({ lang, setLang, route, mode, onSearch, onAccountClick, previewMember }: {
   lang: Language; setLang: (v: Language) => void; route: Route;
-  mode: HomeMode; onSearch: (mode: HomeMode, query: string) => void
+  mode: HomeMode; onSearch: (mode: HomeMode, query: string) => void; onAccountClick: () => void; previewMember: boolean
 }) {
   const t = words[lang]
   const isHome = route.page === 'home' || (['rentals', 'stays', 'exchange', 'roam'].includes(route.page) && !route.id)
@@ -249,7 +249,7 @@ function Header({ lang, setLang, route, mode, onSearch }: {
           <span className="compact-search-icon"><LineIcon name="search" size={18}/></span>
         </button>}
         <div className="header-actions clear-header-actions">
-          <ThemeSwitch lang={lang}/>
+          <button type="button" className="account-trigger" onClick={onAccountClick} aria-label={lang === 'zh' ? (previewMember ? '会员账户' : '登录或注册') : (previewMember ? 'Member account' : 'Log in or sign up')}><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.25"/><path d="M5.3 20c.35-3.6 2.75-5.7 6.7-5.7s6.35 2.1 6.7 5.7"/></svg><span>{lang === 'zh' ? (previewMember ? '会员' : '登录/注册') : (previewMember ? 'Member' : 'Log in')}</span></button>
           <button className="language-switch" onClick={() => setLang(lang === 'zh' ? 'en' : 'zh')} aria-label={t.language + ': ' + (lang === 'zh' ? 'English' : '中文')}>{lang === 'zh' ? 'EN' : '中'}</button>
           <button className="menu-button" aria-expanded={open} aria-label={t.menu} onClick={() => { setOpen(value => !value); setSearchOpen(false) }}><span></span><span></span></button>
         </div>
@@ -413,16 +413,24 @@ function ListingPage({ lang, id, onAction, query = '' }: { lang: Language; id?: 
   </div>
 }
 
+function AccountRequiredPage({ lang, onLogin }: { lang: Language; onLogin: () => void }) {
+  return <section className="account-required page-shell"><span className="account-eyebrow">KUAI LÜ JU / MEMBER ACCESS</span><h1>{lang === 'zh' ? '登录后继续委托房源' : 'Sign in to manage a property'}</h1><p>{lang === 'zh' ? '房源录入与委托管理仅对会员开放。请先登录或注册，再继续填写资料。' : 'Property submissions and management are available to members. Please sign in or register to continue.'}</p><button type="button" className="button button-dark" onClick={onLogin}>{lang === 'zh' ? '登录 / 注册' : 'Log in / Sign up'}</button><p className="account-preview-note">{lang === 'zh' ? '当前为静态演示站，尚未接入真实会员认证及安全数据存储。' : 'Static preview only; live authentication and secure data storage are not connected.'}</p></section>
+}
+
 export default function App() {
   const [route, setRoute] = useState<Route>(parseRoute)
   const [lang, setLangState] = useState<Language>(() => (localStorage.getItem('kuailvju-lang') as Language) || (navigator.language.toLowerCase().startsWith('zh') ? 'zh' : 'en'))
   const [message, setMessage] = useState<string | null>(null)
+  const [accountOpen, setAccountOpen] = useState(false)
+  const [previewMember, setPreviewMember] = useState(() => { try { return sessionStorage.getItem('kuailvju-preview-member') === '1' } catch { return false } })
   useEffect(() => {
     const update = () => { setRoute(parseRoute()); setMessage(null); window.scrollTo({ top: 0, behavior: 'instant' }) }
     window.addEventListener('hashchange', update)
     return () => window.removeEventListener('hashchange', update)
   }, [])
   useEffect(() => {
+    document.documentElement.dataset.theme = 'light'
+    document.documentElement.style.colorScheme = 'light'
     document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en'
     document.title = lang === 'zh' ? '快旅居｜好房源，心服务' : 'Kuai Lü Ju | Good homes. Thoughtful service.'
     document.querySelector('meta[name="description"]')?.setAttribute('content', lang === 'zh'
@@ -430,6 +438,7 @@ export default function App() {
       : 'Kuai Lü Ju: homes, stay exchange and property care. Explore interactive browser-only workflows; live homes and transactions follow verification.')
   }, [lang])
   const setLang = (next: Language) => { setLangState(next); localStorage.setItem('kuailvju-lang', next) }
+  useEffect(() => { if (route.page === 'management' && !previewMember) setAccountOpen(true) }, [route.page, previewMember])
   const t = words[lang]
   const category = ['rentals', 'stays', 'exchange', 'roam'].includes(route.page) && !route.id
   const activeMode: HomeMode = category ? route.page as HomeMode : 'rentals'
@@ -452,9 +461,9 @@ export default function App() {
     if (route.page === 'request' && route.mode === 'exchange') return <ExchangeRequestPage lang={lang} listingId={route.id} query={route.query}/>
     if (route.page === 'test-inbox') return <TestInbox lang={lang}/>
     return <SiteOverview lang={lang}/>
-  }, [route, lang, category])
+  }, [route, lang, category, previewMember])
   return <>
-    <Header lang={lang} setLang={setLang} route={route} mode={activeMode} onSearch={onHomeSearch}/>
+    <Header lang={lang} setLang={setLang} route={route} mode={activeMode} onSearch={onHomeSearch} onAccountClick={() => setAccountOpen(true)} previewMember={previewMember}/>
     <main id="main-content">{content}</main>
     <footer className="site-footer"><div className="page-shell">
       <div className="footer-top"><a className="footer-brand" href="#/">快旅居 <span>KUAI LÜ JU</span></a>
@@ -463,7 +472,7 @@ export default function App() {
       </div>
       <div className="footer-bottom"><span>{t.footer}</span><p>{t.legal}</p><span>© {new Date().getFullYear()} KUAI LÜ JU</span></div>
     </div></footer>
-    {message && <div className="modal-backdrop" onClick={() => setMessage(null)}><div className="modal" role="dialog" aria-modal="true" aria-label={t.preview} onClick={e => e.stopPropagation()}>
+    {accountOpen && <AccountDialog lang={lang} onClose={() => setAccountOpen(false)} previewMember={previewMember} onPreviewEnter={() => { try { sessionStorage.setItem('kuailvju-preview-member', '1') } catch { /* session-only preview */ } setPreviewMember(true); setAccountOpen(false) }} onPreviewExit={() => { try { sessionStorage.removeItem('kuailvju-preview-member') } catch { /* session-only preview */ } setPreviewMember(false); setAccountOpen(false); if (route.page === 'management') window.location.hash = '#/' }}/>}\n    {message && <div className="modal-backdrop" onClick={() => setMessage(null)}><div className="modal" role="dialog" aria-modal="true" aria-label={t.preview} onClick={e => e.stopPropagation()}>
       <button className="modal-close" onClick={() => setMessage(null)} aria-label={t.close}>×</button><span className="eyebrow">PREVIEW NOTICE</span>
       <h2>{t.preview}</h2><p>{message}</p><button className="button button-dark" onClick={() => setMessage(null)}>{t.understood} ↗</button>
     </div></div>}
