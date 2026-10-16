@@ -90,7 +90,7 @@ export function HomeFinder({ lang, mode, onSummaryChange }: { lang: Language; mo
           {[1, 2, 3, 4, 5, 6, 8, 10].map(n => <option key={n} value={n}>{n}</option>)}
         </select>
       </label>}
-      <button className="home-discovery-submit" type="submit"><LineIcon name="search" size={19}/><span>{t.search}</span></button>
+      <button className="home-discovery-submit" type="submit" aria-label={t.search} title={t.search}><LineIcon name="search" size={20}/></button>
     </form>
     {error && <p className="form-error" role="alert">{error}</p>}
     <p className="home-discovery-note">{t.demo}</p>

@@ -1135,84 +1135,127 @@ h1, h2, h3 { min-width: 0; overflow-wrap: anywhere; font-weight: 500; line-heigh
 }
 
 
-/* Compact 750px finder — only the expanded home search changes.
-   The five navigation links and their spacing stay untouched. */
+/* The home finder is an 800px editorial search strip with even typography.
+   Keep the five main navigation links and the scroll-to-compact search unchanged. */
 .home-affixed .home-discovery {
-  padding-top: 8px;
+  padding-top: 9px;
   padding-bottom: 11px;
 }
 .home-affixed .home-discovery-form {
-  width: min(100%, 750px);
-  max-width: 750px;
-  min-height: 66px;
+  width: min(100%, 800px);
+  max-width: 800px;
+  min-height: 68px;
   border-radius: 17px;
 }
 .home-affixed .home-discovery-field {
-  gap: 3px;
   min-width: 0;
-  margin-block: 7px;
-  padding-inline: 10px;
+  gap: 3px;
+  margin-block: 8px;
+  padding-inline: 9px;
+}
+.home-affixed .home-discovery-field:first-child {
+  padding-left: 19px;
 }
 .home-affixed .home-discovery-field > span {
-  font-size: 10px;
+  font-size: 12px;
+  font-weight: 550;
   line-height: 1.2;
-  letter-spacing: .01em;
+  letter-spacing: .012em;
   white-space: nowrap;
 }
-:root #root .home-affixed .home-discovery-field select {
-  min-height: 28px;
-  font-size: 12px;
-  font-weight: 600;
-}
-.home-affixed .home-discovery-field input[type="date"] {
-  min-height: 28px;
-  font-size: 12px;
+/* Override the general form-control rules consistently, including focus state. */
+:root #root .home-affixed .home-discovery-field select,
+:root #root .home-affixed .home-discovery-field input[type="date"] {
+  width: 100%;
+  min-width: 0;
+  min-height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--color-ink);
+  font: 600 14px/1.35 var(--font-body);
+  letter-spacing: 0;
   font-variant-numeric: tabular-nums;
 }
+:root #root .home-affixed .home-discovery-field select:focus,
+:root #root .home-affixed .home-discovery-field input[type="date"]:focus {
+  font-size: 14px;
+  line-height: 1.35;
+}
 .home-affixed .home-discovery-field input[type="date"]::-webkit-calendar-picker-indicator {
-  width: 13px;
-  height: 13px;
+  width: 14px;
+  height: 14px;
   margin-left: 2px;
-  opacity: .78;
+  opacity: .8;
   cursor: pointer;
 }
 .home-affixed .home-discovery-submit {
-  gap: 6px;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
   min-height: 44px;
-  margin: 6px;
-  padding-inline: 13px;
-  border-radius: 11px;
-  font-size: 13px;
+  margin: 0 14px 0 10px;
+  padding: 0;
+  border-radius: 12px;
+  align-self: center;
+  justify-content: center;
+  box-shadow: none;
+  transition: background-color 180ms ease, box-shadow 180ms ease;
 }
-.home-affixed .home-discovery-submit svg { width: 17px; height: 17px; }
+.home-affixed .home-discovery-submit:hover {
+  background: var(--color-ink);
+  box-shadow: 0 4px 11px var(--color-soft-shadow);
+  transform: none;
+}
+.home-affixed .home-discovery-submit svg {
+  display: block;
+  width: 20px;
+  height: 20px;
+  margin: auto;
+}
 .home-affixed .home-discovery-note,
-.home-affixed .home-discovery .form-error { max-width: 750px; }
-.home-affixed .home-discovery-note { margin-top: 7px; font-size: 10px; }
+.home-affixed .home-discovery .form-error {
+  max-width: 800px;
+}
+.home-affixed .home-discovery-note {
+  margin-top: 9px;
+  font-size: 11px;
+}
 @media (max-width: 930px) and (min-width: 761px) {
   .home-affixed .home-discovery-field { padding-inline: 8px; }
-  .home-affixed .home-discovery-submit { padding-inline: 11px; }
+  .home-affixed .home-discovery-field:first-child { padding-left: 15px; }
+  .home-affixed .home-discovery-submit { margin-right: 12px; margin-left: 7px; }
 }
 @media (max-width: 760px) {
   .home-affixed .home-discovery { padding-top: 11px; padding-bottom: 15px; }
   .home-affixed .home-discovery-form {
     width: 100%;
+    max-width: 100%;
     min-height: auto;
     border-radius: 17px;
   }
   .home-affixed .home-discovery-field {
-    gap: 5px;
-    min-height: 62px;
+    gap: 4px;
+    min-height: 66px;
     margin: 0;
-    padding: 9px 11px;
+    padding: 9px 12px;
+  }
+  .home-affixed .home-discovery-field:first-child {
+    padding-left: 16px;
   }
   :root #root .home-affixed .home-discovery-field select,
-  .home-affixed .home-discovery-field input[type="date"] {
-    min-height: 38px;
-    font-size: 13px;
+  :root #root .home-affixed .home-discovery-field input[type="date"],
+  :root #root .home-affixed .home-discovery-field select:focus,
+  :root #root .home-affixed .home-discovery-field input[type="date"]:focus {
+    min-height: 36px;
+    font-size: 16px;
+    line-height: 1.35;
   }
   .home-affixed .home-discovery-submit {
-    min-height: 44px;
-    margin: 9px 0 0;
-    border-radius: 11px;
+    grid-column: 1 / -1;
+    justify-self: end;
+    margin: 9px 11px 7px 0;
   }
 }
