@@ -1,8 +1,10 @@
 import type { ReactNode, SVGProps } from 'react'
 
-export type IconName = 'guests' | 'bedroom' | 'bed' | 'bath' | 'area' | 'window' | 'garden' | 'pool' | 'climate' | 'wifi' | 'living' | 'dining' | 'balcony' | 'arrow' | 'calendar' | 'location' | 'shield' | 'check' | 'utility' | 'kitchen' | 'workspace' | 'parking' | 'tv' | 'lift' | 'washer' | 'lock' | 'photos' | 'heart' | 'share' | 'close' | 'family'
+export type IconName = 'search' | 'compass' | 'guests' | 'bedroom' | 'bed' | 'bath' | 'area' | 'window' | 'garden' | 'pool' | 'climate' | 'wifi' | 'living' | 'dining' | 'balcony' | 'arrow' | 'calendar' | 'location' | 'shield' | 'check' | 'utility' | 'kitchen' | 'workspace' | 'parking' | 'tv' | 'lift' | 'washer' | 'lock' | 'photos' | 'heart' | 'share' | 'close' | 'family'
 
 const paths: Record<IconName, ReactNode> = {
+  search: <><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></>,
+  compass: <><circle cx="12" cy="12" r="9"/><path d="m15.8 8.2-2.4 5.2-5.2 2.4 2.4-5.2 5.2-2.4Z"/></>,
   guests: <><circle cx="9" cy="8" r="3"/><path d="M3.5 19v-1a5.5 5.5 0 0 1 11 0v1M17 5.5a3 3 0 0 1 0 5.8M17 14a4.5 4.5 0 0 1 3.5 4.4V19"/></>,
   bedroom: <><path d="M4 21V4.5A1.5 1.5 0 0 1 5.5 3h13A1.5 1.5 0 0 1 20 4.5V21M3 21h18"/><circle cx="16" cy="12" r=".8"/></>,
   bed: <><path d="M3 18v-7M21 18v-7M3 15h18M5 15v-4.5A2.5 2.5 0 0 1 7.5 8h9a2.5 2.5 0 0 1 2.5 2.5V15M5 11h14"/></>,

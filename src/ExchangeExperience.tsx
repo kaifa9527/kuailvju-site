@@ -65,7 +65,7 @@ function ExchangeCard({ home, lang, query, kind }: { home: Listing; lang: Langua
   </a>
 }
 
-export function SearchForm({ lang, initial, kind, searchLabel }: { lang: Language; initial: ExchangeSearch; kind: 'exchange' | 'stays'; searchLabel?: string }) {
+export function SearchForm({ lang, initial, kind, searchLabel, onSummaryChange }: { lang: Language; initial: ExchangeSearch; kind: 'exchange' | 'stays'; searchLabel?: string; onSummaryChange?: (summary: [string, string, string]) => void }) {
   const t = words[lang]
   const [draft, setDraft] = useState(initial)
   const [active, setActive] = useState<'where' | 'when' | 'who' | 'filters' | null>(null)
@@ -97,6 +97,7 @@ export function SearchForm({ lang, initial, kind, searchLabel }: { lang: Languag
   const destination = draft.city === 'all' ? t.anyCity : `${city?.[lang]}${draft.region === 'all' ? '' : ` · ${city?.regions.find(item => item.id === draft.region)?.[lang] || ''}`}`
   const dateLabel = draft.start && draft.end ? `${draft.start.slice(5).replace('-', '/')}–${draft.end.slice(5).replace('-', '/')}` : lang === 'zh' ? '选择日期' : 'Add dates'
   const guestLabel = lang === 'zh' ? `${draft.guests} 位住客` : `${draft.guests} ${draft.guests === 1 ? 'guest' : 'guests'}`
+  useEffect(() => { onSummaryChange?.([destination, dateLabel, guestLabel]) }, [onSummaryChange, destination, dateLabel, guestLabel])
   const amenityKeys: AmenityFilter[] = ['pool', 'parking', 'wifi', 'climate', 'view']
   return <div className="compact-finder" ref={finder}>
     <div className="compact-searchbar" role="search">

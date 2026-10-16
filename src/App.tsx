@@ -7,6 +7,7 @@ import { ExchangeGallery } from './components/ExchangeGallery'
 import { ExchangeRequestPage, RentalRequestPage, TestInbox } from './TestFlows'
 import { ManagementPage } from './ManagementPage'
 import { ManagementEntry } from './ManagementEntry'
+import { RoamPage } from './RoamPage'
 import { ExchangeCatalogPage, ExchangeDetailPage, SearchForm } from './ExchangeExperience'
 import { demoAvailable, emptyExchangeSearch, localDate } from './lib/exchangeDiscovery'
 import { handoverReady, leaseRange } from './lib/inventory'
@@ -19,7 +20,7 @@ const asset = (path: string) => `${import.meta.env.BASE_URL}${path.replace(/^\//
 
 const words = {
   zh: {
-    rent: '长租房', stays: '民宿房', exchange: '旅居置换', manage: '物业托管', explore: '探索房源', more: '了解详情',
+    rent: '长租房', stays: '民宿房', exchange: '旅居置换', roam: '漫游', navRent: '长租', navStays: '短租', navExchange: '置换', manage: '物业托管', explore: '探索房源', more: '了解详情',
     preview: '置换资格提示', menu: '菜单', search: '查找房源', city: '城市', area: '区域', stay: '租期',
     homeSearchTitle: '按需求找房', searchRentals: '查找长租房', searchStays: '查找民宿房', searchExchange: '查找可置换房源', demoNotice: '当前为站内体验：房源、价格和档期均为示意；真实申请需经平台核验。',
     rentLead: '半年或一年起租 · 租客免中介费', staysLead: '按晚选择委托经营房源',
@@ -31,11 +32,12 @@ const words = {
     ineligible: '民宿独立经营，不参与置换；未获授权的长租房也不能发起互换申请。',
     understood: '我知道了', back: '返回房源', ready: '业主已授权 · 可申请置换', noExchange: '暂不开放置换',
     occupants: '可住', room: '卧室', rooms: '卧室', baths: '卫生间', beds: '床位', size: '面积', experience: '居住体验', terms: '可选租期',
-    quickRent: '长租房', quickStays: '民宿房', quickExchange: '旅居置换', quickManage: '物业托管',
+    quickRent: '长租', quickStays: '短租', quickExchange: '置换', quickManage: '漫游',
     sampleInventory: '以下房源及参数为页面示意，真实房源与可订日期待核验上线。',
     pinned: '置顶', exchangeBadge: '可置换 · 示意', exchangeMayWaive: '符合条件可免住宿费', exchangeCostsBrief: '保洁费 + 押金 + 水电',
     exchangeSectionNote: '仅已授权的委托租赁业主可申请。每次入住收 ¥600 入住前后保洁费；押金按目标长租房一个月租金，水电据实结算。已出租期间不可置换，芭提雅收等值泰铢。',
     homeManageNote: '委托租赁、委托经营、委托看护。选一种适合您房屋现状的方式。',
+    roamLead: '住进一座城市，再走进它的日常。', roamNote: '三城本地活动体验 · 查看示意内容与站内预约流程',
     registrationTitle: '登记房源意向', serviceScope: '服务与收费', registrationPreview: '可测试提交流程 · 不收集真实资料',
     registrationNotice: '选择房屋信息后可生成一条站内测试记录，保存在当前浏览器。电话与邮箱暂不填写，也不会发送给平台。',
     propertyCity: '房源城市', propertyRegion: '所在区域', propertySize: '建筑面积（m²）',
@@ -78,7 +80,7 @@ const words = {
     testDesk: '流程测试', language: '语言', close: '关闭', footer: '快旅居 · 房屋租赁与托管', legal: '房源与价格均为示意。可在当前浏览器测试流程，不构成真实预订、置换或交易。',
   },
   en: {
-    rent: 'Long stays', stays: 'Short stays', exchange: 'Stay Exchange', manage: 'Property Care', explore: 'Explore homes', more: 'View details',
+    rent: 'Long stays', stays: 'Short stays', exchange: 'Stay Exchange', roam: 'Explore', navRent: 'Long', navStays: 'Short', navExchange: 'Exchange', manage: 'Property Care', explore: 'Explore homes', more: 'View details',
     preview: 'Exchange eligibility', menu: 'Menu', search: 'Search', city: 'City', area: 'Area', stay: 'Stay',
     homeSearchTitle: 'Find your kind of stay', searchRentals: 'Search long stays', searchStays: 'Search short stays', searchExchange: 'Search exchange homes', demoNotice: 'Interactive preview: homes, prices and dates are examples. Live requests require platform verification.',
     rentLead: 'Six or twelve months · no tenant agency fee', staysLead: 'Operated homes for nightly stays',
@@ -90,11 +92,12 @@ const words = {
     ineligible: 'Short stays operate separately and do not join exchange. An unauthorized long-stay home cannot receive an exchange request either.',
     understood: 'Got it', back: 'Back to homes', ready: 'Owner authorized · Exchange eligible', noExchange: 'Exchange unavailable',
     occupants: 'Sleeps', room: 'Bedroom', rooms: 'Bedrooms', baths: 'Bathrooms', beds: 'Beds', size: 'Area', experience: 'The space', terms: 'Stay options',
-    quickRent: 'Long stays', quickStays: 'Short stays', quickExchange: 'Stay exchange', quickManage: 'Property care',
+    quickRent: 'Long', quickStays: 'Short', quickExchange: 'Exchange', quickManage: 'Explore',
     sampleInventory: 'Homes and details below are illustrative. Live inventory and dates require verification.',
     pinned: 'Pinned', exchangeBadge: 'Exchange eligible · concept', exchangeMayWaive: 'Eligible stays may waive rent', exchangeCostsBrief: 'Cleaning + deposit + utilities',
     exchangeSectionNote: 'Only authorized entrusted-leasing owners may apply. Each stay has a ¥600 pre/post-stay cleaning fee, a deposit equal to the occupied home’s monthly rent and metered utilities. Tenanted dates are unavailable. Pattaya charges the THB equivalent.',
     homeManageNote: 'Leasing, full management or home care. Choose the service that fits your property.',
+    roamLead: 'Find a place to stay. Then explore its everyday life.', roamNote: 'Local activity concepts in three cities · preview the booking flow',
     registrationTitle: 'Register a property enquiry', serviceScope: 'Service & fees', registrationPreview: 'Interactive workflow test · no real details collected',
     registrationNotice: 'Submit property choices to create a browser-only test record. Phone and email remain disabled; nothing is sent to the platform.',
     propertyCity: 'Property city', propertyRegion: 'Area', propertySize: 'Floor area (m²)',
@@ -144,7 +147,7 @@ function parseRoute(): Route {
   const parts = path.split('/').filter(Boolean)
   const params = new URLSearchParams(query)
   return {
-    page: parts[0] || 'home', id: parts[0] === 'listing' ? parts[1] : parts[0] === 'request' || (parts[0] === 'exchange' || parts[0] === 'stays') && parts[1] === 'home' ? parts[2] : undefined,
+    page: parts[0] || 'home', id: parts[0] === 'listing' || parts[0] === 'roam' ? parts[1] : parts[0] === 'request' || (parts[0] === 'exchange' || parts[0] === 'stays') && parts[1] === 'home' ? parts[2] : undefined,
     mode: parts[0] === 'management' || parts[0] === 'request' ? parts[1] : undefined,
     filters: { city: params.get('city') || 'all', region: params.get('region') || 'all', type: params.get('type') || 'all', term: params.get('term') || 'all', moveIn: params.get('moveIn') || '', guestsMin: params.get('guests') || 'all', bedroomsMin: params.get('bedrooms') || 'all', areaMin: params.get('area') || 'all' },
     query,
@@ -167,29 +170,72 @@ function rentalsHash(filters: Filters) {
 function Header({ lang, setLang, route }: { lang: Language; setLang: (v: Language) => void; route: Route }) {
   const t = words[lang]
   const [open, setOpen] = useState(false)
+  const isHome = route.page === 'home'
+  const [scrolled, setScrolled] = useState(() => window.scrollY > 170)
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [searchMode, setSearchMode] = useState<'rentals' | 'stays' | 'exchange'>('rentals')
+  const [modeMenuOpen, setModeMenuOpen] = useState(false)
+  const [searchSummary, setSearchSummary] = useState<[string, string, string]>([t.allCities, lang === 'zh' ? '选择日期' : 'Add dates', t.allTerms])
+  const header = useRef<HTMLElement>(null)
+  useEffect(() => {
+    if (!isHome) return
+    const update = () => setScrolled(window.scrollY > 170)
+    update()
+    window.addEventListener('scroll', update, { passive: true })
+    return () => window.removeEventListener('scroll', update)
+  }, [isHome])
+  useEffect(() => { setSearchOpen(false); setModeMenuOpen(false); setOpen(false) }, [route.page])
+  useEffect(() => {
+    if (!isHome || !searchOpen) return
+    const closeOutside = (event: PointerEvent) => { if (!header.current?.contains(event.target as Node)) setSearchOpen(false) }
+    const closeEscape = (event: KeyboardEvent) => { if (event.key === 'Escape') setSearchOpen(false) }
+    document.addEventListener('pointerdown', closeOutside)
+    document.addEventListener('keydown', closeEscape)
+    return () => { document.removeEventListener('pointerdown', closeOutside); document.removeEventListener('keydown', closeEscape) }
+  }, [isHome, searchOpen])
+  useEffect(() => {
+    if (!modeMenuOpen) return
+    const closeOutside = (event: PointerEvent) => { if (!header.current?.querySelector('.home-search-modes')?.contains(event.target as Node)) setModeMenuOpen(false) }
+    const closeEscape = (event: KeyboardEvent) => { if (event.key === 'Escape') setModeMenuOpen(false) }
+    document.addEventListener('pointerdown', closeOutside)
+    document.addEventListener('keydown', closeEscape)
+    return () => { document.removeEventListener('pointerdown', closeOutside); document.removeEventListener('keydown', closeEscape) }
+  }, [modeMenuOpen])
+  useEffect(() => { if (scrolled && !searchOpen) setModeMenuOpen(false) }, [scrolled, searchOpen])
+  const expanded = !scrolled || searchOpen
+  const modeLabel = searchMode === 'rentals' ? t.rent : searchMode === 'stays' ? t.stays : t.exchange
   const nav = [
-    { href: '#/rentals', label: t.rent, key: 'rentals' },
-    { href: '#/stays', label: t.stays, key: 'stays' },
-    { href: '#/exchange', label: t.exchange, key: 'exchange' },
+    { href: '#/rentals', label: t.navRent, key: 'rentals', icon: 'window' as const },
+    { href: '#/stays', label: t.navStays, key: 'stays', icon: 'bed' as const },
+    { href: '#/exchange', label: t.navExchange, key: 'exchange', icon: 'share' as const },
+    { href: '#/roam', label: t.roam, key: 'roam', icon: 'compass' as const },
   ]
-  return <header className="site-header">
+  return <>{isHome && <div className="home-header-space" aria-hidden="true"/>}<header ref={header} className={`site-header${isHome ? ` home-header${expanded ? ' is-expanded' : ' is-compact'}${open ? ' has-menu' : ''}` : ''}`}>
     <div className="header-inner">
       <a className="brand" href="#/" aria-label={lang === 'zh' ? '快旅居首页' : 'Kuai Lü Ju home'}><span className="brand-mark">快</span><span className="brand-name">快旅居<span>KUAI LÜ JU</span></span></a>
       <nav className={`primary-nav ${open ? 'is-open' : ''}`} aria-label={t.menu}>
-        {nav.map(item => <a key={item.key} href={item.href} className={route.page === item.key ? 'is-current' : ''} onClick={() => setOpen(false)}>{item.label}</a>)}
-        <a href="#/management" className={`nav-management ${route.page === 'management' ? 'is-current' : ''}`} onClick={() => setOpen(false)}>{t.manage}<span aria-hidden="true">↗</span></a>
+        {nav.map(item => <a key={item.key} href={item.href} className={route.page === item.key || isHome && searchMode === item.key ? 'is-current' : ''} onClick={() => setOpen(false)}><LineIcon name={item.icon} size={19}/><span>{item.label}</span></a>)}
+        <a href="#/management" className={`nav-management${isHome ? ' home-management-menu-link' : ''}${route.page === 'management' ? ' is-current' : ''}`} onClick={() => setOpen(false)}>{t.manage}<span aria-hidden="true">↗</span></a>
+        {isHome && <a className="mobile-test-link" href="#/test-inbox" onClick={() => setOpen(false)}>{t.testDesk}</a>}
       </nav>
+      {isHome && <button type="button" className="home-compact-search" aria-expanded={expanded} aria-label={`${t.search}：${modeLabel} · ${searchSummary.join(' · ')}`} onClick={() => { setSearchOpen(true); setOpen(false) }}><LineIcon name="search" size={18}/><span className="home-compact-mode">{modeLabel}</span><span className="home-compact-detail">{searchSummary[0]}</span><span className="home-compact-detail">{searchSummary[1]}</span><span className="home-compact-detail">{searchSummary[2]}</span></button>}
       <div className="header-actions">
+        {isHome && <a className="home-management-action" href="#/management">{t.manage} <LineIcon name="arrow" size={14}/></a>}
         <ThemeSwitch lang={lang}/>
         <a className="test-desk-link" href="#/test-inbox">{t.testDesk}</a>
         <button className="language-switch" onClick={() => setLang(lang === 'zh' ? 'en' : 'zh')} aria-label={`${t.language}: ${lang === 'zh' ? 'English' : '中文'}`}>{lang === 'zh' ? 'EN' : '中'}</button>
-        <button className="menu-button" aria-expanded={open} aria-label={t.menu} onClick={() => setOpen(v => !v)}><span></span><span></span></button>
+        <button className="menu-button" aria-expanded={open} aria-label={t.menu} onClick={() => { setOpen(v => !v); setSearchOpen(false) }}><span></span><span></span></button>
       </div>
     </div>
-  </header>
+    {isHome && <div className="home-search-stage"><div className="home-search-stage-inner">
+      <div className="home-search-modes"><button type="button" className="home-search-mode-trigger" aria-expanded={modeMenuOpen} aria-label={`${t.homeSearchTitle}：${modeLabel}`} onClick={() => setModeMenuOpen(value => !value)}><span>{modeLabel}</span><span aria-hidden="true">⌄</span></button>{modeMenuOpen && <div className="home-search-mode-options" role="group" aria-label={t.homeSearchTitle}>{([['rentals', t.rent], ['stays', t.stays], ['exchange', t.exchange]] as const).map(([mode, label]) => <button key={mode} type="button" className={searchMode === mode ? 'is-active' : ''} aria-pressed={searchMode === mode} onClick={() => { setSearchMode(mode); setModeMenuOpen(false) }}>{label}{searchMode === mode && <LineIcon name="check" size={16}/>}</button>)}</div>}</div>
+      <div className="home-search-control">{searchMode === 'rentals' ? <SearchPanel lang={lang} initial={emptyFilters} searchLabel={t.searchRentals} onSummaryChange={setSearchSummary}/> : <SearchForm key={searchMode} lang={lang} initial={emptyExchangeSearch} kind={searchMode} searchLabel={searchMode === 'stays' ? t.searchStays : t.searchExchange} onSummaryChange={setSearchSummary}/>}</div>
+      {scrolled && <button className="home-search-dismiss" type="button" aria-label={t.close} onClick={() => setSearchOpen(false)}><LineIcon name="close" size={17}/></button>}
+    </div></div>}
+  </header></>
 }
 
-function SearchPanel({ lang, initial, searchLabel }: { lang: Language; initial: Filters; searchLabel?: string }) {
+function SearchPanel({ lang, initial, searchLabel, onSummaryChange }: { lang: Language; initial: Filters; searchLabel?: string; onSummaryChange?: (summary: [string, string, string]) => void }) {
   const t = words[lang]
   const [draft, setDraft] = useState(initial)
   const [active, setActive] = useState<'where' | 'when' | 'term' | 'filters' | null>(null)
@@ -211,6 +257,7 @@ function SearchPanel({ lang, initial, searchLabel }: { lang: Language; initial: 
   const termLabel = draft.term === 'halfYear' ? t.halfYear : draft.term === 'year' ? t.year : t.allTerms
   const cityLabel = draft.city === 'all' ? t.allCities : city?.[lang] || t.allCities
   const regionLabel = draft.region === 'all' ? t.allAreas : city?.regions.find(item => item.id === draft.region)?.[lang] || t.allAreas
+  useEffect(() => { onSummaryChange?.([cityLabel, draft.moveIn || (lang === 'zh' ? '选择日期' : 'Add dates'), termLabel]) }, [onSummaryChange, cityLabel, draft.moveIn, lang, termLabel])
   const clear = () => commit(emptyFilters)
   return <div className="compact-finder rental-finder" ref={finder}>
     <div className="compact-searchbar rental-searchbar" role="search">
@@ -262,18 +309,13 @@ function ManagementCards({ lang }: { lang: Language }) {
 
 function HomePage({ lang }: { lang: Language }) {
   const t = words[lang]
-  const [searchMode, setSearchMode] = useState<'rentals' | 'stays' | 'exchange'>('rentals')
   const featured = sortFeaturedListings(listings.filter(item => item.management === 'leased')).slice(0, 6)
   const shortStayHomes = sortFeaturedListings(listings.filter(item => item.management === 'operated')).slice(0, 6)
   const exchangeHomes = sortFeaturedListings(listings.filter(canExchange)).slice(0, 6)
   return <>
-    <div className="mobile-service-nav page-shell" aria-label={t.guide}><a href="#/rentals"><span>01</span>{t.quickRent}</a><a href="#/stays"><span>02</span>{t.quickStays}</a><a href="#/exchange"><span>03</span>{t.quickExchange}</a><a href="#/management"><span>04</span>{t.quickManage}</a></div>
+    <div className="mobile-service-nav page-shell" aria-label={t.guide}><a href="#/rentals"><span>01</span>{t.quickRent}</a><a href="#/stays"><span>02</span>{t.quickStays}</a><a href="#/exchange"><span>03</span>{t.quickExchange}</a><a href="#/roam"><span>04</span>{t.quickManage}</a></div>
     <section className="hero page-shell"><div className="hero-copy"><p className="eyebrow">KUAI LÜ JU / HOMES & STAYS</p><h1>{t.rentalLine}</h1><p className="hero-description">{t.intro}</p></div><div className="hero-visual"><img src={asset('/images/pattaya-concept.jpg')} alt={t.demo}/><span>{t.demo} / PATTAYA</span></div></section>
-    <div className="search-wrap page-shell home-search-shell">
-      <div className="home-search-modes" aria-label={t.homeSearchTitle}><span>{t.homeSearchTitle}</span><div>{([['rentals', t.rent], ['stays', t.stays], ['exchange', t.exchange]] as const).map(([mode, label]) => <button key={mode} type="button" className={searchMode === mode ? 'is-active' : ''} aria-pressed={searchMode === mode} onClick={() => setSearchMode(mode)}>{label}</button>)}</div></div>
-      {searchMode === 'rentals' ? <SearchPanel lang={lang} initial={emptyFilters} searchLabel={t.searchRentals}/> : <SearchForm key={searchMode} lang={lang} initial={emptyExchangeSearch} kind={searchMode} searchLabel={searchMode === 'stays' ? t.searchStays : t.searchExchange}/>}
-      <p className="home-demo-notice"><LineIcon name="shield" size={16}/>{t.demoNotice}</p>
-    </div>
+    <p className="home-demo-notice page-shell"><LineIcon name="shield" size={16}/>{t.demoNotice}</p>
     <section className="section page-shell home-property-section" id="homes"><div className="section-heading"><div><div className="home-section-title"><span className="home-section-number" aria-hidden="true">01</span><h2>{t.rent}</h2>{lang === 'zh' && <span className="home-section-english" aria-hidden="true">LONG STAYS</span>}</div><p className="home-section-lead">{t.rentLead}</p></div><a className="text-link" href="#/rentals">{t.explore} <span>↗</span></a></div><div className="listing-grid home-listing-grid">{featured.map(listing => <ListingCard key={listing.id} listing={listing} lang={lang}/>)}</div></section>
     <section className="section page-shell home-stays-section"><div className="section-heading"><div><div className="home-section-title"><span className="home-section-number" aria-hidden="true">02</span><h2>{t.stays}</h2>{lang === 'zh' && <span className="home-section-english" aria-hidden="true">SHORT STAYS</span>}</div><p className="home-section-lead">{t.staysLead}</p></div><a className="text-link" href="#/stays">{t.explore} <span>↗</span></a></div><div className="listing-grid home-listing-grid">{shortStayHomes.map(listing => <ListingCard key={listing.id} listing={listing} lang={lang} context="stays"/>)}</div></section>
     <section className="section home-exchange-section" id="exchange-homes"><div className="page-shell"><div className="section-heading"><div><div className="home-section-title"><span className="home-section-number" aria-hidden="true">03</span><h2>{t.exchange}</h2>{lang === 'zh' && <span className="home-section-english" aria-hidden="true">STAY EXCHANGE</span>}</div><p className="home-section-lead">{t.exchangeLine}</p></div><a className="text-link" href="#/exchange">{t.more} <span>↗</span></a></div>
@@ -281,7 +323,8 @@ function HomePage({ lang }: { lang: Language }) {
       <div className="home-exchange-story"><div><span>01</span><strong>{t.exchangeWho}</strong><p>{t.exchangeWhoDetail}</p></div><div><span>02</span><strong>{t.exchangeHow}</strong><p>{t.exchangeHowDetail}</p></div><div><span>03</span><strong>{t.exchangeThen}</strong><p>{t.exchangeThenDetail}</p></div></div>
       <div className="home-exchange-costs"><div><small>{t.exchangeFree}</small><strong>{t.exchangeFreeValue}</strong></div><div><small>{t.exchangeClean}</small><strong>{t.exchangeCleanValue}</strong></div><div><small>{t.exchangeDeposit}</small><strong>{t.exchangeDepositValue}</strong></div><div><small>{t.exchangeUtilities}</small><strong>{t.exchangeUtilitiesValue}</strong></div></div><p className="home-exchange-cost-note">{t.exchangeCostNote}</p>
       </div></section>
-    <section className="section page-shell home-management-section" id="property-management"><div className="section-heading"><div><div className="home-section-title"><span className="home-section-number" aria-hidden="true">04</span><h2>{t.manage}</h2>{lang === 'zh' && <span className="home-section-english" aria-hidden="true">PROPERTY CARE</span>}</div><p className="home-section-lead">{t.homeManageNote}</p></div><a className="text-link" href="#/management">{t.more} <span>↗</span></a></div><ManagementCards lang={lang}/></section>
+    <section className="section page-shell home-roam-section" id="roam"><div className="section-heading"><div><div className="home-section-title"><span className="home-section-number" aria-hidden="true">04</span><h2>{t.roam}</h2>{lang === 'zh' && <span className="home-section-english" aria-hidden="true">LOCAL EXPERIENCES</span>}</div><p className="home-section-lead">{t.roamLead}</p></div><a className="text-link" href="#/roam">{t.more} <span>↗</span></a></div><div className="home-roam-strip"><LineIcon name="compass" size={31}/><p>{t.roamNote}</p><div>{cities.map(city => <a key={city.id} href={`#/roam?city=${city.id}`}>{city[lang]} ↗</a>)}</div></div></section>
+    <section className="section page-shell home-management-section" id="property-management"><div className="section-heading"><div><div className="home-section-title"><span className="home-section-number" aria-hidden="true">05</span><h2>{t.manage}</h2>{lang === 'zh' && <span className="home-section-english" aria-hidden="true">PROPERTY CARE</span>}</div><p className="home-section-lead">{t.homeManageNote}</p></div><a className="text-link" href="#/management">{t.more} <span>↗</span></a></div><ManagementCards lang={lang}/></section>
   </>
 }
 
@@ -365,6 +408,7 @@ export default function App() {
     if (route.page === 'stays') return <ExchangeCatalogPage lang={lang} query={route.query} kind="stays"/>
     if (route.page === 'exchange' && route.id) return <ExchangeDetailPage lang={lang} id={route.id} query={route.query} kind="exchange"/>
     if (route.page === 'exchange') return <ExchangeCatalogPage lang={lang} query={route.query} kind="exchange"/>
+    if (route.page === 'roam') return <RoamPage lang={lang} id={route.id} query={route.query}/>
     if (route.page === 'management' && !route.mode) return <ManagementEntry lang={lang} suggested={new URLSearchParams(route.query).get('service') || undefined}/>
     if (route.page === 'management') return <ManagementPage lang={lang} mode={route.mode}/>
     if (route.page === 'request' && route.mode === 'rental') return <RentalRequestPage lang={lang} listingId={route.id} query={route.query}/>
@@ -372,5 +416,5 @@ export default function App() {
     if (route.page === 'test-inbox') return <TestInbox lang={lang}/>
     return <HomePage lang={lang}/>
   }, [route, lang])
-  return <><Header lang={lang} setLang={setLang} route={route}/><main id="main-content">{content}</main><footer className="site-footer"><div className="page-shell"><div className="footer-top"><a className="footer-brand" href="#/">快旅居 <span>KUAI LÜ JU</span></a><nav aria-label="Footer"><a href="#/rentals">{t.rent}</a><a href="#/stays">{t.stays}</a><a href="#/exchange">{t.exchange}</a><a href="#/management">{t.manage}</a></nav></div><div className="footer-bottom"><span>{t.footer}</span><p>{t.legal}</p><span>© {new Date().getFullYear()} KUAI LÜ JU</span></div></div></footer>{message && <div className="modal-backdrop" onClick={() => setMessage(null)}><div className="modal" role="dialog" aria-modal="true" aria-label={t.preview} onClick={e => e.stopPropagation()}><button className="modal-close" onClick={() => setMessage(null)} aria-label={t.close}>×</button><span className="eyebrow">PREVIEW NOTICE</span><h2>{t.preview}</h2><p>{message}</p><button className="button button-dark" onClick={() => setMessage(null)}>{t.understood} ↗</button></div></div>}</>
+  return <><Header lang={lang} setLang={setLang} route={route}/><main id="main-content">{content}</main><footer className="site-footer"><div className="page-shell"><div className="footer-top"><a className="footer-brand" href="#/">快旅居 <span>KUAI LÜ JU</span></a><nav aria-label="Footer"><a href="#/rentals">{t.rent}</a><a href="#/stays">{t.stays}</a><a href="#/exchange">{t.exchange}</a><a href="#/roam">{t.roam}</a><a href="#/management">{t.manage}</a></nav></div><div className="footer-bottom"><span>{t.footer}</span><p>{t.legal}</p><span>© {new Date().getFullYear()} KUAI LÜ JU</span></div></div></footer>{message && <div className="modal-backdrop" onClick={() => setMessage(null)}><div className="modal" role="dialog" aria-modal="true" aria-label={t.preview} onClick={e => e.stopPropagation()}><button className="modal-close" onClick={() => setMessage(null)} aria-label={t.close}>×</button><span className="eyebrow">PREVIEW NOTICE</span><h2>{t.preview}</h2><p>{message}</p><button className="button button-dark" onClick={() => setMessage(null)}>{t.understood} ↗</button></div></div>}</>
 }
