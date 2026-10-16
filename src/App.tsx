@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { ThemeSwitch } from './ThemeSwitch'
 import { HomeFinder } from './HomeFinder'
-import { groupListingsByCity, previewListings } from './lib/homePresentation'
+import { previewListings } from './lib/homePresentation'
+import { parseSortMode, sortDiscoveryListings, supportsPriceSort } from './lib/recommendation'
 import type { HomeMode } from './lib/homeDiscovery'
 import { cities, listings, type Listing, type Term } from './data'
 import { canExchange, estimateLeaseMoveIn, filterListings, formatPrice, longRentalMonthlyPrice, sortFeaturedListings, type Language, type LeasePaymentOption } from './lib/catalog'
@@ -319,7 +320,7 @@ function SiteOverview({ lang }: { lang: Language }) {
   return <div className="home-overview">
     {sections.map(mode => {
       const heading = categoryHeading(mode, lang)
-      const items = previewListings(availableByMode(mode))
+      const items = previewListings(sortDiscoveryListings(availableByMode(mode), 'recommended'))
       return <section className="section page-shell home-overview-section" key={mode} aria-label={heading.title}>
         <div className="section-heading home-overview-heading">
           <div className="home-heading-copy"><h2>{heading.title}</h2><span>{heading.subtitle}</span></div>
@@ -350,22 +351,25 @@ function SiteOverview({ lang }: { lang: Language }) {
 
 function CategoryPage({ lang, mode, query }: { lang: Language; mode: HomeMode; query: string }) {
   const heading = categoryHeading(mode, lang)
-  const listingsByCity = mode === 'roam' ? [] : groupListingsByCity(availableByMode(mode), cities)
+  const [sortMode, setSortMode] = useState(() => parseSortMode(new URLSearchParams(query).get('sort')))
+  const candidates = mode === 'roam' ? [] : availableByMode(mode)
+  const priceComparable = supportsPriceSort(candidates)
+  const sorted = sortDiscoveryListings(candidates, sortMode)
+  const activeSort = !priceComparable && (sortMode === 'price-asc' || sortMode === 'price-desc') ? 'recommended' : sortMode
   const noResults = lang === 'zh' ? '暂无符合条件的演示房源，请调整上方搜索条件。' : 'No demo homes match; try changing your search.'
   return <div className="home-category-view page-shell">
     <div className="section-heading home-overview-heading">
       <div className="home-heading-copy"><h2>{heading.title}</h2><span>{heading.subtitle}</span></div>
+      {mode !== 'roam' && <label className="catalog-sort-control"><span>{lang === 'zh' ? '排序' : 'Sort'}</span><select value={activeSort} onChange={event => setSortMode(parseSortMode(event.target.value))} aria-label={lang === 'zh' ? '房源排序' : 'Sort homes'}><option value="recommended">{lang === 'zh' ? '推荐排序' : 'Recommended'}</option><option value="newest">{lang === 'zh' ? '最新上架' : 'Newest'}</option>{priceComparable && <><option value="price-asc">{lang === 'zh' ? '价格从低到高' : 'Price: low to high'}</option><option value="price-desc">{lang === 'zh' ? '价格从高到低' : 'Price: high to low'}</option></>}</select></label>}
       <a className="text-link" href="#/">{lang === 'zh' ? '返回首页' : 'Home'} <span aria-hidden="true">↗</span></a>
     </div>
     {mode === 'roam'
       ? <RoamPage lang={lang} query={query} embedded hideSearch groupCities/>
-      : listingsByCity.length ? listingsByCity.map(group => {
-          const city = cities.find(item => item.id === group.city)!
-          return <section className="city-listing-section" key={group.city} aria-label={city[lang]}>
-            <div className="city-listing-heading"><h3>{city[lang]}</h3><span>{group.listings.length} {lang === 'zh' ? '套房源' : 'homes'}</span></div>
-            <div className="listing-grid home-four-grid">{group.listings.map(item => <ListingCard key={item.id} listing={item} lang={lang} context={mode}/>)}</div>
-          </section>
-        }) : <div className="empty-state"><p>{noResults}</p></div>}
+      : sorted.length ? <div className="listing-grid home-four-grid">{sorted.map(item =>
+          <ListingCard key={item.id} listing={item} lang={lang} context={mode}/>
+        )}</div>
+        : <div className="empty-state"><p>{noResults}</p></div>}
+    {!priceComparable && mode !== 'roam' && <p className="catalog-sort-note">{lang === 'zh' ? '包含不同币种或计价单位，暂不提供跨币种价格排序。' : 'Price sorting is unavailable across currencies or billing units.'}</p>}
     <p className="home-discovery-results-note">{lang === 'zh' ? '演示房源、价格和档期不是可预订承诺，实际信息仍需核验。' : 'Demo inventory and dates are not live bookings. Verification is required.'}</p>
   </div>
 }
