@@ -6,7 +6,6 @@ import { readExchangeDrafts, validRange, type ExchangeDraft } from './lib/testWo
 import { LineIcon, amenityIcon } from './components/LineIcon'
 import { ExchangeGallery } from './components/ExchangeGallery'
 import { guestRecommendation } from './lib/guestRecommendation'
-import { addDays } from './lib/inventory'
 
 const asset = (path: string) => `${import.meta.env.BASE_URL}${path.replace(/^\//, '')}`
 const words = {
@@ -159,17 +158,6 @@ export function ExchangeCatalogPage({ lang, query, kind = 'exchange' }: { lang: 
   </div>
 }
 
-function Calendar({ home, lang, start, end, onSelect }: { home: Listing; lang: Language; start: string; end: string; onSelect: (date: string) => void }) {
-  const t = words[lang]
-  const [offset, setOffset] = useState(0)
-  const now = new Date()
-  const first = new Date(now.getFullYear(), now.getMonth() + offset, 1)
-  const days = new Date(first.getFullYear(), first.getMonth() + 1, 0).getDate()
-  const pad = (first.getDay() + 6) % 7
-  const weekday = lang === 'zh' ? ['一', '二', '三', '四', '五', '六', '日'] : ['M', 'T', 'W', 'T', 'F', 'S', 'S']
-  return <div className="exchange-calendar"><div className="calendar-head"><strong>{new Intl.DateTimeFormat(lang === 'zh' ? 'zh-CN' : 'en-US', { year: 'numeric', month: 'long' }).format(first)}</strong><div><button type="button" disabled={offset === 0} onClick={() => setOffset(offset - 1)} aria-label={lang === 'zh' ? '上个月' : 'Previous month'}>←</button><button type="button" disabled={offset === 5} onClick={() => setOffset(offset + 1)} aria-label={lang === 'zh' ? '下个月' : 'Next month'}>→</button></div></div><div className="calendar-grid">{weekday.map((label, index) => <small key={index}>{label}</small>)}{Array.from({ length: pad }, (_, index) => <i key={`p${index}`}/>)}{Array.from({ length: days }, (_, index) => { const date = `${first.getFullYear()}-${String(first.getMonth() + 1).padStart(2, '0')}-${String(index + 1).padStart(2, '0')}`; const closed = date < localDate() || !demoAvailable(home.id, { start: date, end: addDays(date, 1) }); return <button key={date} type="button" disabled={closed} className={`${closed ? 'is-blocked' : ''} ${date >= start && date < end && start && end ? 'is-selected' : ''} ${date === start || date === end ? 'is-boundary' : ''}`} aria-label={`${date}${closed ? ` · ${t.blocked}` : ''}`} aria-pressed={date === start || date === end} onClick={() => onSelect(date)}>{index + 1}</button> })}</div><p>{t.availabilityNote}</p></div>
-}
-
 export function ExchangeDetailPage({ lang, id, query, kind = 'exchange' }: { lang: Language; id?: string; query: string; kind?: 'exchange' | 'stays' }) {
   const t = words[lang]
   const home = listings.find(item => item.id === id)
@@ -201,12 +189,6 @@ export function ExchangeDetailPage({ lang, id, query, kind = 'exchange' }: { lan
     params.set('guests', String(chosenGuests))
     window.location.hash = `#/request/${mode}/${home.id}?${params}`
   }
-  const selectDay = (date: string) => {
-    if (!start || end || date <= start) { setStart(date); setEnd(''); setError(''); return }
-    if (!demoAvailable(home.id, { start, end: date })) { setError(t.unavailable); return }
-    setEnd(date)
-    setError('')
-  }
   const related = listings.filter(item => (kind === 'stays' ? item.management === 'operated' : canExchange(item)) && item.id !== home.id && item.guests >= guests).sort((a, b) => Number(b.city === home.city) - Number(a.city === home.city)).slice(0, 3)
   const exchangeCleaning = home.city === 'pattaya' ? (lang === 'zh' ? '¥600 等值泰铢' : 'THB equivalent of ¥600') : '¥600'
   const exchangeDeposit = new Intl.NumberFormat(lang === 'zh' ? 'zh-CN' : 'en-US', { style: 'currency', currency: home.currency, maximumFractionDigits: 0 }).format(home.price)
@@ -229,7 +211,6 @@ export function ExchangeDetailPage({ lang, id, query, kind = 'exchange' }: { lan
       <section className="exchange-info-section"><p className="eyebrow">AMENITIES</p><h2>{t.amenities}</h2><div className="amenity-list">{(amenitiesOpen ? home.amenities : home.amenities.slice(0, 6)).map(item => <span key={item.zh}><LineIcon name={amenityIcon(item.zh)} size={23}/>{item[lang]}</span>)}</div>{home.amenities.length > 6 && <button className="exchange-amenities-toggle" type="button" aria-expanded={amenitiesOpen} onClick={() => setAmenitiesOpen(!amenitiesOpen)}>{amenitiesOpen ? (lang === 'zh' ? '收起设施' : 'Show fewer') : (lang === 'zh' ? `查看全部 ${home.amenities.length} 项设施` : `Show all ${home.amenities.length} amenities`)} <span aria-hidden="true">{amenitiesOpen ? '−' : '+'}</span></button>}<p className="exchange-amenities-note">{lang === 'zh' ? '以上配置为示意数据，真实房源上线前逐项核验。' : 'Concept amenities are verified individually before a live home is published.'}</p></section>
       {kind !== 'stays' && home.walkMin && home.nearby && <section className="exchange-info-section"><p className="eyebrow">WALK SCORE</p><h2>{t.walkTitle}</h2><p className="lead">{t.walkSub} · <strong>{home.walkMin} {lang === 'zh' ? '分钟' : 'min'}</strong></p><ul className="ex-walk-list">{home.nearby.map(item => <li key={item.zh}><LineIcon name="location" size={17}/>{item[lang]}</li>)}</ul></section>}
       {kind !== 'stays' && home.wishlist && <section className="exchange-info-section ex-wish"><p className="eyebrow">EXCHANGE WISH</p><h2>{t.wishTitle}</h2><p className="lead">{t.wishSub}</p><div className="ex-wishlist">{home.wishlist.map(item => <span key={item.zh}><LineIcon name="arrow" size={15}/>{item[lang]}</span>)}</div></section>}
-      {kind !== 'stays' && <section className="exchange-info-section"><p className="eyebrow">AVAILABILITY</p><h2>{t.availability}</h2><Calendar home={home} lang={lang} start={start} end={end} onSelect={selectDay}/></section>}
       <section className="exchange-info-section"><p className="eyebrow">LOCATION</p><h2>{t.location}</h2><div className="exchange-location"><strong>{location(home, lang)}</strong><p>{t.locationNote}</p></div></section>
       <section className="exchange-info-section"><p className="eyebrow">GOOD TO KNOW</p><h2>{t.rules}</h2><p>{t.rulesNote}</p></section>
       {kind === 'exchange' && <section className="exchange-info-section exchange-rules"><p className="eyebrow">OWNER EXCHANGE</p><h2>{t.exchange}</h2><p className="lead">{t.protectSub}</p><div><article><LineIcon name="shield"/><h3>{t.eligibility}</h3><p>{t.eligibilityText}</p></article><article><LineIcon name="calendar"/><h3>{t.timing}</h3><p>{t.timingText}</p></article><article><LineIcon name="utility"/><h3>{t.fees}</h3><p>{t.feesText}</p></article></div><div className="ex-protect-grid">{[{ icon: 'shield' as const, title: t.protect1, sub: t.protect1Sub }, { icon: 'lock' as const, title: t.protect2, sub: t.protect2Sub }, { icon: 'utility' as const, title: t.protect3, sub: t.protect3Sub }, { icon: 'check' as const, title: t.protect4, sub: t.protect4Sub }].map(item => <article key={item.title} className="ex-protect-item"><LineIcon name={item.icon} size={22}/><h3>{item.title}</h3><p>{item.sub}</p></article>)}</div></section>}

@@ -161,7 +161,6 @@ function Header({ lang, setLang, route, mode, onSearch, onAccountClick, previewM
   mode: HomeMode; onSearch: (mode: HomeMode, query: string) => void; onAccountClick: () => void; previewMember: boolean
 }) {
   const t = words[lang]
-  const isHome = route.page === 'home' || (['rentals', 'stays', 'exchange', 'roam'].includes(route.page) && !route.id)
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(() => window.scrollY > 180)
   const [searchOpen, setSearchOpen] = useState(false)
@@ -186,23 +185,29 @@ function Header({ lang, setLang, route, mode, onSearch, onAccountClick, previewM
     setSearchOpen(false)
   }, [route.page])
   useEffect(() => {
-    if (!isHome) return
-    const onScroll = () => setScrolled(window.scrollY > 180)
-    onScroll()
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [isHome])
+    const readScroll = () => {
+      const y = window.scrollY || document.scrollingElement?.scrollTop || 0
+      setScrolled(y > 180)
+    }
+    readScroll()
+    document.addEventListener('scroll', readScroll, { passive: true, capture: true })
+    window.addEventListener('scroll', readScroll, { passive: true })
+    return () => {
+      document.removeEventListener('scroll', readScroll, { capture: true })
+      window.removeEventListener('scroll', readScroll)
+    }
+  }, [])
   useEffect(() => {
-    if (!isHome || !expanded || !headerRef.current) return
+    if (!expanded || !headerRef.current) return
     const node = headerRef.current
     const measure = () => setHomeHeight(Math.ceil(node.getBoundingClientRect().height))
     measure()
     const observer = new ResizeObserver(measure)
     observer.observe(node)
     return () => observer.disconnect()
-  }, [isHome, expanded])
+  }, [expanded])
   useEffect(() => {
-    if (!isHome || !searchOpen || !scrolled) return
+    if (!searchOpen || !scrolled) return
     const onOutside = (event: PointerEvent) => {
       if (!headerRef.current?.contains(event.target as Node)) setSearchOpen(false)
     }
@@ -215,14 +220,14 @@ function Header({ lang, setLang, route, mode, onSearch, onAccountClick, previewM
       document.removeEventListener('pointerdown', onOutside)
       document.removeEventListener('keydown', onEscape)
     }
-  }, [isHome, searchOpen, scrolled])
+  }, [searchOpen, scrolled])
   useEffect(() => {
     if (scrolled && searchOpen) headerRef.current?.querySelector<HTMLSelectElement>('.home-discovery-destination select')?.focus()
   }, [scrolled, searchOpen])
 
   return <>
-    {isHome && <div className="home-header-space" style={{ height: homeHeight }} aria-hidden="true"/>}
-    <header ref={headerRef} className={'site-header clear-site-header' + (isHome ? ' home-affixed' + (expanded ? ' home-expanded' : ' home-collapsed') : '')}>
+    <div className="home-header-space" style={{ height: homeHeight }} aria-hidden="true"/>
+    <header ref={headerRef} className={'site-header clear-site-header home-affixed' + (expanded ? ' home-expanded' : ' home-collapsed')}>
       <div className="header-inner">
         <a className="brand" href="#/" onClick={() => { if (route.page === 'home') window.scrollTo({ top: 0, behavior: 'smooth' }) }} aria-label={lang === 'zh' ? '快旅居首页' : 'Kuai Lü Ju home'}>
           <span className="brand-mark">快</span><span className="brand-name">快旅居<span>KUAI LÜ JU</span></span>
@@ -239,7 +244,7 @@ function Header({ lang, setLang, route, mode, onSearch, onAccountClick, previewM
             <NavGlyph name="management" size={22}/><span>{lang === 'zh' ? '委托' : 'Owners'}</span>
           </a>
         </nav>
-        {isHome && <button type="button" className="home-compact-search" aria-controls="home-search-panel"
+        <button type="button" className="home-compact-search" aria-controls="home-search-panel"
           aria-expanded={expanded} aria-label={(lang === 'zh' ? '展开搜索：' : 'Expand search: ') + modeLabel + ' · ' + searchSummary.join(' · ')}
           onClick={() => { setSearchOpen(true); setOpen(false) }}>
           <span className="compact-search-mode">{modeLabel}</span>
@@ -247,7 +252,7 @@ function Header({ lang, setLang, route, mode, onSearch, onAccountClick, previewM
           <span className="compact-search-detail">{searchSummary[1]}</span>
           <span className="compact-search-detail compact-search-extra">{searchSummary[2]}</span>
           <span className="compact-search-icon"><LineIcon name="search" size={18}/></span>
-        </button>}
+        </button>
         <div className="header-actions clear-header-actions">
           <button type="button" className="account-trigger" onClick={onAccountClick} aria-label={lang === 'zh' ? (previewMember ? '会员账户' : '登录或注册') : (previewMember ? 'Member account' : 'Log in or sign up')}><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.25"/><path d="M5.3 20c.35-3.6 2.75-5.7 6.7-5.7s6.35 2.1 6.7 5.7"/></svg><span>{lang === 'zh' ? (previewMember ? '会员' : '登录/注册') : (previewMember ? 'Member' : 'Log in')}</span></button>
           <button className="language-switch" onClick={() => setLang(lang === 'zh' ? 'en' : 'zh')} aria-label={t.language + ': ' + (lang === 'zh' ? 'English' : '中文')}>{lang === 'zh' ? 'EN' : '中'}</button>
@@ -257,11 +262,11 @@ function Header({ lang, setLang, route, mode, onSearch, onAccountClick, previewM
       {open && <nav className="mobile-utility-menu" aria-label={t.menu}>
         <a href="#/test-inbox" onClick={() => setOpen(false)}>{t.testDesk}</a>
       </nav>}
-      {isHome && <div className="home-finder-stage" id="home-search-panel" aria-hidden={!expanded}>
+      <div className="home-finder-stage" id="home-search-panel" aria-hidden={!expanded}>
         <HomeFinder lang={lang} mode={mode} onSearch={onSearch} onSummaryChange={setSearchSummary}/>
         {scrolled && searchOpen && <button type="button" className="home-finder-dismiss" aria-label={t.close}
           onClick={() => setSearchOpen(false)}><LineIcon name="close" size={18}/></button>}
-      </div>}
+      </div>
     </header>
   </>
 }
@@ -441,7 +446,7 @@ export default function App() {
   useEffect(() => { if (route.page === 'management' && !previewMember) setAccountOpen(true) }, [route.page, previewMember])
   const t = words[lang]
   const category = ['rentals', 'stays', 'exchange', 'roam'].includes(route.page) && !route.id
-  const activeMode: HomeMode = category ? route.page as HomeMode : 'rentals'
+  const activeMode: HomeMode = (['rentals', 'stays', 'exchange', 'roam'] as HomeMode[]).includes(route.page as HomeMode) ? route.page as HomeMode : 'rentals'
   const onHomeSearch = (mode: HomeMode, query: string) => {
     const hash = `#/${mode}${query ? `?${query}` : ''}`
     if (window.location.hash !== hash) window.location.hash = hash
