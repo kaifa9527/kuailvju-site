@@ -18,6 +18,11 @@ const copy = {
     renoOptions: [['new', '新装 / 状态良好'], ['standard', '正常使用'], ['refresh', '需要翻新评估']], furnishingOptions: [['none', '空置'], ['partial', '部分配置'], ['full', '可拎包入住']], applianceOptions: [['none', '无家电'], ['basic', '基础家电'], ['full', '配备齐全']], occupancyOptions: [['vacant', '空置'], ['owner', '业主自住'], ['tenant', '现有租客']],
     rentMinimum: '可接受的租期', rentLong: '仅接受一年', rentQuarter: '半年或一年都可以', cooperationModel: '合作结算方式', modelCommission: '成交后房东支付佣金', modelFixed: '约定房东固定到手租金', expectedRent: '期望一年基础月租 / 到手租金（选填）', mandate: '委托方式', exclusive: '独家委托', nonexclusive: '非独家委托', mandateHint: '长期委托；生效、退出及独家范围以双方私密电子协议为准。非独家房源可在外部出租，平台须先核实档期再确认。', operationReady: '经营准备情况', readyOptions: [['ready', '可直接经营'], ['prepare', '需要整理或配置'], ['review', '希望平台评估']],
     exchangeChoice: '另行授权加入旅居置换', exchangeHint: '仅委托租赁的长租房可自愿加入。勾选后，经核验的城市、区域、房型、面积和照片可在置换板块展示；不公开门牌与联系方式。已有租客占用的日期不可置换；与长租共用档期。', exchangePromptTitle: '要让这套长租房参与旅居置换吗？', exchangePrompt: '授权后，空置可交付的档期可供其他业主发现。置换与长租共用同一房态，已出租期间不可置换。现在不加入也可继续登记。', exchangeBack: '返回勾选授权', exchangeSkip: '不加入，继续登记',
+    ringLead: '资料越完整，越早获得推荐', ringHint: '补充房源故事与人设标签，点亮「优质优选」', premium: '优质优选', premiumHint: '资料完整度 90% 解锁 · 首页流量与曝光翻倍', premiumLocked: '还差一点：补全房源故事与基础资料，即可解锁「优质优选」', progressText: '资料完整度',
+    storyTitle: '聊聊这个家', storyLead: '不用写长表格，像和朋友聊天一样，选一选、点一点就好。', storyNote: '以下回答会展示在您的房源页面，帮助旅人更快喜欢上它。', qCorner: '您最喜欢这套房子的哪个角落？', qUse: '您最希望它被怎样使用？', qNote: '给未来的住客留一句话（选填）', qNotePlaceholder: '例如：推开窗是海风，别忘了在阳台喝一杯。',
+    cornerOptions: [['balcony', '阳台日出'], ['teatable', '客厅茶席'], ['kitchen', '厨房烟火'], ['garden', '庭院绿意']], useOptions: [['self', '自己小住'], ['family', '家人朋友团聚'], ['traveler', '交给有缘的旅人']],
+    personaTitle: '点亮你的房东人设', personaHint: '最多选 3 个，会作为微胶囊标签展示在房源页', personaOptions: [['coast', '海岸慢生活家'], ['garden', '园艺爱好者'], ['surf', '冲浪老手'], ['tea', '茶与慢生活'], ['family', '亲子玩家'], ['nomad', '数字游民'], ['bake', '烘焙达人'], ['craft', '手作匠人']],
+    modelHome: '满分样板间', modelSub: '对标参考：这样填写最容易获得信任', modelName: '北海银滩 · 银滩海岸公寓', modelPersona: '海岸慢生活家 · 园艺爱好者', modelCorner: '最喜欢的角落：阳台日出', modelUse: '最希望的用法：交给有缘的旅人', modelBadge: '已解锁优质优选 · 曝光翻倍', modelCta: '向样板间看齐，点亮你的房源',
     careAddons: '希望了解的升级服务（选填）', careItems: [['garden', '园林修剪'], ['pool', '泳池管理'], ['deepClean', '深度清洁'], ['ac', '空调与除湿维护'], ['pest', '虫害防治'], ['linen', '布草与软装维护'], ['storm', '雨季 / 台风专项巡检'], ['arrival', '返家前准备']],
     photos: '房屋图片（选填）', photoAction: '选择图片', photoHint: '最多 8 张 JPG、PNG 或 WebP；单张不超过 8 MB。只在本页预览，测试记录仅保存图片张数。', photoError: '请选择不超过 8 张、单张小于 8 MB 的 JPG、PNG 或 WebP 图片。', removePhoto: '移除图片', careBase: '基础看护示意月费', careExtra: '升级项目另行报价，不计入基础月费。',
     privateAddress: '详细地址及联系方式', privateHint: '正式服务时，在私密登记流程中填写；当前测试版不采集。', submit: '提交测试登记', saveError: '当前浏览器未能保存测试记录，请检查存储权限后重试。', floorError: '所在楼层不能高于总楼层。',
@@ -55,6 +60,11 @@ const copy = {
     renoOptions: [['new', 'New / good condition'], ['standard', 'Normal use'], ['refresh', 'Needs assessment']], furnishingOptions: [['none', 'Unfurnished'], ['partial', 'Part furnished'], ['full', 'Ready to move in']], applianceOptions: [['none', 'None'], ['basic', 'Basic appliances'], ['full', 'Fully equipped']], occupancyOptions: [['vacant', 'Vacant'], ['owner', 'Owner occupied'], ['tenant', 'Tenanted']],
     rentMinimum: 'Lease terms you accept', rentLong: 'One year only', rentQuarter: 'Six months or one year', cooperationModel: 'Owner payout model', modelCommission: 'Owner pays commission after leasing', modelFixed: 'Agree a fixed take-home rent', expectedRent: 'Annual base monthly rent / take-home rent (optional)', mandate: 'Mandate type', exclusive: 'Exclusive', nonexclusive: 'Non-exclusive', mandateHint: 'Ongoing mandate; start, exit and exclusivity scope belong in the private e-agreement. Non-exclusive homes require an external availability check before confirmation.', operationReady: 'Operating readiness', readyOptions: [['ready', 'Ready to operate'], ['prepare', 'Needs furnishing or preparation'], ['review', 'Request an assessment']],
     exchangeChoice: 'Separately authorize stay exchange', exchangeHint: 'Only entrusted long-stay homes may opt in. Verified city, area, type, size and photos may appear in exchange discovery; exact address and contact details stay private. Tenanted dates are unavailable, and both channels share one calendar.', exchangePromptTitle: 'Add this long-stay home to exchange?', exchangePrompt: 'Available, deliverable dates can be discovered by other owners. Long stays and exchanges share one calendar. You may continue without opting in.', exchangeBack: 'Return to authorize', exchangeSkip: 'Continue without exchange',
+    ringLead: 'A complete profile gets discovered sooner', ringHint: 'Tell the story and light up your persona to unlock Premium', premium: 'Premium pick', premiumHint: 'Unlocks at 90% completeness · double homepage reach', premiumLocked: 'Almost there: finish the story and key details to unlock Premium pick', progressText: 'Profile completeness',
+    storyTitle: 'Tell us about this home', storyLead: 'No long forms — answer like you are chatting with a friend.', storyNote: 'These answers appear on your home page so travellers warm to it faster.', qCorner: 'Which corner do you love most?', qUse: 'How do you hope it is used?', qNote: 'A note for future guests (optional)', qNotePlaceholder: 'e.g. The sea breeze greets you at the window — do not miss a drink on the balcony.',
+    cornerOptions: [['balcony', 'Balcony sunrise'], ['teatable', 'Living-room tea table'], ['kitchen', 'Kitchen warmth'], ['garden', 'Garden greenery']], useOptions: [['self', 'My own retreat'], ['family', 'Family & friends'], ['traveler', 'Travellers with stories']],
+    personaTitle: 'Light up your host persona', personaHint: 'Pick up to 3 — they become capsule tags on your listing', personaOptions: [['coast', 'Coastal slow-lifer'], ['garden', 'Garden lover'], ['surf', 'Surf regular'], ['tea', 'Tea & slow life'], ['family', 'Family player'], ['nomad', 'Digital nomad'], ['bake', 'Baker'], ['craft', 'Craft maker']],
+    modelHome: 'Full-score showcase', modelSub: 'Benchmark: the fastest way to win trust', modelName: 'Beihai Silver Beach · Coastal Flat', modelPersona: 'Coastal slow-lifer · Garden lover', modelCorner: 'Favourite corner: balcony sunrise', modelUse: 'Preferred use: travellers with stories', modelBadge: 'Premium pick unlocked · double reach', modelCta: 'Follow the showcase and light up your home',
     careAddons: 'Optional care upgrades', careItems: [['garden', 'Garden pruning'], ['pool', 'Pool management'], ['deepClean', 'Deep cleaning'], ['ac', 'AC & humidity care'], ['pest', 'Pest prevention'], ['linen', 'Linen & furnishings'], ['storm', 'Storm season checks'], ['arrival', 'Pre-arrival preparation']],
     photos: 'Property photos (optional)', photoAction: 'Choose photos', photoHint: 'Up to 8 JPG, PNG or WebP images, 8 MB each. Previewed on this page only; test records store the photo count.', photoError: 'Choose up to 8 JPG, PNG or WebP images, each below 8 MB.', removePhoto: 'Remove photo', careBase: 'Sample base care per month', careExtra: 'Upgrades are quoted separately and excluded from the base rate.',
     privateAddress: 'Exact address & contact details', privateHint: 'Collected in a private secure flow for live service. This preview does not collect them.', submit: 'Submit test enquiry', saveError: 'This browser could not save the test record. Check storage permissions and try again.', floorError: 'Floor cannot be higher than the total building floors.',
@@ -95,6 +105,11 @@ function RegistrationForm({ lang, mode }: { lang: Language; mode: Mode }) {
   const [saveError, setSaveError] = useState('')
   const [exchangeOptIn, setExchangeOptIn] = useState(false)
   const [exchangePromptOpen, setExchangePromptOpen] = useState(false)
+  const [persona, setPersona] = useState<string[]>([])
+  const [corner, setCorner] = useState('')
+  const [use, setUse] = useState('')
+  const [note, setNote] = useState('')
+  const [, setTick] = useState(0)
   const formRef = useRef<HTMLFormElement>(null)
   const exchangeCheckRef = useRef<HTMLInputElement>(null)
   const city = cities.find(item => item.id === cityId)
@@ -135,8 +150,27 @@ function RegistrationForm({ lang, mode }: { lang: Language; mode: Mode }) {
         careEstimate: careEstimate || undefined,
         photoCount: previews.length,
         exchangeOptIn: mode === 'leasing' && exchangeOptIn,
+        persona: persona.length ? persona : undefined,
+        story: corner || use || note ? { corner: corner || undefined, use: use || undefined, note: note || undefined } : undefined,
       })
     } catch { setSaveError(t.saveError) }
+  }
+
+  function refreshProgress() { setTick(tick => tick + 1) }
+
+  function completion(): number {
+    const form = formRef.current
+    if (!form) return 0
+    const required = Array.from(form.querySelectorAll<HTMLInputElement | HTMLSelectElement>('[required]'))
+    if (!required.length) return 0
+    const done = required.filter(el => el.type === 'checkbox' ? el.checked : String(el.value || '').trim() !== '').length
+    const base = Math.round((done / required.length) * 100)
+    const story = Math.min(20, (persona.length > 0 ? 5 : 0) + (corner ? 5 : 0) + (use ? 5 : 0) + (note ? 5 : 0))
+    return Math.min(100, Math.round(base * 0.8 + story))
+  }
+
+  function togglePersona(value: string) {
+    setPersona(previous => previous.includes(value) ? previous.filter(item => item !== value) : previous.length >= 3 ? previous : [...previous, value])
   }
 
   function submit(event: FormEvent<HTMLFormElement>) {
@@ -147,8 +181,16 @@ function RegistrationForm({ lang, mode }: { lang: Language; mode: Mode }) {
 
   const countOptions = (max: number) => Array.from({ length: max + 1 }, (_, number) => <option key={number} value={number}>{number}</option>)
   const selectOptions = (items: ReadonlyArray<readonly [string, string]>) => <><option value="">{t.choose}</option>{items.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</>
-  return <><form ref={formRef} className="management-form" id="register-property" onSubmit={submit}>
+  const progress = completion()
+  const ring = 2 * Math.PI * 52
+  const premiumUnlocked = progress >= 90
+  return <><form ref={formRef} className="management-form" id="register-property" onSubmit={submit} onChange={refreshProgress}>
     <div className="management-form-head"><p className="eyebrow">PROPERTY / ENQUIRY</p><h2>{t.formTitle}</h2><p>{t.formLead}</p></div>
+    <div className="management-progress" role="status" aria-label={`${t.progressText} ${progress}%`}>
+      <svg className={`progress-ring ${premiumUnlocked ? 'is-premium' : ''}`} viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="52" className="progress-ring-track"/><circle cx="60" cy="60" r="52" className="progress-ring-value" style={{ strokeDasharray: `${(progress / 100) * ring} ${ring}` }}/><text x="60" y="58" textAnchor="middle" className="progress-ring-number">{progress}%</text><text x="60" y="75" textAnchor="middle" className="progress-ring-label">{lang === 'zh' ? '完整度' : 'Complete'}</text></svg>
+      <div className="management-progress-text"><p className="eyebrow">PROFILE / COMPLETENESS</p>{premiumUnlocked ? <><strong>★ {t.premium}</strong><p>{t.premiumHint}</p></> : <><strong>{t.ringLead}</strong><p>{progress >= 75 ? t.premiumLocked : t.ringHint}</p></>}</div>
+    </div>
+    {premiumUnlocked && <p className="management-premium-note"><span aria-hidden="true">★</span>{t.premium} · {t.premiumHint}</p>}
     <div className="management-test-note"><strong>{t.testOnly}</strong><p>{t.testNote}</p></div>
     <fieldset className="management-fieldset"><legend>01 / {t.location}</legend><div className="management-fields">
       <label>{t.city}<select required value={cityId} onChange={event => { setCityId(event.target.value); setRegionId('') }}><option value="">{t.choose}</option>{cities.map(item => <option key={item.id} value={item.id}>{item[lang]}</option>)}</select></label>
@@ -173,6 +215,15 @@ function RegistrationForm({ lang, mode }: { lang: Language; mode: Mode }) {
       {mode === 'operation' && <div className="management-fields"><label className="field-wide">{t.operationReady}<select name="operationReady" required>{selectOptions(t.readyOptions)}</select></label></div>}
       {mode === 'care' && <><p className="management-choice-label">{t.careAddons}</p><div className="management-checks">{t.careItems.map(([value, label]) => <label key={value}><input type="checkbox" name="careAddons" value={value}/>{label}</label>)}</div>{careEstimate !== null && <p className="management-care-estimate"><span>{t.careBase}</span><strong>{new Intl.NumberFormat(lang === 'zh' ? 'zh-CN' : 'en-US', { style: 'currency', currency: careCurrency, maximumFractionDigits: 0 }).format(careEstimate)}</strong><small>{t.careExtra}</small></p>}</>}
     </fieldset>
+    <fieldset className="management-fieldset story-fieldset"><legend>04 / {t.storyTitle}</legend><p className="management-story-lead">{t.storyLead}</p>
+      <div className="story-cards">
+        <div className="story-card"><p className="story-question">{t.qCorner}</p><div className="story-options">{t.cornerOptions.map(([value, label]) => <button key={value} type="button" className={corner === value ? 'is-active' : ''} onClick={() => setCorner(value)}>{label}</button>)}</div></div>
+        <div className="story-card"><p className="story-question">{t.qUse}</p><div className="story-options">{t.useOptions.map(([value, label]) => <button key={value} type="button" className={use === value ? 'is-active' : ''} onClick={() => setUse(value)}>{label}</button>)}</div></div>
+      </div>
+      <label className="story-note-field"><span>{t.qNote}</span><textarea name="storyNote" value={note} rows={2} placeholder={t.qNotePlaceholder} onChange={event => setNote(event.target.value)}/></label>
+      <div className="persona-block"><p className="story-question">{t.personaTitle}</p><p className="persona-hint">{t.personaHint}</p><div className="persona-chips">{t.personaOptions.map(([value, label]) => <button key={value} type="button" className={persona.includes(value) ? 'is-active' : ''} onClick={() => togglePersona(value)}>{label}</button>)}</div></div>
+      <p className="management-story-note">{t.storyNote}</p>
+    </fieldset>
     {mode === 'leasing' && <label className={`management-exchange-consent ${exchangeOptIn ? 'is-selected' : ''}`}><input ref={exchangeCheckRef} type="checkbox" checked={exchangeOptIn} onChange={event => setExchangeOptIn(event.target.checked)}/><span><strong>{t.exchangeChoice}</strong><small>{t.exchangeHint}</small></span></label>}
     <div className="management-photos"><div><strong>{t.photos}</strong><p>{t.photoHint}</p></div><label className="button button-outline">{t.photoAction}<input type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={event => { selectPhotos(event.target.files); event.target.value = '' }}/></label></div>
     {photoError && <p role="alert" className="form-error">{photoError}</p>}
@@ -187,6 +238,7 @@ function ServiceDetails({ lang, mode }: { lang: Language; mode: Mode }) {
   const t = copy[lang]
   const details = t.modes[mode]
   return <aside className="management-service" aria-label={t.serviceTitle}>
+    <div className="management-model-home"><p className="eyebrow">SHOWCASE / FULL SCORE</p><h3>{t.modelHome}</h3><p className="management-model-sub">{t.modelSub}</p><div className="management-model-name">{t.modelName}</div><ul className="management-model-facts"><li>{t.modelPersona}</li><li>{t.modelCorner}</li><li>{t.modelUse}</li></ul><p className="management-model-badge"><span aria-hidden="true">★</span>{t.modelBadge}</p><p className="management-model-cta">{t.modelCta}</p></div>
     <p className="eyebrow">SERVICE / {String(modes.indexOf(mode) + 1).padStart(2, '0')}</p>
     <h2>{t.serviceTitle}</h2><p className="management-service-lead">{details.lead}</p>
     {details.paragraphs.map(paragraph => <p key={paragraph} className="management-service-paragraph">{paragraph}</p>)}

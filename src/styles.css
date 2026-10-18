@@ -1563,3 +1563,52 @@ h1, h2, h3 { min-width: 0; overflow-wrap: anywhere; font-weight: 500; line-heigh
 .ex-protect-item h3 { margin: 0 0 4px; font-size: 14px; color: var(--color-ink); }
 .ex-protect-item p { margin: 0; font-size: 12px; color: var(--color-muted-strong); line-height: 1.6; }
 @media (max-width: 700px) { .ex-protect-grid { grid-template-columns: repeat(2, 1fr); } }
+
+/* ===== 情感化上架四件套（白皮书 UX 重构） ===== */
+/* 1 圆环进度 · 优质优选解锁 */
+.management-progress { display: flex; align-items: center; gap: 16px; margin: 0 0 18px; padding: 14px 16px; border: 1px solid var(--color-rule); border-radius: var(--radius-panel); background: var(--color-white); }
+.progress-ring { width: 84px; height: 84px; flex: none; transform: rotate(-90deg); }
+.progress-ring-track { fill: none; stroke: var(--color-sand); stroke-width: 9; }
+.progress-ring-value { fill: none; stroke: var(--color-accent); stroke-width: 9; stroke-linecap: round; transition: stroke-dasharray .4s ease; }
+.progress-ring.is-premium .progress-ring-value { stroke: #C9A64B; }
+.progress-ring-number { transform: rotate(90deg); transform-origin: 60px 60px; text-anchor: middle; font-size: 24px; font-weight: 700; fill: var(--color-ink); }
+.progress-ring.is-premium .progress-ring-number { fill: #8A6D2F; }
+.progress-ring-label { transform: rotate(90deg); transform-origin: 60px 60px; text-anchor: middle; font-size: 9px; fill: var(--color-muted); }
+.management-progress-text .eyebrow { margin-bottom: 4px; }
+.management-progress-text strong { display: block; font-size: 16px; color: var(--color-ink); }
+.management-progress-text p { margin: 4px 0 0; font-size: 13px; color: var(--color-muted-strong); line-height: 1.5; }
+.management-premium-note { display: flex; align-items: center; gap: 7px; margin: -8px 0 16px; padding: 9px 13px; border-radius: var(--radius-control); background: linear-gradient(135deg, #8A6D2F, #C9A64B); color: #fff; font-size: 13px; font-weight: 600; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), 0 4px 10px rgba(138, 109, 47, .22); }
+/* 2 情感问答卡 */
+.story-fieldset { border-top: 2px solid var(--color-accent); }
+.management-story-lead { margin: 0 0 14px; color: var(--color-muted); font-size: 14px; }
+.story-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.story-card { padding: 16px; border: 1px solid var(--color-rule); border-radius: var(--radius-panel); background: var(--color-white); }
+.story-question { margin: 0 0 12px; font-size: 17px; font-weight: 700; color: var(--color-ink); line-height: 1.5; }
+.story-options { display: flex; flex-wrap: wrap; gap: 8px; }
+.story-options button { padding: 11px 15px; border: 1px solid var(--color-rule); border-radius: var(--radius-control); background: var(--color-paper); color: var(--color-accent); font-size: 14px; font-weight: 500; cursor: pointer; transition: all .15s ease; }
+.story-options button:hover { border-color: var(--color-accent); }
+.story-options button.is-active { background: var(--color-accent); border-color: var(--color-accent); color: #fff; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18), 0 4px 10px rgba(27, 67, 50, .2); }
+.story-note-field { display: block; margin: 12px 0 0; }
+.story-note-field > span { display: block; margin-bottom: 7px; font-size: 17px; font-weight: 700; color: var(--color-ink); }
+.story-note-field textarea { width: 100%; box-sizing: border-box; padding: 12px 14px; border: 1px solid var(--color-rule); border-radius: var(--radius-control); background: var(--color-white); color: var(--color-ink); font: inherit; font-size: 15px; line-height: 1.6; resize: vertical; }
+.story-note-field textarea:focus { outline: none; border-color: var(--color-accent); }
+/* 3 人设标签胶囊 */
+.persona-block { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--color-rule); }
+.persona-hint { margin: -6px 0 10px; color: var(--color-muted); font-size: 12px; }
+.persona-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.persona-chips button { padding: 7px 14px; border: 1px solid var(--color-rule); border-radius: 999px; background: var(--color-white); color: var(--color-muted-strong); font-size: 13px; font-weight: 500; cursor: pointer; transition: all .15s ease; }
+.persona-chips button::before { content: ''; width: 7px; height: 7px; display: inline-block; margin-right: 7px; border-radius: 50%; background: var(--color-tertiary); opacity: .55; }
+.persona-chips button:hover { border-color: var(--color-accent); color: var(--color-accent); }
+.persona-chips button.is-active { background: var(--color-accent-light); border-color: var(--color-accent); color: var(--color-accent); font-weight: 600; }
+.persona-chips button.is-active::before { opacity: 1; }
+.management-story-note { margin: 12px 0 0; color: var(--color-muted); font-size: 12px; }
+/* 4 满分样板间 */
+.management-model-home { margin-bottom: var(--space-6); padding: 16px; border: 1px solid var(--color-rule); border-radius: var(--radius-panel); background: linear-gradient(160deg, var(--color-cream), var(--color-white)); }
+.management-model-home h3 { margin: 0 0 4px; font-size: 18px; color: var(--color-ink); }
+.management-model-sub { margin: 0 0 12px; color: var(--color-muted); font-size: 13px; }
+.management-model-name { padding: 9px 11px; border-radius: var(--radius-control); background: var(--color-white); border: 1px solid var(--color-rule); font-size: 14px; font-weight: 600; color: var(--color-accent); }
+.management-model-facts { list-style: none; margin: 10px 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--color-muted-strong); }
+.management-model-facts li::before { content: ''; width: 6px; height: 6px; display: inline-block; margin-right: 8px; border-radius: 50%; background: var(--color-tertiary); }
+.management-model-badge { display: flex; align-items: center; gap: 6px; margin: 0; padding: 8px 11px; border-radius: 999px; background: linear-gradient(135deg, #8A6D2F, #C9A64B); color: #fff; font-size: 12px; font-weight: 600; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), 0 4px 10px rgba(138, 109, 47, .22); }
+.management-model-cta { margin: 10px 0 0; font-size: 12px; color: var(--color-accent); font-weight: 600; }
+@media (max-width: 700px) { .story-cards { grid-template-columns: 1fr; } .management-progress { align-items: flex-start; } }

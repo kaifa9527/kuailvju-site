@@ -9,6 +9,7 @@ export type ManagementRequest = BaseRequest & {
   renovation?: string; furnishing?: string; appliances?: string; occupancy?: string; rentalMinimum?: string; cooperationModel?: string;
   expectedMonthlyRent?: number; operationReady?: string; careAddons?: string[]; photoCount?: number; careEstimate?: number;
   exchangeOptIn?: boolean; mandateType?: 'exclusive' | 'nonexclusive';
+  persona?: string[]; story?: { corner?: string; use?: string; note?: string };
   status: 'submitted' | 'reviewing' | 'replied'
 }
 export type ExchangeDraft = { id: string; city: string; region: string; propertyType: string; area: number; bedrooms: number; condition?: 'new' | 'standard' | 'refresh'; management: 'leasing'; authorized: true }
