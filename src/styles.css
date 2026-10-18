@@ -1479,16 +1479,16 @@ h1, h2, h3 { min-width: 0; overflow-wrap: anywhere; font-weight: 500; line-heigh
 .account-field-hint { margin: 6px 0 13px; color: var(--color-muted); font-size: 10.5px; line-height: 1.55; }
 .account-consent { display: flex; align-items: flex-start; gap: 8px; margin: 14px 0 13px; color: var(--color-muted); font-size: 11px; line-height: 1.8; }
 .account-consent input { flex: 0 0 auto; width: 14px; height: 14px; margin: 3px 0 0; accent-color: var(--color-accent); }
-.account-legal-link { display: inline; padding: 0; border: 0; background: transparent; color: #737b75; font: inherit; text-decoration: underline; text-decoration-color: #c4c9c3; text-underline-offset: 3px; cursor: pointer; }
+.account-legal-link { display: inline; padding: 0; border: 0; background: transparent; color: var(--color-muted-strong); font: inherit; text-decoration: underline; text-decoration-color: var(--color-rule); text-underline-offset: 3px; cursor: pointer; }
 .account-legal-link:hover { color: var(--color-accent); }
 .account-status { margin: 10px 0; padding: 10px 11px; border-radius: 9px; background: var(--color-cream); color: var(--color-muted); font-size: 11px; line-height: 1.65; }
 .account-primary-button, .account-primary-link { width: 100%; margin-top: 8px; justify-content: center; text-decoration: none; }
-.account-preview-separator { display: flex; align-items: center; gap: 12px; margin: 17px 0 12px; color: #929891; font-size: 10px; }
+.account-preview-separator { display: flex; align-items: center; gap: 12px; margin: 17px 0 12px; color: var(--color-muted); font-size: 10px; }
 .account-preview-separator::before, .account-preview-separator::after { content: ''; height: 1px; flex: 1; background: var(--color-rule); }
 .account-preview-button { display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 43px; padding: 0 13px; border: 1px solid var(--color-rule); border-radius: 10px; background: transparent; color: var(--color-ink); font-size: 12px; }
 .account-preview-button:hover { border-color: var(--color-accent); }
 .account-preview-button span { color: var(--color-accent); font-size: 17px; }
-.account-preview-note { margin: 10px 0 0; color: #838a84; font-size: 10px; line-height: 1.65; }
+.account-preview-note { margin: 10px 0 0; color: var(--color-muted); font-size: 10px; line-height: 1.65; }
 .account-avatar-large { display: grid; place-items: center; width: 58px; height: 58px; margin: 24px 0 15px; border: 1px solid var(--color-rule); border-radius: 50%; background: var(--color-white); }
 .account-avatar-large svg { width: 30px; height: 30px; fill: none; stroke: var(--color-accent); stroke-width: 1.5; stroke-linecap: round; }
 .account-text-action { margin-top: 17px; padding: 5px 0; border: 0; background: transparent; color: var(--color-muted); font-size: 11px; text-decoration: underline; text-underline-offset: 3px; }
@@ -1505,10 +1505,10 @@ h1, h2, h3 { min-width: 0; overflow-wrap: anywhere; font-weight: 500; line-heigh
 .legal-dialog-header .eyebrow { color: var(--color-muted); font-size: 9px; letter-spacing: .13em; }
 .legal-dialog-header h2 { margin: 7px 0 0; font-size: 20px; letter-spacing: -.02em; }
 .legal-scroll { overflow-y: auto; overscroll-behavior: contain; padding: 15px 28px 18px; }
-.legal-scroll .legal-intro { margin: 0 0 15px; color: #858c86; font-size: 11px; line-height: 1.75; }
+.legal-scroll .legal-intro { margin: 0 0 15px; color: var(--color-muted); font-size: 11px; line-height: 1.75; }
 .legal-scroll section { margin: 0 0 14px; }
-.legal-scroll h3 { margin: 0 0 4px; color: #666e68; font-size: 12px; line-height: 1.6; font-weight: 650; letter-spacing: 0; }
-.legal-scroll section p { margin: 0; color: #737a74; font-size: 11.5px; line-height: 1.85; font-weight: 400; }
+.legal-scroll h3 { margin: 0 0 4px; color: var(--color-ink); font-size: 12px; line-height: 1.6; font-weight: 650; letter-spacing: 0; }
+.legal-scroll section p { margin: 0; color: var(--color-muted); font-size: 11.5px; line-height: 1.85; font-weight: 400; }
 .legal-dialog-footer { flex: 0 0 auto; padding: 12px 28px 20px; border-top: 1px solid var(--color-rule); }
 .legal-dialog-footer .button { width: 100%; min-height: 42px; justify-content: center; font-size: 12px; }
 @media (max-width: 760px) {

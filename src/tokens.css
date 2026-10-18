@@ -15,8 +15,8 @@
   --color-footer-muted: oklch(78% 0.006 165);
   --color-backdrop: oklch(18% 0.01 155 / .55);
   --color-dialog-shadow: oklch(15% 0.01 155 / .2);
-  --font-body: -apple-system, BlinkMacSystemFont, "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
-  --font-display: "Iowan Old Style", "Baskerville", "Times New Roman", "Songti SC", "Noto Serif SC", serif;
+  --font-body: "Plus Jakarta Sans", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: "Epilogue", "Noto Serif SC", "Songti SC", "PingFang SC", "Iowan Old Style", serif;
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;

@@ -1,23 +1,28 @@
 /* Shared component layer; keep the coastal editorial identity. */
 :root {
   color-scheme: light;
-  --color-paper: #FAF9F6;
-  --color-cream: #F0EFEA;
-  --color-sand: #E8E6DF;
-  --color-white: #FFFFFF;
-  --color-ink: #252926;
-  --color-muted: #646B66;
-  --color-accent: #356654;
-  --color-accent-light: #E3EEE8;
-  --color-rule: #D5D8D2;
+  /* 快旅居视觉宪法 · 极简轻奢与东方禅意 */
+  --color-primary: #1B4332;      /* 深森林墨绿：导航/CTA/选中 */
+  --color-secondary: #52796F;    /* 鼠尾草灰绿：次级文字/边框/房源参数 */
+  --color-tertiary: #D87258;     /* 陶土砖橙：价格高亮/角标（克制使用，不做大色块底） */
+  --color-paper: #F9F7F2;        /* 暖米白：全局底色（禁纯死白铺底） */
+  --color-cream: #F1EDE4;        /* 次级底色 */
+  --color-sand: #E6E1D6;         /* 更深底/占位底 */
+  --color-white: #FFFFFF;        /* surface：浮于米白背景的卡片容器 */
+  --color-ink: #1E332B;          /* 深墨绿黑：主文字 */
+  --color-muted: #52796F;        /* 次级文字（≥14px 使用） */
+  --color-muted-strong: #3E6359; /* 更深的次级文字（小字/法律页） */
+  --color-accent: #1B4332;
+  --color-accent-light: #E4EFE8;
+  --color-rule: #D9D4C8;
   --color-on-solid: #fff;
-  --color-footer: oklch(23% 0.018 160);
-  --color-success: oklch(39% 0.075 155);
-  --color-error: oklch(43% 0.14 27);
-  --color-disabled: oklch(55% 0.01 160);
+  --color-footer: #143027;
+  --color-success: #2F6B4F;
+  --color-error: #B4553B;
+  --color-disabled: #8A938D;
   --radius-control: 12px;
-  --radius-card: 20px;
-  --radius-panel: 24px;
+  --radius-card: 16px;   /* 白皮书：surface 卡片 16px 圆角 */
+  --radius-panel: 20px;
   --control-height: 48px;
   --touch-size: 44px;
   --leading-heading: 1.25;
@@ -38,7 +43,8 @@ h3 { line-height: 1.35; letter-spacing: -.015em; }
 }
 .button:hover { transform: none; }
 .button:active:not(:disabled) { transform: scale(.98); }
-.button-dark, .button-dark:hover { background: var(--color-accent); border-color: var(--color-accent); color: var(--color-paper); }
+.button-dark, .button-dark:hover { background: var(--color-accent); border-color: var(--color-accent); color: var(--color-paper);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 6px 16px rgba(27,67,50,.18); }
 .button-dark:hover { filter: brightness(.95); }
 .button-outline:hover, .button-light:hover { background: var(--color-cream); color: var(--color-accent); border-color: var(--color-accent); }
 .button:disabled, [aria-disabled="true"] { color: var(--color-disabled); background: var(--color-cream); border-color: var(--color-rule); opacity: 1; }
@@ -63,7 +69,8 @@ input[aria-invalid="true"], select[aria-invalid="true"], textarea[aria-invalid="
 .search-panel, .compact-searchbar { border-color: var(--color-rule); }
 .search-panel select, .exchange-action-fields input, .exchange-action-fields select { border-radius: 0; }
 .search-advanced select { min-height: var(--touch-size); font-size: var(--text-base); }
-.listing-card, .exchange-draft-card { border-radius: var(--radius-card); overflow: hidden; }
+.listing-card, .exchange-draft-card { border-radius: var(--radius-card); overflow: hidden;
+  box-shadow: 0 2px 6px rgba(27,67,50,.05), 0 14px 30px rgba(27,67,50,.07); }
 .listing-card { transition: border-color 120ms linear; }
 .listing-card:hover, .listing-card:active { transform: none; }
 .listing-card .listing-image { aspect-ratio: 4 / 3; }
