@@ -18,6 +18,10 @@
   --color-on-solid: #fff;
   --color-footer: #143027;
   --color-success: #2F6B4F;
+  --color-open: #2F8F5B;         /* 开放置换状态徽标绿（比 success 更亮，仅用于状态点） */
+  --color-gold: #C9A64B;         /* 特权金标亮色：独家托管/优质优选角标 */
+  --color-gold-deep: #8A6D2F;    /* 特权金标深色：金色文字/深端 */
+  --gradient-gold: linear-gradient(135deg, #8A6D2F, #C9A64B); /* 特权角标渐变 */
   --color-error: #B4553B;
   --color-disabled: #8A938D;
   --radius-control: 12px;
