@@ -1,4 +1,4 @@
-export type CityId = 'pattaya' | 'sanya' | 'beihai'
+export type CityId = 'pattaya' | 'sanya' | 'beihai' | 'xishuangbanna'
 export type Term = 'day' | 'month' | 'quarter' | 'halfYear' | 'year'
 export type Localized = { zh: string; en: string }
 
@@ -46,6 +46,7 @@ export const cities: { id: CityId; zh: string; en: string; regions: { id: string
   { id: 'pattaya', zh: '芭提雅', en: 'Pattaya', regions: [{ id: 'jomtien', zh: '中天海滩', en: 'Jomtien' }, { id: 'north', zh: '北芭提雅', en: 'North Pattaya' }] },
   { id: 'sanya', zh: '三亚', en: 'Sanya', regions: [{ id: 'haitang', zh: '海棠湾', en: 'Haitang Bay' }, { id: 'yalo', zh: '亚龙湾', en: 'Yalong Bay' }] },
   { id: 'beihai', zh: '北海', en: 'Beihai', regions: [{ id: 'yintan', zh: '银滩', en: 'Silver Beach' }, { id: 'qiaogang', zh: '侨港', en: 'Qiaogang' }] },
+  { id: 'xishuangbanna', zh: '西双版纳', en: 'Xishuangbanna', regions: [{ id: 'gaozhuang', zh: '告庄西双景', en: 'Gaozhuang' }, { id: 'jinghong', zh: '景洪市区', en: 'Jinghong' }] },
 ]
 
 export const listings: Listing[] = [
@@ -182,5 +183,34 @@ export const listings: Listing[] = [
     price: 3600, currency: 'CNY', priceUnit: 'month', pinned: false, publishedAt: '2026-10-01', highlight: { zh: '海岸慢生活', en: 'Easy coastal living' }, demo: true,
     features: [{ zh: '双卧与独立餐厅', en: 'Two bedrooms and a dining area' }, { zh: '适合家庭或结伴长住', en: 'Suited to family or shared long stays' }],
     amenities: [{ zh: '起居室', en: 'Living area' }, { zh: '餐厅', en: 'Dining area' }, { zh: '空调', en: 'Air conditioning' }, { zh: '海景窗景', en: 'Sea-facing windows' }],
+  },
+  {
+    id: 'xishuangbanna-gaozhuang-monthly', city: 'xishuangbanna', region: 'gaozhuang',
+    title: { zh: '告庄雨林度假公寓', en: 'Gaozhuang Rainforest Retreat' },
+    description: { zh: '雨林环绕的傣式度假公寓，庭院泳池与木构起居空间相连。房源与图片仅为页面示意。', en: 'A Dai-style retreat wrapped in rainforest, with a courtyard pool beside a timber living space. Concept home and imagery only.' },
+    type: { zh: '度假公寓', en: 'Retreat apartment' },
+    gallery: [{ image: '/images/xishuangbanna-gaozhuang.jpg', caption: { zh: '庭院与泳池 · 视觉示意', en: 'Courtyard and pool · concept' } }, { image: '/images/xishuangbanna-bedroom.jpg', caption: { zh: '卧室与自然光 · 视觉示意', en: 'Bedroom in natural light · concept' } }],
+    guests: 4, bedrooms: 2, bathrooms: 2, beds: 2, area: 96, terms: ['halfYear', 'year'], management: 'leased', condition: 'new', mandateType: 'exclusive', exchangeAuthorized: true, exchangeOpen: true,
+    price: 1200, currency: 'CNY', priceUnit: 'month', pinned: false, publishedAt: '2026-10-10', highlight: { zh: '雨林庭院', en: 'Rainforest courtyard' }, demo: true,
+    features: [{ zh: '庭院泳池连接起居空间', en: 'Courtyard pool opens to the living area' }, { zh: '按月长住，适合避寒候鸟', en: 'Monthly stays for winter sun-seekers' }],
+    amenities: [{ zh: '庭院', en: 'Courtyard' }, { zh: '泳池', en: 'Pool' }, { zh: '起居室', en: 'Living area' }, { zh: '空调', en: 'Air conditioning' }, { zh: '无线网络', en: 'Wi-Fi' }],
+    persona: [{ zh: '雨林候鸟', en: 'Rainforest traveller' }, { zh: '茶与慢生活', en: 'Tea & slow life' }],
+    ownerIntro: { zh: '我们把版纳的家托付给快旅居独家托管。每天推开窗是雨林和茶山，想把这份安静也换给你。', en: 'Our Xishuangbanna home is under Kuaijl exclusive care. Every window opens to rainforest and tea hills — we would love to swap that calm with you.' },
+    goldenBadge: true, walkMin: 10,
+    nearby: [{ zh: '告庄星光夜市 · 步行8分钟', en: 'Gaozhuang night market · 8 min walk' }, { zh: '澜沧江步道 · 步行10分钟', en: 'Mekong promenade · 10 min walk' }, { zh: '本地茶室 · 步行5分钟', en: 'Local tea house · 5 min walk' }],
+    wishlist: [{ zh: '芭提雅 · 泳池别墅', en: 'Pattaya · pool villa' }, { zh: '三亚 · 海棠湾', en: 'Sanya · Haitang Bay' }, { zh: '带庭院的海边之家', en: 'A seaside home with a garden' }],
+    inspection: { passed: true, date: '2026-10-12', note: { zh: '防潮、木构与庭院设施核验通过，可交付', en: 'Moisture control, timber structure and courtyard verified and ready' } },
+  },
+  {
+    id: 'xishuangbanna-jinghong-stay', city: 'xishuangbanna', region: 'jinghong',
+    title: { zh: '景洪雨林民宿', en: 'Jinghong Rainforest Guesthouse' },
+    description: { zh: '木质坡屋顶与自然光组成的轻松短住空间，窗外是热带绿植。房源与图片仅为页面示意。', en: 'A relaxed short stay under a timber roof in natural light, framed by tropical greenery. Concept home and imagery only.' },
+    type: { zh: '雨林民宿', en: 'Rainforest guesthouse' },
+    gallery: [{ image: '/images/xishuangbanna-bedroom.jpg', caption: { zh: '卧室与藤编细节 · 视觉示意', en: 'Bedroom and rattan details · concept' } }],
+    guests: 2, bedrooms: 1, bathrooms: 1, beds: 1, area: 45, terms: ['day'], management: 'operated', exchangeAuthorized: false, exchangeOpen: false,
+    price: 180, currency: 'CNY', priceUnit: 'day', pinned: false, publishedAt: '2026-10-12', highlight: { zh: '自然光与绿意', en: 'Natural light & greenery' }, demo: true,
+    features: [{ zh: '藤编与木质细节', en: 'Rattan and timber details' }, { zh: '适合双人短住', en: 'A compact stay for two' }],
+    selfCheckIn: true,
+    amenities: [{ zh: '庭景窗景', en: 'Garden outlook' }, { zh: '厨房', en: 'Kitchen' }, { zh: '空调', en: 'Air conditioning' }, { zh: '无线网络', en: 'Wi-Fi' }],
   },
 ]
