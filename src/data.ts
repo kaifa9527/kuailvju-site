@@ -31,6 +31,14 @@ export type Listing = {
   amenities: Localized[]
   selfCheckIn?: boolean
   verifiedReviews?: { rating: number; stayCompleted: true }[]
+  /* A–F 六区（白皮书·详情页） */
+  persona?: Localized[]          /* B 房东信任 · 人设标签 */
+  ownerIntro?: Localized         /* B 房东信任 · 自荐 */
+  goldenBadge?: boolean          /* B 房东信任 · 独家托管金标 */
+  walkMin?: number               /* C 步行 10 分钟便利圈 */
+  nearby?: Localized[]           /* C 步行便利清单 */
+  wishlist?: Localized[]         /* D 交换偏好 · 愿望清单 */
+  inspection?: { passed: boolean; date: string; note: Localized } /* E 品控验房记录 */
   demo: true
 }
 
@@ -81,6 +89,12 @@ export const listings: Listing[] = [
     price: 3900, currency: 'CNY', priceUnit: 'month', pinned: true, publishedAt: '2026-09-20', highlight: { zh: '长租友好', en: 'Long-stay friendly' }, demo: true,
     features: [{ zh: '卧室与起居分区清晰', en: 'Separate rest and living areas' }, { zh: '按月计价，适合较长停留', en: 'Monthly pricing for longer stays' }],
     amenities: [{ zh: '海景窗景', en: 'Sea-facing windows' }, { zh: '起居室', en: 'Living room' }, { zh: '餐厅', en: 'Dining area' }, { zh: '空调', en: 'Air conditioning' }],
+    persona: [{ zh: '海岸慢生活家', en: 'Coastal slow-living host' }, { zh: '园艺爱好者', en: 'Garden lover' }],
+    ownerIntro: { zh: '这是我留在北海的第二个家，交给快旅居独家托管。我喜欢它每天被海风叫醒、阳台上有绿意的感觉。', en: 'My second home in Beihai, under exclusive care with Kuaijl. I love waking to the sea breeze with green on the balcony.' },
+    goldenBadge: true, walkMin: 10,
+    nearby: [{ zh: '银滩步行道 · 步行5分钟', en: 'Silver Beach boardwalk · 5 min walk' }, { zh: '侨港风情街 · 步行10分钟', en: 'Qiaogang food street · 10 min walk' }, { zh: '本地菜市场 · 步行8分钟', en: 'Local market · 8 min walk' }],
+    wishlist: [{ zh: '三亚 · 海棠湾', en: 'Sanya · Haitang Bay' }, { zh: '芭提雅 · 中天海滩', en: 'Pattaya · Jomtien' }, { zh: '海边两居以上的家', en: 'A 2+ bedroom home by the sea' }],
+    inspection: { passed: true, date: '2026-10-08', note: { zh: '水电、墙面、家具与家电核验通过，可交付', en: 'Utilities, walls, furniture and appliances verified and ready' } },
   },
   {
     id: 'pattaya-north-two-bedroom', city: 'pattaya', region: 'north',
@@ -136,7 +150,7 @@ export const listings: Listing[] = [
     description: { zh: '起居、用餐与卧室分区清楚，适合较长居住。房源与价格仅为页面示意。', en: 'A clear living, dining and sleeping layout for longer stays. Concept home and price only.' },
     type: { zh: '长租公寓', en: 'Monthly apartment' },
     gallery: [{ image: '/images/pattaya-north-monthly.jpg', caption: { zh: '客厅与阳台 · 视觉示意', en: 'Living room and balcony · concept' } }],
-    guests: 2, bedrooms: 1, bathrooms: 1, beds: 1, area: 55, terms: ['halfYear', 'year'], management: 'leased', condition: 'standard', mandateType: 'nonexclusive', exchangeAuthorized: true, exchangeOpen: true,
+    guests: 2, bedrooms: 1, bathrooms: 1, beds: 1, area: 55, terms: ['halfYear', 'year'], management: 'leased', condition: 'standard', mandateType: 'nonexclusive', exchangeAuthorized: false, exchangeOpen: false,
     price: 18000, currency: 'THB', priceUnit: 'month', pinned: false, publishedAt: '2026-10-03', highlight: { zh: '日常生活便利', en: 'Easy everyday living' }, demo: true,
     features: [{ zh: '独立卧室与客厅', en: 'Separate bedroom and living room' }, { zh: '适合一至两人长住', en: 'Suited to one or two long-stay guests' }],
     amenities: [{ zh: '阳台', en: 'Balcony' }, { zh: '起居室', en: 'Living area' }, { zh: '空调', en: 'Air conditioning' }, { zh: '无线网络', en: 'Wi-Fi' }],
@@ -151,6 +165,12 @@ export const listings: Listing[] = [
     price: 6200, currency: 'CNY', priceUnit: 'month', pinned: false, publishedAt: '2026-10-02', highlight: { zh: '绿意庭景', en: 'Garden outlook' }, demo: true,
     features: [{ zh: '家庭友好的双卧布局', en: 'Two-bedroom family layout' }, { zh: '起居与用餐空间完整', en: 'Full living and dining areas' }],
     amenities: [{ zh: '庭景窗景', en: 'Garden outlook' }, { zh: '起居室', en: 'Living area' }, { zh: '空调', en: 'Air conditioning' }, { zh: '餐厅', en: 'Dining area' }],
+    persona: [{ zh: '亲子旅居达人', en: 'Family-travel host' }, { zh: '园艺爱好者', en: 'Garden lover' }],
+    ownerIntro: { zh: '这套房是我们一家三口度假用的，现在交给快旅居独家托管。窗外是整片绿庭，希望你也喜欢。', en: 'Our family holiday home, now under exclusive care with Kuaijl. A full garden outside the window — I hope you love it too.' },
+    goldenBadge: true, walkMin: 10,
+    nearby: [{ zh: '海棠湾免税城 · 步行10分钟', en: 'Haitang Bay duty-free mall · 10 min walk' }, { zh: '沿海步道 · 步行6分钟', en: 'Coastal promenade · 6 min walk' }, { zh: '社区超市 · 步行5分钟', en: 'Neighbourhood market · 5 min walk' }],
+    wishlist: [{ zh: '芭提雅 · 泳池别墅', en: 'Pattaya · pool villa' }, { zh: '北海 · 银滩海岸', en: 'Beihai · Silver Beach' }, { zh: '带庭院的度假屋', en: 'A holiday home with a garden' }],
+    inspection: { passed: true, date: '2026-10-05', note: { zh: '家电、墙面与儿童防护设施核验通过，可交付', en: 'Appliances, walls and child-safety features verified and ready' } },
   },
   {
     id: 'beihai-qiaogang-monthly', city: 'beihai', region: 'qiaogang',

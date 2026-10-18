@@ -34,12 +34,13 @@ test('filterListings applies long-stay detail filters', () => {
   assert.deepEqual(filterListings(typed, { guestsMin: '4', bedroomsMin: '2', areaMin: '80' }).map(item => item.id), ['b'])
 })
 
-test('canExchange accepts only authorized long-stay homes; operated stays stay separate', () => {
+test('canExchange accepts only exclusive entrusted long-stay homes; operated stays and non-exclusive mandates stay separate', () => {
   assert.equal(canExchange(sample[0]), false)
   assert.equal(canExchange(sample[1]), false)
   assert.equal(canExchange(sample[2]), false)
-  assert.equal(canExchange({ ...sample[1], exchangeAuthorized: true, exchangeOpen: true }), true)
-  assert.equal(canExchange({ ...sample[1], management: 'care', exchangeAuthorized: true, exchangeOpen: true }), false)
+  assert.equal(canExchange({ ...sample[1], mandateType: 'exclusive', exchangeAuthorized: true, exchangeOpen: true }), true)
+  assert.equal(canExchange({ ...sample[1], exchangeAuthorized: true, exchangeOpen: true }), false, 'non-exclusive mandate cannot join exchange')
+  assert.equal(canExchange({ ...sample[1], mandateType: 'exclusive', management: 'care', exchangeAuthorized: true, exchangeOpen: true }), false)
 })
 
 test('six-month rent rises 10 percent while one-year rent stays at the base rate', () => {

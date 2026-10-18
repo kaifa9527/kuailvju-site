@@ -30,6 +30,7 @@ function propertyCategory(type?: { zh: string; en: string }): string {
 
 type ExchangeListing = {
   management: string
+  mandateType?: 'exclusive' | 'nonexclusive'
   exchangeAuthorized: boolean
   exchangeOpen: boolean
 }
@@ -53,7 +54,7 @@ export function filterListings<T extends SearchableListing>(items: readonly T[],
 }
 
 export function canExchange(listing: ExchangeListing): boolean {
-  return listing.management === 'leased' && listing.exchangeAuthorized && listing.exchangeOpen
+  return listing.management === 'leased' && listing.mandateType === 'exclusive' && listing.exchangeAuthorized && listing.exchangeOpen
 }
 
 export function longRentalMonthlyPrice(baseMonthlyRent: number, term: 'halfYear' | 'year'): number {
