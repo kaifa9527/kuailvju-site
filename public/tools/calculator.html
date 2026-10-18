@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>快旅居 · 房东收益测算器（原型）</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230E3B43'/%3E%3Cpath d='M7 24c3-8 6-12 9-12s6 4 9 12' stroke='%23E9C46A' stroke-width='2.6' fill='none' stroke-linecap='round'/%3E%3Cpath d='M7 24c3 8 6 12 9 12s6-4 9-12' stroke='%232A9D8F' stroke-width='2.6' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='16' cy='12' r='2.6' fill='%23E9C46A'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap">
+<style>
+/* ===== 基础 ===== */
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --deep:#0E3B43;
+  --teal:#1B6B72;
+  --sea:#2A9D8F;
+  --sand:#E9C46A;
+  --bg:#F6F3EC;
+  --ink:#22333B;
+  --muted:#6B7A80;
+  --coral:#E76F51;
+  --card:#FFFFFF;
+  --line:#DCE4E3;
+  --ok:#2A9D8F;
+  --warn:#E9C46A;
+}
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:"Noto Sans SC","PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+  background:var(--bg);color:var(--ink);line-height:1.6;
+  font-size:15px;
+}
+.wrap{max-width:1120px;margin:0 auto;padding:0 16px}
+/* ===== Hero ===== */
+.hero{
+  background:linear-gradient(150deg,var(--deep) 0%,var(--teal) 78%);
+  color:#fff;padding:44px 0 38px;border-radius:0 0 28px 28px;
+}
+.hero .kicker{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:12.5px;letter-spacing:.18em;color:var(--sand);
+  border:1px solid rgba(233,196,106,.45);border-radius:999px;padding:5px 14px;margin-bottom:16px;
+}
+.hero h1{font-size:clamp(26px,5.2vw,40px);font-weight:900;line-height:1.25;letter-spacing:.01em}
+.hero p.sub{margin-top:12px;font-size:15px;color:#D8E6E4;max-width:640px}
+.hero .statrow{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+.hero .stat{
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);
+  border-radius:14px;padding:10px 16px;min-width:150px;flex:1 1 150px;
+}
+.hero .stat b{display:block;font-size:19px;color:var(--sand)}
+.hero .stat span{font-size:12px;color:#BFD3D1}
+/* ===== 布局 ===== */
+main{margin-top:-6px;padding:28px 0 0}
+.grid{display:grid;grid-template-columns:1fr;gap:18px}
+@media(min-width:900px){
+  .grid{grid-template-columns:400px 1fr;gap:24px;align-items:start}
+}
+/* ===== 输入卡 ===== */
+.panel{
+  background:var(--card);border:1px solid var(--line);border-radius:18px;
+  padding:18px 16px;box-shadow:0 1px 2px rgba(14,59,67,.05);
+}
+@media(min-width:900px){.left{position:sticky;top:14px}}
+.panel h2{font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.panel h2 .n{
+  width:22px;height:22px;border-radius:50%;background:var(--deep);color:var(--sand);
+  font-size:12.5px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:none;
+}
+.field{margin-bottom:13px}
+.field label{display:block;font-size:13px;font-weight:500;color:var(--deep);margin-bottom:5px}
+.field .hint{font-size:11.5px;color:var(--muted);margin-top:4px}
+.field select,.field input{
+  width:100%;padding:10px 12px;border:1px solid #C9D5D3;border-radius:10px;
+  font-size:16px;font-family:inherit;background:#FBFCFA;color:var(--ink);
+}
+.field select:focus,.field input:focus{outline:2px solid var(--sea);outline-offset:-1px;border-color:var(--sea)}
+.citiquick{
+  margin:-4px 0 12px;padding:9px 11px;border-left:3px solid var(--sand);
+  background:#FBF6E9;border-radius:0 8px 8px 0;font-size:12.5px;color:#5E5A45;
+}
+.citiquick b{color:var(--deep)}
+details.adv{margin-top:14px;border-top:1px dashed var(--line);padding-top:10px}
+details.adv summary{cursor:pointer;font-size:12.5px;color:var(--teal);font-weight:500;user-select:none}
+details.adv .inner{margin-top:10px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cta{
+  width:100%;margin-top:16px;padding:13px;border:0;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;
+}
+.cta:active{transform:scale(.99)}
+/* ===== 结果区 ===== */
+.result .panel{margin-bottom:18px}
+.bigres{
+  display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:4px 0 2px;
+}
+.bigres .num{font-size:clamp(30px,5vw,44px);font-weight:900;color:var(--deep);letter-spacing:.01em}
+.bigres .per{font-size:14px;color:var(--muted);font-weight:500}
+.smallnote{font-size:12px;color:var(--muted)}
+/* 三方案卡 */
+.plans{display:grid;grid-template-columns:1fr;gap:12px;margin-top:14px}
+@media(min-width:560px){.plans{grid-template-columns:repeat(3,1fr)}}
+.plan{
+  border:1px solid var(--line);border-radius:14px;padding:14px 13px;background:#FDFDFB;
+  display:flex;flex-direction:column;gap:6px;
+}
+.plan.rec{border:2px solid var(--sea);background:#F2FAF8;position:relative}
+.plan.rec::after{
+  content:"推荐";position:absolute;top:-9px;right:10px;background:var(--sea);color:#fff;
+  font-size:11px;font-weight:700;padding:2px 9px;border-radius:999px;
+}
+.plan h3{font-size:14.5px;font-weight:700;color:var(--deep);display:flex;align-items:center;gap:6px}
+.plan .tag{font-size:11px;color:var(--muted);font-weight:400}
+.plan .net{font-size:22px;font-weight:900;color:var(--teal)}
+.plan .net small{font-size:12px;color:var(--muted);font-weight:500}
+.plan .row{display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted)}
+.plan .row b{color:var(--ink);font-weight:500}
+.plan .risk{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500;margin-top:2px}
+.risk .dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.r-low{background:var(--ok)}.r-mid{background:var(--warn)}.r-high{background:var(--coral)}
+/* 柱状对比 */
+.bars{margin-top:16px}
+.bars .baritem{margin-bottom:12px}
+.bars .barhead{display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);margin-bottom:4px}
+.bars .barhead b{color:var(--ink)}
+.bars .track{height:14px;background:#EDF1EF;border-radius:7px;overflow:hidden}
+.bars .fill{height:100%;border-radius:7px;background:var(--sea)}
+.bars .fill.b{background:var(--teal)}
+.bars .fill.c{background:var(--sand)}
+/* 明细 */
+table.detail{width:100%;border-collapse:collapse;margin-top:10px;table-layout:fixed}
+table.detail th,table.detail td{
+  text-align:left;padding:7px 6px;font-size:12.5px;border-bottom:1px solid var(--line);
+  overflow-wrap:break-word;
+}
+table.detail th{color:var(--deep);font-weight:700;background:#F3F7F6;width:34%}
+table.detail td b{color:var(--teal)}
+/* 行情底表 */
+.market{margin-top:6px}
+.market table{width:100%;border-collapse:collapse;table-layout:fixed;margin-top:10px}
+.market th,.market td{padding:8px 6px;font-size:12.5px;text-align:left;border-bottom:1px solid var(--line);overflow-wrap:break-word}
+.market thead th{background:var(--deep);color:#fff;font-weight:500;white-space:nowrap}
+.market tbody tr:nth-child(even){background:#F7FAF9}
+.src{font-size:11px;color:var(--muted);margin-top:8px;line-height:1.5}
+.badge{
+  display:inline-block;font-size:10.5px;padding:1px 7px;border-radius:999px;font-weight:500;
+}
+.badge.ok{background:#E3F4F0;color:#1B6B72}
+.badge.tbd{background:#FBF0DB;color:#9A7B1F}
+/* 免责 */
+.disclaim{
+  font-size:11.5px;color:var(--muted);background:#F0F3F1;border-radius:10px;
+  padding:10px 12px;margin-top:16px;line-height:1.6;
+}
+/* toast */
+#toast{
+  position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);
+  background:var(--deep);color:#fff;padding:12px 20px;border-radius:12px;font-size:14px;
+  opacity:0;pointer-events:none;transition:all .25s ease;z-index:99;max-width:88vw;text-align:center;
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media (prefers-reduced-motion: reduce){
+  #toast{transition:none}
+}
+footer{margin:34px 0 20px;padding:0 16px;font-size:12px;color:var(--muted);text-align:center;line-height:1.7}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="kicker"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M3 17l6-6 4 4 8-8" stroke="#E9C46A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7h6v6" stroke="#E9C46A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>快旅居 · 业主端工具</span>
+    <h1>你的旅居房，一年能赚多少？</h1>
+    <p class="sub">输入房源信息，三秒对比「纯长租 / 纯短租 / 快旅居独家托管」三种运营方式的到手收入。结果仅为运营估算，签约以实勘评估为准。</p>
+    <div class="statrow">
+      <div class="stat"><b>3 种方案</b><span>长租 / 短租 / 托管对比</span></div>
+      <div class="stat"><b>4 座城市</b><span>芭提雅 · 三亚 · 北海 · 西双版纳</span></div>
+      <div class="stat"><b>费用透明</b><span>结构一目了然</span></div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="grid">
+    <!-- ===== 左：输入 ===== -->
+    <section class="left" aria-label="房源信息输入">
+      <div class="panel">
+        <h2><span class="n">1</span>房源信息</h2>
+        <div class="field">
+          <label for="city">所在城市</label>
+          <select id="city">
+            <option value="pattaya">泰国 · 芭提雅</option>
+            <option value="sanya">海南 · 三亚</option>
+            <option value="beihai">广西 · 北海</option>
+            <option value="banna">云南 · 西双版纳</option>
+          </select>
+        </div>
+        <div id="citiquick" class="citiquick">行情参考加载中…</div>
+        <div class="row2">
+          <div class="field">
+            <label for="rooms">户型</label>
+            <select id="rooms">
+              <option value="1">一居</option>
+              <option value="2" selected>两居</option>
+              <option value="3">三居及以上</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="area">面积（㎡）</label>
+            <input id="area" type="number" min="15" max="500" value="70" inputmode="decimal">
+          </div>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label for="deco">装修程度</label>
+            <select id="deco">
+              <option value="s">简装</option>
+              <option value="f" selected>精装</option>
+              <option value="h">豪华</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="longrent">长租月租（元/月）</label>
+            <input id="longrent" type="number" min="0" step="100" inputmode="decimal">
+            <div class="hint">已按城市填入参考中值，可修改</div>
+          </div>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label for="daily">短租参考日价（元/晚）</label>
+            <input id="daily" type="number" min="0" step="10" inputmode="decimal">
+            <div class="hint">可改为你的实际挂牌价</div>
+          </div>
+          <div class="field">
+            <label for="nights">短租年出租晚数</label>
+            <input id="nights" type="number" min="0" max="365" value="150" inputmode="decimal">
+          </div>
+        </div>
+        <details class="adv">
+          <summary>高级参数（费率 / 出租率，默认已按行业常见值预填）</summary>
+          <div class="inner">
+            <div class="row2">
+              <div class="field">
+                <label for="comm">长租平台佣金率 %</label>
+                <input id="comm" type="number" min="0" max="50" step="1" value="10">
+              </div>
+              <div class="field">
+                <label for="split">短租平台分成 %</label>
+                <input id="split" type="number" min="0" max="70" step="1" value="30">
+              </div>
+            </div>
+            <div class="row2">
+              <div class="field">
+                <label for="months">长租年出租月数</label>
+                <input id="months" type="number" min="1" max="12" step="1" value="10">
+              </div>
+              <div class="field">
+                <label for="occ">短租淡季入住率 %</label>
+                <input id="occ" type="number" min="0" max="100" step="5" value="60">
+              </div>
+            </div>
+            <div class="field">
+              <label for="fx">泰铢汇率（¥1 = ฿）</label>
+              <input id="fx" type="number" min="1" max="15" step="0.1" value="5.0">
+              <div class="hint">仅影响芭提雅参考值换算</div>
+            </div>
+          </div>
+        </details>
+        <button class="cta" id="calcBtn">开始测算</button>
+      </div>
+    </section>
+
+    <!-- ===== 右：结果 ===== -->
+    <section class="result" aria-label="测算结果">
+      <div class="panel">
+        <h2><span class="n">2</span>三种运营方式对比</h2>
+        <div class="bigres">
+          <span class="num" id="bestNum">¥0</span>
+          <span class="per" id="bestName">—</span>
+        </div>
+        <div class="smallnote" id="bestNote">填写左侧信息后点击「开始测算」</div>
+        <div class="plans" id="plans"></div>
+        <div class="bars" id="bars"></div>
+      </div>
+
+      <div class="panel">
+        <h2><span class="n">3</span>测算明细</h2>
+        <table class="detail">
+          <tbody id="detailBody"></tbody>
+        </table>
+      </div>
+
+      <div class="panel market">
+        <h2><span class="n">4</span>四城行情参考底表</h2>
+        <table>
+          <colgroup><col style="width:16%"><col style="width:22%"><col style="width:20%"><col style="width:24%"><col style="width:18%"></colgroup>
+          <thead><tr><th>城市</th><th>长租月租参考</th><th>短租日价</th><th>出租率提示</th><th>数据状态</th></tr></thead>
+          <tbody id="marketBody"></tbody>
+        </table>
+        <p class="src" id="marketSrc">数据来源标注见下方说明；短租日价标注「待核实」的为占位值，签约前以快旅居实勘评估为准。</p>
+        <div class="disclaim">
+          说明：本测算为运营模式对比原型，计算结果基于你填入的参数与公开行情参考（数据来源已标注），不构成收益承诺。实际收益受季节、空置、维护、税费与汇率波动影响；快旅居「独家托管」方案另有置换权益与漫游增值等非现金价值，未计入本表。芭提雅参考值按汇率 ¥1≈฿5 折算，可在高级参数中调整。
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer>快旅居 · 分布式旅居资产运营网络 — 独家托管底座 · 全球等权置换护城河 · 漫游增值闭环<br>原型 v0.1 · 2026-10</footer>
+
+<div id="toast" role="status"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ===== 四城行情参考（公开数据 2026，标注来源）===== */
+var FX = 5.0;
+var MARKET = {
+  pattaya: {
+    name:"芭提雅", fx:"THB",
+    long: {"1":[12000,20000],"2":[20000,40000],"3":[30000,60000]},
+    daily: {"1":240,"2":400,"3":600}, // 待核实占位（折算人民币）
+    occNote:"旺季 11–次年3月，全年长租需求稳",
+    src:"Alan Bolton Property 2026；BAANLYY Pattaya Rental Market Report 2026；Dot Property 挂牌行情"
+  },
+  sanya: {
+    name:"三亚", fx:"CNY",
+    long: {"1":[2000,4500],"2":[3500,6500],"3":[5000,9000]},
+    daily: {"1":350,"2":550,"3":800}, // 待核实占位
+    occNote:"冬春季为绝对旺季，夏季淡季明显",
+    src:"58同城租金走势 2026（月川2500/亚龙湾4500/荔枝沟2000）；贝壳三亚租房 2026；本地过冬租房攻略"
+  },
+  beihai: {
+    name:"北海", fx:"CNY",
+    long: {"1":[550,1500],"2":[800,1500],"3":[1500,3000]},
+    daily: {"1":150,"2":220,"3":350}, // 待核实占位
+    occNote:"候鸟季 10–次年4月，海景房源受捧",
+    src:"58同城北海 2026-10；本地房东直租行情（海景两房 800–1500 元/月）"
+  },
+  banna: {
+    name:"西双版纳", fx:"CNY",
+    long: {"1":[800,1500],"2":[1300,1800],"3":[1800,3000]},
+    daily: {"1":150,"2":230,"3":350}, // 待核实占位
+    occNote:"冬季避寒旅居热，告庄/曼弄枫片区为主",
+    src:"58同城西双版纳 2026；本地房东调价通知（单间500–800、一室一厅800–1500、两室1300–1800）"
+  }
+};
+
+var $ = function(id){ return document.getElementById(id); };
+var num = function(v){
+  var n = Math.round(v);
+  return n.toLocaleString("zh-CN");
+};
+
+function fmtMoney(v){ return "¥" + num(v); }
+
+function cityData(){
+  var city = $("city").value;
+  var rooms = $("rooms").value;
+  var fx = parseFloat($("fx").value) || 5.0;
+  var m = MARKET[city];
+  var r = m.long[rooms];
+  var mid = Math.round((r[0]+r[1])/2);
+  var daily = m.daily[rooms];
+  if(city === "pattaya"){ mid = Math.round(mid/fx); daily = Math.round(daily); }
+  return {m:m, rooms:rooms, mid:mid, daily:daily};
+}
+
+function refreshCityHint(){
+  var d = cityData();
+  var m = d.m;
+  var r = m.long[d.rooms];
+  var label = m.fx === "THB" ? "长租月租 ฿" + r[0].toLocaleString() + "–" + r[1].toLocaleString() + "（约 ¥" + num(r[0]/FX) + "–" + num(r[1]/FX) + " 元/月）" : "长租月租 ¥" + r[0].toLocaleString() + "–" + r[1].toLocaleString() + " 元/月";
+  $("citiquick").innerHTML = "<b>" + m.name + "行情参考</b>：" + label + "；" + m.occNote;
+  // 若用户未手动改过长租月租，则同步参考中值
+  if(!window.__touchedLong){ $("longrent").value = d.mid; }
+  if(!window.__touchedDaily){ $("daily").value = d.daily; }
+}
+
+function calc(){
+  var d = cityData();
+  var longRent = parseFloat($("longrent").value) || d.mid;
+  var daily = parseFloat($("daily").value) || d.daily;
+  var nights = parseInt($("nights").value,10) || 150;
+  var months = parseInt($("months").value,10) || 10;
+  var occ = (parseInt($("occ").value,10) || 60) / 100;
+  var comm = (parseFloat($("comm").value) || 10) / 100;
+  var split = (parseFloat($("split").value) || 30) / 100;
+  var deco = $("deco").value;
+  var area = parseInt($("area").value,10) || 70;
+  var decoFactor = deco === "s" ? 0.9 : (deco === "h" ? 1.15 : 1.0);
+  var areaFactor = Math.max(0.6, Math.min(1.6, area/70));
+
+  // 方案A 纯长租
+  var A_gross = longRent * months * decoFactor * areaFactor;
+  var A_fee = A_gross * comm;
+  var A_net = A_gross - A_fee;
+  // 方案B 纯短租（淡旺季折算：参考日价 × 年晚数 × 入住率）
+  var B_gross = daily * nights * (0.5 + occ * 0.5) * decoFactor * areaFactor;
+  var B_fee = B_gross * split;
+  var B_net = B_gross - B_fee;
+  // 方案C 快旅居托管：旺季短租 + 淡季长租 组合
+  var C_shortMonths = 4, C_longMonths = 8;
+  var C_shortGross = daily * 30 * C_shortMonths * 0.72 * decoFactor * areaFactor; // 旺季入住率72%参考
+  var C_longGross = longRent * C_longMonths * decoFactor * areaFactor;
+  var C_fee = C_shortGross * split + C_longGross * comm;
+  var C_net = C_shortGross + C_longGross - C_fee;
+
+  renderPlans(A_net, B_net, C_net, A_fee, B_fee, C_fee, A_gross, B_gross, C_shortGross+C_longGross);
+  renderBars(A_net, B_net, C_net);
+  renderDetail(A_net, B_net, C_net, A_gross, B_gross, C_shortGross+C_longGross, A_fee, B_fee, C_fee);
+}
+
+function riskOf(net){
+  if(net <= 0) return {l:"风险偏高", c:"r-high"};
+  return {l:"中等", c:"r-mid"};
+}
+
+function renderPlans(a,b,c, af,bf,cf, ag,bg,cg){
+  var plans = [
+    {k:"A", name:"纯长租", tag:"省心 · 收益稳", net:a, gross:ag, fee:af, note:"长租佣金 " + Math.round(af/Math.max(ag,1)*100) + "%"},
+    {k:"B", name:"纯短租", tag:"弹性 · 上限高", net:b, gross:bg, fee:bf, note:"平台分成 " + Math.round(bf/Math.max(bg,1)*100) + "%"},
+    {k:"C", name:"独家托管", tag:"长短组合 · 含置换权益", net:c, gross:cg, fee:cf, note:"旺季短租+淡季长租"}
+  ];
+  var best = Math.max(a,b,c);
+  var bestName = "";
+  plans.forEach(function(p){
+    if(Math.abs(p.net - best) < 1){ bestName = "方案" + p.k + " · " + p.name; }
+  });
+  $("bestNum").textContent = fmtMoney(best);
+  $("bestName").textContent = bestName + " 年净收入最高";
+  $("bestNote").textContent = "以上为年净收入估算（已扣平台费用）；方案 C 另含置换与漫游等非现金权益，未计入金额";
+
+  var html = "";
+  plans.forEach(function(p){
+    var r = riskOf(p.net);
+    var rec = Math.abs(p.net - best) < 1 ? " rec" : "";
+    html += '<div class="plan'+rec+'">'
+      + '<h3>方案' + p.k + ' · ' + p.name + ' <span class="tag">' + p.tag + '</span></h3>'
+      + '<div class="net">' + fmtMoney(p.net) + '<small> /年净收入</small></div>'
+      + '<div class="row"><span>年毛收入</span><b>' + fmtMoney(p.gross) + '</b></div>'
+      + '<div class="row"><span>平台费用</span><b>−' + fmtMoney(p.fee) + '</b></div>'
+      + '<div class="row"><span>费用结构</span><b>' + p.note + '</b></div>'
+      + '<span class="risk"><span class="dot ' + r.c + '"></span>风险：' + r.l + '</span>'
+      + '</div>';
+  });
+  $("plans").innerHTML = html;
+}
+
+function renderBars(a,b,c){
+  var max = Math.max(a,b,c,1);
+  var arr = [
+    {k:"A", n:"长租", v:a, c:"fill"},
+    {k:"B", n:"短租", v:b, c:"fill b"},
+    {k:"C", n:"托管", v:c, c:"fill c"}
+  ];
+  var html = '<div class="barhead" style="font-weight:700;color:var(--deep);font-size:13px">年净收入对比</div>';
+  arr.forEach(function(x){
+    var w = Math.max(2, Math.round(x.v/max*100));
+    html += '<div class="baritem">'
+      + '<div class="barhead"><span>方案' + x.k + ' · ' + x.n + '</span><b>' + fmtMoney(x.v) + '</b></div>'
+      + '<div class="track"><div class="' + x.c + '" style="width:' + w + '%"></div></div>'
+      + '</div>';
+  });
+  $("bars").innerHTML = html;
+}
+
+function renderDetail(a,b,c, ag,bg,cg, af,bf,cf){
+  var rows = [
+    ["方案A 纯长租 年净收入", a],
+    ["　· 年毛收入（月租×" + ($("months").value||10) + "个月）", ag],
+    ["　· 平台佣金（" + ($("comm").value||10) + "%）", -af],
+    ["方案B 纯短租 年净收入", b],
+    ["　· 年毛收入（日价×" + ($("nights").value||150) + "晚）", bg],
+    ["　· 平台分成（" + ($("split").value||30) + "%）", -bf],
+    ["方案C 独家托管 年净收入", c],
+    ["　· 毛收入（旺季短租4个月+长租8个月）", cg],
+    ["　· 平台费用（短租分成+长租佣金）", -cf],
+    ["推荐年净收入", Math.max(a,b,c)]
+  ];
+  var html = "";
+  rows.forEach(function(r,i){
+    var isHead = (i % 3 === 0) || i === rows.length-1;
+    var val = typeof r[1] === "number" ? fmtMoney(r[1]) : r[1];
+    if(r[1] < 0){ val = "−" + fmtMoney(-r[1]); }
+    html += '<tr><th' + (isHead ? ' style="background:var(--deep);color:#fff"' : '') + '>' + r[0] + '</th>'
+      + '<td' + (isHead ? ' style="font-weight:900;color:var(--teal)"' : '') + '><b>' + val + '</b></td></tr>';
+  });
+  $("detailBody").innerHTML = html;
+}
+
+function renderMarket(){
+  var html = "";
+  Object.keys(MARKET).forEach(function(k){
+    var m = MARKET[k];
+    var r1 = m.long["1"], r2 = m.long["2"];
+    var range = m.fx === "THB"
+      ? "฿" + r1[0].toLocaleString() + "–" + r1[1].toLocaleString()
+      : "¥" + r1[0].toLocaleString() + "–" + r1[1].toLocaleString();
+    var d = m.fx === "THB" ? "฿" + (m.daily["1"]*FX).toLocaleString() + "+" : "¥" + m.daily["1"] + "+";
+    html += '<tr><td>' + m.name + '</td><td>' + range + '（一居）</td>'
+      + '<td>' + d + ' <span class="badge tbd">待核实</span></td>'
+      + '<td>' + m.occNote + '</td>'
+      + '<td><span class="badge ok">已查证</span></td></tr>';
+  });
+  $("marketBody").innerHTML = html;
+  $("marketSrc").innerHTML = "数据来源：" + MARKET.pattaya.src + "；" + MARKET.sanya.src + "；" + MARKET.beihai.src + "；" + MARKET.banna.src + "。";
+}
+
+/* 绑定 */
+$("calcBtn").addEventListener("click", calc);
+["city","rooms","deco","fx"].forEach(function(id){
+  $(id).addEventListener("change", refreshCityHint);
+});
+["longrent","daily"].forEach(function(id){
+  $(id).addEventListener("input", function(){ window["__touched" + (id==="longrent"?"Long":"Daily")] = true; });
+});
+
+function toast(msg){
+  var t = $("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(function(){ t.classList.remove("show"); }, 2600);
+}
+
+/* 首次加载：初始化默认值并计算 */
+refreshCityHint();
+renderMarket();
+calc();
+})();
+</script>
+</body>
+</html>
