@@ -61,6 +61,7 @@ const words = {
     guide: '三种服务，一目了然',
     cityNote: '目前开放芭提雅、三亚、北海。更多城市将逐步加入。',
     rentalLine: '好房源，心服务。', exchangeLine: '一房托管，旅居世界。', manageLine: '专业、靠谱，知托付。',
+    heroEyebrow: 'KUAI LÜ JU · DISTRIBUTED LIVING NETWORK', heroTitle: '一房托管，旅居世界。', heroSub: '连接高品质生活家与全球阳光居所。精选泰国芭提雅、海南三亚、广西北海、云南西双版纳四大核心慢居地，让闲置资产成为开启无界漫居的通行证。',
     eligibility: '谁可以置换？', eligibilityText: '仅已签委托租赁且明确授权的长租房业主，可在空置可交付日期互换；民宿不参与。',
     twoHomes: '两套房源，并列比较', twoHomesSub: '实际入住天数、面积、卧室与装修同屏对照；地段、景观和租金只作参考，双方匿名确认。',
     step1: '选择目标房源', step2: '双方匿名确认', step3: '确定各自入住时间', step4: '支付服务费与押金',
@@ -121,6 +122,7 @@ const words = {
     guide: 'Three clear ways to begin',
     cityNote: 'Now focusing on Pattaya, Sanya and Beihai. More cities will follow.',
     rentalLine: 'Good homes. Thoughtful service.', exchangeLine: 'One home entrusted. A world to stay in.', manageLine: 'Professional care. Trust well placed.',
+    heroEyebrow: 'KUAI LÜ JU · DISTRIBUTED LIVING NETWORK', heroTitle: 'One home entrusted. A world to stay in.', heroSub: 'Connect quality travellers with sunlit homes around the world. Focused on four core slow-living cities — Pattaya, Sanya, Beihai and Xishuangbanna — turning idle assets into a passport to boundless stays.',
     eligibility: 'Who can exchange?', eligibilityText: 'Only owners of entrusted long-stay homes with express authorization may exchange vacant, deliverable dates. Short stays do not join.',
     twoHomes: 'Two homes, side by side', twoHomesSub: 'Compare actual nights, size, bedrooms and condition. Location, views and rent remain references; both owners decide anonymously.',
     step1: 'Choose a home', step2: 'Confirm anonymously', step3: 'Agree on both stay dates', step4: 'Pay fee and deposit',
@@ -313,7 +315,16 @@ function ManagementCards({ lang }: { lang: Language }) {
 function SiteOverview({ lang }: { lang: Language }) {
   const t = words[lang]
   const sections: CardContext[] = ['rentals', 'stays', 'exchange']
-  return <div className="home-overview">
+  return <>
+    <section className="home-hero page-shell" aria-label={lang === 'zh' ? '快旅居 · 品牌宣言' : 'Kuai Lü Ju · Brand statement'}>
+      <p className="home-hero-eyebrow">{t.heroEyebrow}</p>
+      <h1 className="home-hero-title">{t.heroTitle}</h1>
+      <p className="home-hero-sub">{t.heroSub}</p>
+      <ul className="home-hero-cities" aria-label={lang === 'zh' ? '四大核心慢居地' : 'Four core slow-living cities'}>
+        {cities.map(city => <li key={city.id}><span>{city[lang]}</span><small>{lang === 'zh' ? city.en : city.zh}</small></li>)}
+      </ul>
+    </section>
+    <div className="home-overview">
     {sections.map(mode => {
       const heading = categoryHeading(mode, lang)
       const items = previewListings(sortDiscoveryListings(availableByMode(mode), 'recommended'))
@@ -342,7 +353,8 @@ function SiteOverview({ lang }: { lang: Language }) {
       <ManagementCards lang={lang}/>
     </section>
     <p className="home-discovery-results-note page-shell">{lang === 'zh' ? '当前为站内演示：房源、价格、景点及档期均待核验，暂不开放真实预订。' : 'Demonstration only: homes, rates, attractions and dates require verification; no live bookings.'}</p>
-  </div>
+    </div>
+  </>
 }
 
 function CategoryPage({ lang, mode, query }: { lang: Language; mode: HomeMode; query: string }) {
