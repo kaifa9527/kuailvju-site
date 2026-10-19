@@ -22,9 +22,9 @@ const asset = (path: string) => `${import.meta.env.BASE_URL}${path.replace(/^\//
 
 const words = {
   zh: {
-    rent: '长租房', stays: '民宿房', exchange: '旅居置换', roam: '漫游', navRent: '长租', navStays: '短租', navExchange: '置换', manage: '物业托管', explore: '探索房源', more: '了解详情',
+    rent: '长租房', stays: '短租', exchange: '旅居置换', roam: '漫游', navRent: '长租', navStays: '短租', navExchange: '置换', manage: '物业托管', explore: '探索房源', more: '了解详情',
     preview: '置换资格提示', menu: '菜单', search: '查找房源', city: '城市', area: '区域', stay: '租期',
-    homeSearchTitle: '按需求找房', searchRentals: '查找长租房', searchStays: '查找民宿房', searchExchange: '查找可置换房源', demoNotice: '当前为站内体验：房源、价格和档期均为示意；真实申请需经平台核验。',
+    homeSearchTitle: '按需求找房', searchRentals: '查找长租房', searchStays: '查找短租房', searchExchange: '查找可置换房源', demoNotice: '当前为站内体验：房源、价格和档期均为示意；真实申请需经平台核验。',
     rentLead: '半年或一年起租 · 租客免中介费', staysLead: '按晚选择委托经营房源',
     exchangeWho: '长租业主先授权', exchangeWhoDetail: '委托租赁业主自愿授权空置可交付档期。民宿不参与置换。', exchangeHow: '双方匿名确认', exchangeHowDetail: '对照天数、面积、卧室与装修，各自确认房源和日期。', exchangeThen: '平台核验履约', exchangeThenDetail: '双房源共用库存，核对两段日期与交付能力。',
     exchangeFree: '住宿费', exchangeFreeValue: '对等互换可免', exchangeClean: '每次入住保洁', exchangeCleanValue: '¥600', exchangeDeposit: '入住押金', exchangeDepositValue: '目标房源月租', exchangeUtilities: '水电费用', exchangeUtilitiesValue: '实际抄表自付', exchangeCostNote: '仅已授权的委托租赁长租房参与。保洁费含入住前、退房后各一次；押金等于实际入住房源的一个月租金。面积、卧室、装修与各自实际入住天数用于推荐，地段和租金只作参考；芭提雅费用按确认时等值泰铢收取。', exchangeReference: '月租参考价 · 非置换应付', exchangeCardAction: '查看置换条件',
