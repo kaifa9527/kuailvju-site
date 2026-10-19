@@ -185,10 +185,10 @@ function RegistrationForm({ lang, mode }: { lang: Language; mode: Mode }) {
   const ring = 2 * Math.PI * 52
   const premiumUnlocked = progress >= 90
   return <><form ref={formRef} className="management-form" id="register-property" onSubmit={submit} onChange={refreshProgress}>
-    <div className="management-form-head"><p className="eyebrow">PROPERTY / ENQUIRY</p><h2>{t.formTitle}</h2><p>{t.formLead}</p></div>
+    <div className="management-form-head"><h2>{t.formTitle}</h2><p>{t.formLead}</p></div>
     <div className="management-progress" role="status" aria-label={`${t.progressText} ${progress}%`}>
       <svg className={`progress-ring ${premiumUnlocked ? 'is-premium' : ''}`} viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="52" className="progress-ring-track"/><circle cx="60" cy="60" r="52" className="progress-ring-value" style={{ strokeDasharray: `${(progress / 100) * ring} ${ring}` }}/><text x="60" y="58" textAnchor="middle" className="progress-ring-number">{progress}%</text><text x="60" y="75" textAnchor="middle" className="progress-ring-label">{lang === 'zh' ? '完整度' : 'Complete'}</text></svg>
-      <div className="management-progress-text"><p className="eyebrow">PROFILE / COMPLETENESS</p>{premiumUnlocked ? <><strong>★ {t.premium}</strong><p>{t.premiumHint}</p></> : <><strong>{t.ringLead}</strong><p>{progress >= 75 ? t.premiumLocked : t.ringHint}</p></>}</div>
+      <div className="management-progress-text">{premiumUnlocked ? <><strong>★ {t.premium}</strong><p>{t.premiumHint}</p></> : <><strong>{t.ringLead}</strong><p>{progress >= 75 ? t.premiumLocked : t.ringHint}</p></>}</div>
     </div>
     {premiumUnlocked && <p className="management-premium-note"><span aria-hidden="true">★</span>{t.premium} · {t.premiumHint}</p>}
     <div className="management-test-note"><strong>{t.testOnly}</strong><p>{t.testNote}</p></div>
@@ -231,19 +231,18 @@ function RegistrationForm({ lang, mode }: { lang: Language; mode: Mode }) {
     <div className="management-private"><strong>{t.privateAddress}</strong><p>{t.privateHint}</p></div>
     {saveError && <p role="alert" className="form-error">{saveError}</p>}
     <button className="button button-dark management-submit" type="submit">{t.submit}<span aria-hidden="true">↗</span></button>
-  </form>{exchangePromptOpen && <div className="modal-backdrop" onClick={() => setExchangePromptOpen(false)}><div className="modal management-exchange-modal" role="dialog" aria-modal="true" aria-label={t.exchangePromptTitle} onClick={event => event.stopPropagation()}><p className="eyebrow">STAY EXCHANGE / CHOICE</p><h2>{t.exchangePromptTitle}</h2><p>{t.exchangePrompt}</p><div><button className="button button-outline" type="button" onClick={() => { setExchangePromptOpen(false); exchangeCheckRef.current?.focus() }}>{t.exchangeBack}</button><button className="button button-dark" type="button" onClick={() => { setExchangePromptOpen(false); if (formRef.current) saveRegistration(formRef.current) }}>{t.exchangeSkip}</button></div></div></div>}</>
+  </form>{exchangePromptOpen && <div className="modal-backdrop" onClick={() => setExchangePromptOpen(false)}><div className="modal management-exchange-modal" role="dialog" aria-modal="true" aria-label={t.exchangePromptTitle} onClick={event => event.stopPropagation()}><h2>{t.exchangePromptTitle}</h2><p>{t.exchangePrompt}</p><div><button className="button button-outline" type="button" onClick={() => { setExchangePromptOpen(false); exchangeCheckRef.current?.focus() }}>{t.exchangeBack}</button><button className="button button-dark" type="button" onClick={() => { setExchangePromptOpen(false); if (formRef.current) saveRegistration(formRef.current) }}>{t.exchangeSkip}</button></div></div></div>}</>
 }
 
 function ServiceDetails({ lang, mode }: { lang: Language; mode: Mode }) {
   const t = copy[lang]
   const details = t.modes[mode]
   return <aside className="management-service" aria-label={t.serviceTitle}>
-    <div className="management-model-home"><p className="eyebrow">SHOWCASE / FULL SCORE</p><h3>{t.modelHome}</h3><p className="management-model-sub">{t.modelSub}</p><div className="management-model-name">{t.modelName}</div><ul className="management-model-facts"><li>{t.modelPersona}</li><li>{t.modelCorner}</li><li>{t.modelUse}</li></ul><p className="management-model-badge"><span aria-hidden="true">★</span>{t.modelBadge}</p><p className="management-model-cta">{t.modelCta}</p></div>
-    <p className="eyebrow">SERVICE / {String(modes.indexOf(mode) + 1).padStart(2, '0')}</p>
+    <div className="management-model-home"><h3>{t.modelHome}</h3><p className="management-model-sub">{t.modelSub}</p><div className="management-model-name">{t.modelName}</div><ul className="management-model-facts"><li>{t.modelPersona}</li><li>{t.modelCorner}</li><li>{t.modelUse}</li></ul><p className="management-model-badge"><span aria-hidden="true">★</span>{t.modelBadge}</p><p className="management-model-cta">{t.modelCta}</p></div>
     <h2>{t.serviceTitle}</h2><p className="management-service-lead">{details.lead}</p>
     {details.paragraphs.map(paragraph => <p key={paragraph} className="management-service-paragraph">{paragraph}</p>)}
     <div className="management-rates"><h3>{details.rateTitle}</h3>{details.rates.map(([label, amount]) => <div key={label}><span>{label}</span><strong>{amount}</strong></div>)}</div>
-    <div className="management-example"><span>EXAMPLE / {lang === 'zh' ? '举例说明' : 'HOW IT WORKS'}</span><p>{details.example}</p></div>
+    <div className="management-example"><span>{lang === 'zh' ? '举例说明' : 'How it works'}</span><p>{details.example}</p></div>
     <p className="management-service-note">{details.note}</p>
     <div className="management-process"><h3>{t.processTitle}</h3><ol>{t.process.map((step, index) => <li key={step}><span>{String(index + 1).padStart(2, '0')}</span>{step}</li>)}</ol></div>
   </aside>
@@ -254,8 +253,8 @@ export function ManagementPage({ lang, mode }: { lang: Language; mode?: string }
   const [selected, setSelected] = useState<Mode>(modes.includes(mode as Mode) ? mode as Mode : 'leasing')
   useEffect(() => { setSelected(modes.includes(mode as Mode) ? mode as Mode : 'leasing') }, [mode])
   return <div className="page-shell page-top management-catalog-page">
-    <div className="page-title"><p className="eyebrow">03 / PROPERTY CARE</p><h1>{t.title}</h1><p>{t.intro}</p></div>
-    <div className="management-tabs" role="tablist" aria-label={t.tabs}>{modes.map((item, index) => <button key={item} id={`management-tab-${item}`} type="button" role="tab" aria-selected={selected === item} aria-controls="management-panel" className={selected === item ? 'is-active' : ''} onClick={() => { setSelected(item); window.history.replaceState(null, '', `#/management/${item}`) }}><span>{String(index + 1).padStart(2, '0')} / SERVICE</span><strong>{t.modes[item].name}</strong><small>{t.modes[item].short}</small></button>)}</div>
+    <div className="page-title"><h1>{t.title}</h1><p>{t.intro}</p></div>
+    <div className="management-tabs" role="tablist" aria-label={t.tabs}>{modes.map((item, index) => <button key={item} id={`management-tab-${item}`} type="button" role="tab" aria-selected={selected === item} aria-controls="management-panel" className={selected === item ? 'is-active' : ''} onClick={() => { setSelected(item); window.history.replaceState(null, '', `#/management/${item}`) }}><strong>{t.modes[item].name}</strong><small>{t.modes[item].short}</small></button>)}</div>
     <div className="management-mobile-highlight"><p>{t.modes[selected].lead}</p><div>{t.modes[selected].rates.slice(0, 2).map(([label, amount]) => <span key={label}>{label} <strong>{amount}</strong></span>)}</div></div>
     <div className="management-content" id="management-panel" role="tabpanel" aria-labelledby={`management-tab-${selected}`}><RegistrationForm key={selected} lang={lang} mode={selected}/><ServiceDetails lang={lang} mode={selected}/></div>
   </div>

@@ -61,7 +61,7 @@ const words = {
     guide: '三种服务，一目了然',
     cityNote: '目前开放芭提雅、三亚、北海。更多城市将逐步加入。',
     rentalLine: '好房源，心服务。', exchangeLine: '一房托管，旅居世界。', manageLine: '专业、靠谱，知托付。',
-    heroEyebrow: 'KUAI LÜ JU · DISTRIBUTED LIVING NETWORK', heroTitle: '一房托管，旅居世界。', heroSub: '精选泰国芭提雅、海南三亚、广西北海、云南西双版纳四大慢居地，让闲置资产成为漫居世界的通行证。',
+    heroTitle: '一房托管，旅居世界。', heroSub: '精选泰国芭提雅、海南三亚、广西北海、云南西双版纳四大慢居地，让闲置资产成为漫居世界的通行证。',
     ecoTitle: '五维居所生态，重构生活边界',
     eligibility: '谁可以置换？', eligibilityText: '仅已签委托租赁且明确授权的长租房业主，可在空置可交付日期互换；民宿不参与。',
     twoHomes: '两套房源，并列比较', twoHomesSub: '实际入住天数、面积、卧室与装修同屏对照；地段、景观和租金只作参考，双方匿名确认。',
@@ -123,7 +123,7 @@ const words = {
     guide: 'Three clear ways to begin',
     cityNote: 'Now focusing on Pattaya, Sanya and Beihai. More cities will follow.',
     rentalLine: 'Good homes. Thoughtful service.', exchangeLine: 'One home entrusted. A world to stay in.', manageLine: 'Professional care. Trust well placed.',
-    heroEyebrow: 'KUAI LÜ JU · DISTRIBUTED LIVING NETWORK', heroTitle: 'One home entrusted. A world to stay in.', heroSub: 'Four slow-living cities — Pattaya, Sanya, Beihai and Xishuangbanna — where an idle asset becomes a passport to boundless stays.',
+    heroTitle: 'One home entrusted. A world to stay in.', heroSub: 'Four slow-living cities — Pattaya, Sanya, Beihai and Xishuangbanna — where an idle asset becomes a passport to boundless stays.',
     ecoTitle: 'Five journeys, one living ecosystem',
     eligibility: 'Who can exchange?', eligibilityText: 'Only owners of entrusted long-stay homes with express authorization may exchange vacant, deliverable dates. Short stays do not join.',
     twoHomes: 'Two homes, side by side', twoHomesSub: 'Compare actual nights, size, bedrooms and condition. Location, views and rent remain references; both owners decide anonymously.',
@@ -281,7 +281,7 @@ function ListingCard({ listing, lang, context = 'rentals', query = '', pendingIn
   const region = city.regions.find(r => r.id === listing.region)!
   return <a className={`listing-card ${context === 'exchange' ? 'listing-card-exchange' : ''}`} href={context === 'exchange' ? `#/exchange/home/${listing.id}` : context === 'stays' ? `#/stays/home/${listing.id}` : `#/listing/${listing.id}${query ? `?${query}` : ''}`}>
     <div className="listing-image"><img src={asset(listing.gallery[0].image)} alt={`${listing.title[lang]} — ${t.demo}`} loading="lazy"/><span className="image-label">{t.demo}</span>{listing.pinned && <span className="listing-pinned">{t.pinned}</span>}</div>
-    <div className="listing-content"><div className="listing-eyebrow">{city[lang]} · {region[lang]} <span>/{listing.type[lang]}</span></div><h3>{listing.title[lang]}</h3>{serviceCaption && context === 'stays' && <p className="listing-service-caption">{lang === 'zh' ? '提供日租/短租服务' : 'Daily stays · Short-term rentals'}</p>}<p>{listing.highlight[lang]} <span>·</span> {listing.bedrooms} {(listing.bedrooms === 1 ? t.room : t.rooms).toLowerCase()} <span>·</span> {listing.area} m²</p><div className="listing-terms">{context === 'exchange' ? <span>{t.exchangeBadge}</span> : context === 'stays' ? <span>{lang === 'zh' ? '按晚入住' : 'Nightly stays'}</span> : listing.terms.map(term => <span key={term}>{t[term]}</span>)}{pendingInspection && <span className="listing-inspection-badge">{lang === 'zh' ? '预计可入住 · 待验房' : 'Estimated · inspection pending'}</span>}</div><div className="listing-bottom">{context === 'exchange' ? <><div><small>{t.exchangeReference}</small><span className="exchange-reference-price">{formatPrice(listing, lang)}</span></div><span className="exchange-card-action">{t.exchangeCardAction} <LineIcon name="arrow" size={16}/></span></> : <><div><small>{context === 'rentals' ? (lang === 'zh' ? '一年基础月租 · 半年上浮10%' : 'Annual base monthly rent · +10% for six months') : t.price}</small><strong>{formatPrice(listing, lang)}</strong></div><span className="circle-arrow" aria-hidden="true">↗</span></>}</div></div>
+    <div className="listing-content"><div className="listing-eyebrow">{city[lang]} · {region[lang]} <span>· {listing.type[lang]}</span></div><h3>{listing.title[lang]}</h3>{serviceCaption && context === 'stays' && <p className="listing-service-caption">{lang === 'zh' ? '提供日租/短租服务' : 'Daily stays · Short-term rentals'}</p>}<p>{listing.highlight[lang]} <span>·</span> {listing.bedrooms} {(listing.bedrooms === 1 ? t.room : t.rooms).toLowerCase()} <span>·</span> {listing.area} m²</p><div className="listing-terms">{context === 'exchange' ? <span>{t.exchangeBadge}</span> : context === 'stays' ? <span>{lang === 'zh' ? '按晚入住' : 'Nightly stays'}</span> : listing.terms.map(term => <span key={term}>{t[term]}</span>)}{pendingInspection && <span className="listing-inspection-badge">{lang === 'zh' ? '预计可入住 · 待验房' : 'Estimated · inspection pending'}</span>}</div><div className="listing-bottom">{context === 'exchange' ? <><div><small>{t.exchangeReference}</small><span className="exchange-reference-price">{formatPrice(listing, lang)}</span></div><span className="exchange-card-action">{t.exchangeCardAction}</span></> : <><div><small>{context === 'rentals' ? (lang === 'zh' ? '一年基础月租 · 半年上浮10%' : 'Annual base monthly rent · +10% for six months') : t.price}</small><strong>{formatPrice(listing, lang)}</strong></div></>}</div></div>
   </a>
 }
 
@@ -308,9 +308,9 @@ function availableByMode(mode: CardContext, query = ''): Listing[] {
 function ManagementCards({ lang }: { lang: Language }) {
   const t = words[lang]
   return <div className="management-grid">
-    <a className="management-card" href="#/management?service=leasing"><span>01 / SERVICE</span><h3>{t.lease}</h3><p>{t.leaseBlurb}</p><b>{t.more} ↗</b></a>
-    <a className="management-card" href="#/management?service=operation"><span>02 / SERVICE</span><h3>{t.operation}</h3><p>{t.operationBlurb}</p><b>{t.more} ↗</b></a>
-    <a className="management-card" href="#/management?service=care"><span>03 / SERVICE</span><h3>{t.care}</h3><p>{t.careBlurb}</p><b>{t.more} ↗</b></a>
+    <a className="management-card" href="#/management?service=leasing"><h3>{t.lease}</h3><p>{t.leaseBlurb}</p><b>{t.more}</b></a>
+    <a className="management-card" href="#/management?service=operation"><h3>{t.operation}</h3><p>{t.operationBlurb}</p><b>{t.more}</b></a>
+    <a className="management-card" href="#/management?service=care"><h3>{t.care}</h3><p>{t.careBlurb}</p><b>{t.more}</b></a>
   </div>
 }
 
@@ -318,13 +318,14 @@ function SiteOverview({ lang }: { lang: Language }) {
   const t = words[lang]
   const sections: CardContext[] = ['rentals', 'stays', 'exchange']
   return <>
-    <section className="home-hero page-shell" aria-label={lang === 'zh' ? '快旅居 · 品牌宣言' : 'Kuai Lü Ju · Brand statement'}>
-      <p className="home-hero-eyebrow">{t.heroEyebrow}</p>
-      <h1 className="home-hero-title">{t.heroTitle}</h1>
-      <p className="home-hero-sub">{t.heroSub}</p>
-      <ul className="home-hero-cities" aria-label={lang === 'zh' ? '四大核心慢居地' : 'Four core slow-living cities'}>
-        {cities.map(city => <li key={city.id}><span>{city[lang]}</span><small>{lang === 'zh' ? city.en : city.zh}</small></li>)}
-      </ul>
+    <section className="home-hero" aria-label={lang === 'zh' ? '快旅居 · 品牌宣言' : 'Kuai Lü Ju · Brand statement'}>
+      <div className="page-shell home-hero-inner">
+        <h1 className="home-hero-title">{t.heroTitle}</h1>
+        <p className="home-hero-sub">{t.heroSub}</p>
+        <ul className="home-hero-cities" aria-label={lang === 'zh' ? '四大核心慢居地' : 'Four core slow-living cities'}>
+          {cities.map(city => <li key={city.id}><span>{city[lang]}</span><small>{lang === 'zh' ? city.en : city.zh}</small></li>)}
+        </ul>
+      </div>
     </section>
     <h2 className="home-ecosystem page-shell">{t.ecoTitle}</h2>
     <div className="home-overview">
@@ -334,7 +335,7 @@ function SiteOverview({ lang }: { lang: Language }) {
       return <section className="section page-shell home-overview-section" key={mode} aria-label={heading.title}>
         <div className="section-heading home-overview-heading">
           <div className="home-heading-copy"><h2>{heading.title}</h2><span>{heading.subtitle}</span></div>
-          <a className="text-link" href={`#/${mode}`}>{t.more} <span aria-hidden="true">↗</span></a>
+          <a className="text-link" href={`#/${mode}`}>{t.more}</a>
         </div>
         {items.length
           ? <div className="listing-grid home-four-grid">{items.map(item => <ListingCard key={item.id} listing={item} lang={lang} context={mode}/>)}</div>
@@ -344,14 +345,14 @@ function SiteOverview({ lang }: { lang: Language }) {
     <section className="section page-shell home-overview-section" aria-label={categoryHeading('roam', lang).title}>
       <div className="section-heading home-overview-heading">
         <div className="home-heading-copy"><h2>{categoryHeading('roam', lang).title}</h2><span>{categoryHeading('roam', lang).subtitle}</span></div>
-        <a className="text-link" href="#/roam">{t.more} <span aria-hidden="true">↗</span></a>
+        <a className="text-link" href="#/roam">{t.more}</a>
       </div>
       <RoamPage lang={lang} query="" embedded hideSearch previewLimit={8}/>
     </section>
     <section className="section page-shell home-overview-section home-owner-overview" aria-label={lang === 'zh' ? '资产托付' : 'Full entrustment'}>
       <div className="section-heading home-overview-heading">
         <div className="home-heading-copy"><h2>{lang === 'zh' ? '资产托付' : 'Full entrustment'}</h2><span>{lang === 'zh' ? '一房托管，稳定收益，畅享换住特权' : 'Entrust one home; earn steadily and unlock exchange stays.'}</span></div>
-        <a className="text-link" href="#/management">{t.more} <span aria-hidden="true">↗</span></a>
+        <a className="text-link" href="#/management">{t.more}</a>
       </div>
       <ManagementCards lang={lang}/>
     </section>
@@ -372,7 +373,7 @@ function CategoryPage({ lang, mode, query }: { lang: Language; mode: HomeMode; q
     <div className="section-heading home-overview-heading">
       <div className="home-heading-copy"><h2>{heading.title}</h2><span>{heading.subtitle}</span></div>
       {mode !== 'roam' && <label className="catalog-sort-control"><span>{lang === 'zh' ? '排序' : 'Sort'}</span><select value={activeSort} onChange={event => setSortMode(parseSortMode(event.target.value))} aria-label={lang === 'zh' ? '房源排序' : 'Sort homes'}><option value="recommended">{lang === 'zh' ? '推荐排序' : 'Recommended'}</option><option value="newest">{lang === 'zh' ? '最新上架' : 'Newest'}</option>{priceComparable && <><option value="price-asc">{lang === 'zh' ? '价格从低到高' : 'Price: low to high'}</option><option value="price-desc">{lang === 'zh' ? '价格从高到低' : 'Price: high to low'}</option></>}</select></label>}
-      <a className="text-link" href="#/">{lang === 'zh' ? '返回首页' : 'Home'} <span aria-hidden="true">↗</span></a>
+      <a className="text-link" href="#/">{lang === 'zh' ? '返回首页' : 'Home'}</a>
     </div>
     {mode === 'roam'
       ? <RoamPage lang={lang} query={query} embedded hideSearch groupCities/>
@@ -395,7 +396,7 @@ function ListingBookingCard({ listing, lang, onAction, query = '' }: { listing: 
   const estimate = listing.priceUnit === 'month' ? estimateLeaseMoveIn(monthlyPrice, termMonths, payment) : null
   const money = (value: number) => new Intl.NumberFormat(lang === 'zh' ? 'zh-CN' : 'en-US', { style: 'currency', currency: listing.currency, maximumFractionDigits: 0 }).format(value)
   return <aside className="booking-card">
-    <span className="eyebrow">{t.feeTitle} / {t.demo}</span>
+    <span className="eyebrow">{t.feeTitle}</span>
     <div className="booking-price"><small>{t.baseRent}</small><strong>{money(monthlyPrice)} / {lang === 'zh' ? '月' : 'month'}</strong></div>
     <div className="fee-lines"><div><span><LineIcon name="shield" size={17}/>{t.zeroAgency}</span><strong>{money(0)}</strong></div><div><span><LineIcon name="utility" size={17}/>{t.utilitiesActual}</span></div></div>
     {listing.priceUnit === 'month' && <div className="payment-example">
@@ -416,7 +417,7 @@ function ListingPage({ lang, id, onAction, query = '' }: { lang: Language; id?: 
   const region = city.regions.find(r => r.id === listing.region)!
   return <div className="page-shell detail-page">
     <a className="back-link" href="#/rentals">← {t.back}</a>
-    <div className="detail-heading"><div><p className="eyebrow">{city[lang]} / {region[lang]} / {t.demo}</p><h1>{listing.title[lang]}</h1><p>{listing.type[lang]} · {listing.highlight[lang]}</p></div><div className="detail-price"><span>{t.price}</span><strong>{formatPrice(listing, lang)}</strong></div></div>
+    <div className="detail-heading"><div><p className="eyebrow">{city[lang]} · {region[lang]}</p><h1>{listing.title[lang]}</h1><p>{listing.type[lang]} · {listing.highlight[lang]}</p></div><div className="detail-price"><span>{t.price}</span><strong>{formatPrice(listing, lang)}</strong></div></div>
     {canExchange(listing) && <div className="exchange-entry"><span>{t.ready}</span><a href={`#/exchange/home/${listing.id}`}>{t.apply} <LineIcon name="arrow" size={17}/></a></div>}
     <ExchangeGallery key={listing.id} home={listing} lang={lang}/>
     <div className="detail-layout"><div className="detail-main">
@@ -434,7 +435,7 @@ function ListingPage({ lang, id, onAction, query = '' }: { lang: Language; id?: 
 }
 
 function AccountRequiredPage({ lang, onLogin }: { lang: Language; onLogin: () => void }) {
-  return <section className="account-required page-shell"><span className="account-eyebrow">KUAI LÜ JU / MEMBER ACCESS</span><h1>{lang === 'zh' ? '登录后继续委托房源' : 'Sign in to manage a property'}</h1><p>{lang === 'zh' ? '房源录入与委托管理仅对会员开放。请先登录或注册，再继续填写资料。' : 'Property submissions and management are available to members. Please sign in or register to continue.'}</p><button type="button" className="button button-dark" onClick={onLogin}>{lang === 'zh' ? '登录 / 注册' : 'Log in / Sign up'}</button><p className="account-preview-note">{lang === 'zh' ? '当前为静态演示站，尚未接入真实会员认证及安全数据存储。' : 'Static preview only; live authentication and secure data storage are not connected.'}</p></section>
+  return <section className="account-required page-shell"><h1>{lang === 'zh' ? '登录后继续委托房源' : 'Sign in to manage a property'}</h1><p>{lang === 'zh' ? '房源录入与委托管理仅对会员开放。请先登录或注册，再继续填写资料。' : 'Property submissions and management are available to members. Please sign in or register to continue.'}</p><button type="button" className="button button-dark" onClick={onLogin}>{lang === 'zh' ? '登录 / 注册' : 'Log in / Sign up'}</button><p className="account-preview-note">{lang === 'zh' ? '当前为静态演示站，尚未接入真实会员认证及安全数据存储。' : 'Static preview only; live authentication and secure data storage are not connected.'}</p></section>
 }
 
 export default function App() {
@@ -495,8 +496,8 @@ export default function App() {
     </div></footer>
     {accountOpen && <AccountDialog lang={lang} onClose={() => setAccountOpen(false)} previewMember={previewMember} onPreviewEnter={() => { try { sessionStorage.setItem('kuailvju-preview-member', '1') } catch { /* session-only preview */ } setPreviewMember(true); setAccountOpen(false) }} onPreviewExit={() => { try { sessionStorage.removeItem('kuailvju-preview-member') } catch { /* session-only preview */ } setPreviewMember(false); setAccountOpen(false); if (route.page === 'management') window.location.hash = '#/' }}/>}
     {message && <div className="modal-backdrop" onClick={() => setMessage(null)}><div className="modal" role="dialog" aria-modal="true" aria-label={t.preview} onClick={e => e.stopPropagation()}>
-      <button className="modal-close" onClick={() => setMessage(null)} aria-label={t.close}>×</button><span className="eyebrow">PREVIEW NOTICE</span>
-      <h2>{t.preview}</h2><p>{message}</p><button className="button button-dark" onClick={() => setMessage(null)}>{t.understood} ↗</button>
+      <button className="modal-close" onClick={() => setMessage(null)} aria-label={t.close}>×</button>
+      <h2>{t.preview}</h2><p>{message}</p><button className="button button-dark" onClick={() => setMessage(null)}>{t.understood}</button>
     </div></div>}
   </>
 }
