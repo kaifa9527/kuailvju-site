@@ -23,6 +23,10 @@
   font-size: 10px; letter-spacing: .04em;
 }
 
+/* ── 容器 ── */
+.roam-page { padding-bottom: clamp(70px, 9vw, 130px); }
+.roam-page-inline { padding: 0; margin: 0; max-width: none; }
+
 /* ── 列表 ── */
 .roam-list { padding-top: 6px; }
 .roam-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 40px; }
