@@ -1288,16 +1288,6 @@ h1, h2, h3 { min-width: 0; overflow-wrap: anywhere; font-family: var(--font-disp
 /* Editorial four-column catalog shared by homepage previews and city result rows. */
 .home-overview-section { padding-block: 25px 30px; }
 
-/* Home journey bar — five entry cards; the owner entry reads as the intake lane. */
-.home-journey { display: flex; gap: 12px; flex-wrap: wrap; padding-block: 30px 4px; }
-.home-journey-link { position: relative; flex: 1 1 0; min-width: 172px; display: flex; flex-direction: column; gap: 6px; padding: 16px 18px 15px; border: 1px solid var(--color-rule); border-radius: 16px; background: var(--color-white); box-shadow: 0 5px 16px var(--color-soft-shadow); color: var(--color-ink); text-decoration: none; transition: transform 200ms var(--ease-out), border-color 200ms var(--ease-out), box-shadow 200ms var(--ease-out); }
-.home-journey-link b { font: 700 18px/1.2 var(--font-display); letter-spacing: -0.01em; }
-.home-journey-link span { font-size: 12px; line-height: 1.55; color: var(--color-muted); }
-.home-journey-link:hover { transform: translateY(-2px); border-color: var(--color-accent); box-shadow: 0 9px 22px var(--color-menu-shadow); }
-.home-journey-owner { background: var(--color-accent-light); border-color: #CBDCD0; }
-.home-journey-owner small { position: absolute; top: 11px; right: 12px; padding: 1px 8px; border: 1px solid var(--color-accent); border-radius: 999px; color: var(--color-accent); font-size: 10px; font-weight: 650; letter-spacing: .05em; }
-.home-journey-owner:hover { border-color: var(--color-accent); }
-
 /* Home hero — full-bleed forest immersion: the brand statement floats on deep green. */
 .home-hero {
   background: radial-gradient(130% 130% at 12% 0%, #27604A 0%, var(--color-primary) 52%, #122B20 100%);
@@ -1320,37 +1310,10 @@ h1, h2, h3 { min-width: 0; overflow-wrap: anywhere; font-family: var(--font-disp
   font-size: clamp(15px, 1.5vw, 18px);
   line-height: 1.75;
 }
-.home-hero-cities {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.home-hero-cities li {
-  display: grid;
-  gap: 3px;
-  min-width: 138px;
-  padding: 13px 16px;
-  border: 1px solid rgba(249, 247, 242, .22);
-  border-radius: var(--radius-surface);
-  background: rgba(249, 247, 242, .09);
-  backdrop-filter: blur(8px);
-  transition: background var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
-}
-.home-hero-cities li:hover { background: rgba(249, 247, 242, .16); transform: translateY(-2px); }
-.home-hero-cities li span { color: var(--color-on-solid); font: 600 15px/1.2 var(--font-display); }
-.home-hero-cities li small { color: rgba(249, 247, 242, .64); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; }
 @media (max-width: 760px) {
   .home-hero { padding-top: 34px; padding-bottom: 32px; }
   .home-hero-title { font-size: clamp(34px, 9.5vw, 46px); }
   .home-hero-sub { font-size: 14px; line-height: 1.7; }
-  .home-hero-cities li { min-width: 120px; padding: 11px 13px; }
-  .home-journey { padding-block: 24px 2px; gap: 10px; }
-  .home-journey-link { min-width: calc(50% - 5px); padding: 14px 15px 13px; }
-  .home-journey-owner { min-width: 100%; }
-  .home-journey-link b { font-size: 16px; }
 }
 
 /* Five-journey ecosystem — one quiet headline that lets the content breathe. */

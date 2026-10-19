@@ -20,8 +20,6 @@ type Filters = { city: string; region: string; type: string; term: string; moveI
 type Route = { page: string; id?: string; mode?: string; filters: Filters; query: string }
 const asset = (path: string) => `${import.meta.env.BASE_URL}${path.replace(/^\//, '')}`
 
-type JourneyItem = { key: string; title: string; line: string; owner?: boolean }
-
 const words = {
   zh: {
     rent: '长租房', stays: '短租', exchange: '旅居置换', roam: '漫游', navRent: '长租', navStays: '短租', navExchange: '置换', manage: '物业托管', explore: '探索房源', more: '了解详情',
@@ -41,14 +39,6 @@ const words = {
     pinned: '置顶', exchangeBadge: '可置换 · 示意', exchangeMayWaive: '符合条件可免住宿费', exchangeCostsBrief: '保洁费 + 押金 + 水电',
     exchangeSectionNote: '仅已授权的委托租赁业主可申请。每次入住收 ¥600 入住前后保洁费；押金按目标长租房一个月租金，水电据实结算。已出租期间不可置换，芭提雅收等值泰铢。',
     homeManageNote: '委托租赁、委托经营、委托看护。选一种适合您房屋现状的方式。',
-    journeyTitle: '从一处好房，进入整个旅居生态',
-    journey: [
-      { key: 'rentals', title: '长租', line: '半年或一年起租 · 租客免中介费' },
-      { key: 'stays', title: '短租', line: '按晚入住 · 委托经营房源' },
-      { key: 'exchange', title: '置换', line: '业主旅居互换 · 对等可免房费' },
-      { key: 'roam', title: '漫游', line: '景点门票 · 高尔夫 · 在地体验' },
-      { key: 'manage', title: '委托', line: '房东收口录入 · 三种托管方式', owner: true },
-    ],
     roamLead: '住进一座城市，再走进它的日常。', roamNote: '三城本地活动体验 · 查看示意内容与站内预约流程',
     registrationTitle: '登记房源意向', serviceScope: '服务与收费', registrationPreview: '可测试提交流程 · 不收集真实资料',
     registrationNotice: '选择房屋信息后可生成一条站内测试记录，保存在当前浏览器。电话与邮箱暂不填写，也不会发送给平台。',
@@ -71,7 +61,7 @@ const words = {
     guide: '三种服务，一目了然',
     cityNote: '目前开放芭提雅、三亚、北海。更多城市将逐步加入。',
     rentalLine: '好房源，心服务。', exchangeLine: '一房托管，旅居世界。', manageLine: '专业、靠谱，知托付。',
-    heroTitle: '一房托管，旅居世界。', heroSub: '精选泰国芭提雅、海南三亚、广西北海、云南西双版纳四大慢居地，让闲置资产成为漫居世界的通行证。',
+    heroTitle: '一处房源，五种生活。', heroSub: '一个平台，安放你全部的旅居方式。',
     ecoTitle: '五维居所生态，重构生活边界',
     eligibility: '谁可以置换？', eligibilityText: '仅已签委托租赁且明确授权的长租房业主，可在空置可交付日期互换；民宿不参与。',
     twoHomes: '两套房源，并列比较', twoHomesSub: '实际入住天数、面积、卧室与装修同屏对照；地段、景观和租金只作参考，双方匿名确认。',
@@ -111,14 +101,6 @@ const words = {
     pinned: 'Pinned', exchangeBadge: 'Exchange eligible · concept', exchangeMayWaive: 'Eligible stays may waive rent', exchangeCostsBrief: 'Cleaning + deposit + utilities',
     exchangeSectionNote: 'Only authorized entrusted-leasing owners may apply. Each stay has a ¥600 pre/post-stay cleaning fee, a deposit equal to the occupied home’s monthly rent and metered utilities. Tenanted dates are unavailable. Pattaya charges the THB equivalent.',
     homeManageNote: 'Leasing, full management or home care. Choose the service that fits your property.',
-    journeyTitle: 'One good home. A whole living ecosystem.',
-    journey: [
-      { key: 'rentals', title: 'Long stays', line: 'Six or twelve months · no tenant fee' },
-      { key: 'stays', title: 'Short stays', line: 'Operated homes by the night' },
-      { key: 'exchange', title: 'Exchange', line: 'Owner stays, side by side' },
-      { key: 'roam', title: 'Roam', line: 'Tickets · golf · local experiences' },
-      { key: 'manage', title: 'Entrust', line: 'One entry for owners · three care modes', owner: true },
-    ],
     roamLead: 'Find a place to stay. Then explore its everyday life.', roamNote: 'Local activity concepts in three cities · preview the booking flow',
     registrationTitle: 'Register a property enquiry', serviceScope: 'Service & fees', registrationPreview: 'Interactive workflow test · no real details collected',
     registrationNotice: 'Submit property choices to create a browser-only test record. Phone and email remain disabled; nothing is sent to the platform.',
@@ -141,7 +123,7 @@ const words = {
     guide: 'Three clear ways to begin',
     cityNote: 'Now focusing on Pattaya, Sanya and Beihai. More cities will follow.',
     rentalLine: 'Good homes. Thoughtful service.', exchangeLine: 'One home entrusted. A world to stay in.', manageLine: 'Professional care. Trust well placed.',
-    heroTitle: 'One home entrusted. A world to stay in.', heroSub: 'Four slow-living cities — Pattaya, Sanya, Beihai and Xishuangbanna — where an idle asset becomes a passport to boundless stays.',
+    heroTitle: 'One home. Five ways to live.', heroSub: 'Every way to live, in one place.',
     ecoTitle: 'Five journeys, one living ecosystem',
     eligibility: 'Who can exchange?', eligibilityText: 'Only owners of entrusted long-stay homes with express authorization may exchange vacant, deliverable dates. Short stays do not join.',
     twoHomes: 'Two homes, side by side', twoHomesSub: 'Compare actual nights, size, bedrooms and condition. Location, views and rent remain references; both owners decide anonymously.',
@@ -334,25 +316,14 @@ function ManagementCards({ lang }: { lang: Language }) {
 
 function SiteOverview({ lang }: { lang: Language }) {
   const t = words[lang]
-  const journey = t.journey as JourneyItem[]
   const sections: CardContext[] = ['rentals', 'stays', 'exchange']
   return <>
     <section className="home-hero" aria-label={lang === 'zh' ? '快旅居 · 品牌宣言' : 'Kuai Lü Ju · Brand statement'}>
       <div className="page-shell home-hero-inner">
         <h1 className="home-hero-title">{t.heroTitle}</h1>
         <p className="home-hero-sub">{t.heroSub}</p>
-        <ul className="home-hero-cities" aria-label={lang === 'zh' ? '四大核心慢居地' : 'Four core slow-living cities'}>
-          {cities.map(city => <li key={city.id}><span>{city[lang]}</span><small>{lang === 'zh' ? city.en : city.zh}</small></li>)}
-        </ul>
       </div>
     </section>
-    <nav className="home-journey page-shell" aria-label={lang === 'zh' ? '探索旅居方式' : 'Explore stay journeys'}>
-      {journey.map(item => (
-        <a key={item.key} className={'home-journey-link' + (item.owner ? ' home-journey-owner' : '')} href={item.key === 'manage' ? '#/management' : `#/${item.key}`}>
-          <b>{item.title}</b><span>{item.line}</span>{item.owner && <small>{lang === 'zh' ? '房东入口' : 'Owner'}</small>}
-        </a>
-      ))}
-    </nav>
     <h2 className="home-ecosystem page-shell">{t.ecoTitle}</h2>
     <div className="home-overview">
     {sections.map(mode => {
