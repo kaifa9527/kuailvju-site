@@ -61,8 +61,8 @@ const words = {
     guide: '三种服务，一目了然',
     cityNote: '目前开放芭提雅、三亚、北海。更多城市将逐步加入。',
     rentalLine: '好房源，心服务。', exchangeLine: '一房托管，旅居世界。', manageLine: '专业、靠谱，知托付。',
-    heroEyebrow: 'KUAI LÜ JU · DISTRIBUTED LIVING NETWORK', heroTitle: '一房托管，旅居世界。', heroSub: '连接高品质生活家与全球阳光居所。精选泰国芭提雅、海南三亚、广西北海、云南西双版纳四大核心慢居地，让闲置资产成为开启无界漫居的通行证。',
-    ecoEyebrow: 'FIVE JOURNEYS · ONE ECOSYSTEM', ecoTitle: '五维居所生态，重构生活边界', ecoSub: '从一房托管到三种住法，再到在地漫游——五维互相补给，让每一处资产都进入流动的旅居网络。',
+    heroEyebrow: 'KUAI LÜ JU · DISTRIBUTED LIVING NETWORK', heroTitle: '一房托管，旅居世界。', heroSub: '精选泰国芭提雅、海南三亚、广西北海、云南西双版纳四大慢居地，让闲置资产成为漫居世界的通行证。',
+    ecoTitle: '五维居所生态，重构生活边界',
     eligibility: '谁可以置换？', eligibilityText: '仅已签委托租赁且明确授权的长租房业主，可在空置可交付日期互换；民宿不参与。',
     twoHomes: '两套房源，并列比较', twoHomesSub: '实际入住天数、面积、卧室与装修同屏对照；地段、景观和租金只作参考，双方匿名确认。',
     step1: '选择目标房源', step2: '双方匿名确认', step3: '确定各自入住时间', step4: '支付服务费与押金',
@@ -123,8 +123,8 @@ const words = {
     guide: 'Three clear ways to begin',
     cityNote: 'Now focusing on Pattaya, Sanya and Beihai. More cities will follow.',
     rentalLine: 'Good homes. Thoughtful service.', exchangeLine: 'One home entrusted. A world to stay in.', manageLine: 'Professional care. Trust well placed.',
-    heroEyebrow: 'KUAI LÜ JU · DISTRIBUTED LIVING NETWORK', heroTitle: 'One home entrusted. A world to stay in.', heroSub: 'Connect quality travellers with sunlit homes around the world. Focused on four core slow-living cities — Pattaya, Sanya, Beihai and Xishuangbanna — turning idle assets into a passport to boundless stays.',
-    ecoEyebrow: 'FIVE JOURNEYS · ONE ECOSYSTEM', ecoTitle: 'Five journeys, one living ecosystem', ecoSub: 'From one entrusted home to three ways of staying, then local roaming — five journeys that feed one another in a distributed living network.',
+    heroEyebrow: 'KUAI LÜ JU · DISTRIBUTED LIVING NETWORK', heroTitle: 'One home entrusted. A world to stay in.', heroSub: 'Four slow-living cities — Pattaya, Sanya, Beihai and Xishuangbanna — where an idle asset becomes a passport to boundless stays.',
+    ecoTitle: 'Five journeys, one living ecosystem',
     eligibility: 'Who can exchange?', eligibilityText: 'Only owners of entrusted long-stay homes with express authorization may exchange vacant, deliverable dates. Short stays do not join.',
     twoHomes: 'Two homes, side by side', twoHomesSub: 'Compare actual nights, size, bedrooms and condition. Location, views and rent remain references; both owners decide anonymously.',
     step1: 'Choose a home', step2: 'Confirm anonymously', step3: 'Agree on both stay dates', step4: 'Pay fee and deposit',
@@ -286,14 +286,6 @@ function ListingCard({ listing, lang, context = 'rentals', query = '', pendingIn
 }
 
 type CardContext = 'rentals' | 'stays' | 'exchange'
-/* 五维居所生态 · 业务逻辑编号（页面叙事 = 业务闭环：供给→三种住法→漫游） */
-const journeyMeta: Record<CardContext | 'roam' | 'management', { index: string; tag: string }> = {
-  rentals: { index: '01', tag: 'FLEXIBLE MONTHLY' },
-  stays: { index: '02', tag: 'MINDFUL ESCAPES' },
-  exchange: { index: '03', tag: 'KEY SWAP' },
-  roam: { index: '04', tag: 'MULTI-CITY CIRCUITS' },
-  management: { index: '05', tag: 'FULL ENTRUSTMENT' },
-}
 const categoryHeading = (mode: HomeMode, lang: Language): { title: string; subtitle: string } => {
   if (lang === 'zh') return {
     rentals: { title: '长租房', subtitle: '可选半年或一年租期' },
@@ -334,18 +326,14 @@ function SiteOverview({ lang }: { lang: Language }) {
         {cities.map(city => <li key={city.id}><span>{city[lang]}</span><small>{lang === 'zh' ? city.en : city.zh}</small></li>)}
       </ul>
     </section>
-    <div className="home-ecosystem page-shell" aria-label={t.ecoTitle}>
-      <p className="home-ecosystem-eyebrow">{t.ecoEyebrow}</p>
-      <div className="home-ecosystem-copy"><h2>{t.ecoTitle}</h2><p>{t.ecoSub}</p></div>
-    </div>
+    <h2 className="home-ecosystem page-shell">{t.ecoTitle}</h2>
     <div className="home-overview">
     {sections.map(mode => {
       const heading = categoryHeading(mode, lang)
-      const meta = journeyMeta[mode]
       const items = previewListings(sortDiscoveryListings(availableByMode(mode), 'recommended'))
       return <section className="section page-shell home-overview-section" key={mode} aria-label={heading.title}>
         <div className="section-heading home-overview-heading">
-          <div className="home-heading-copy"><span className="journey-index" aria-hidden="true">{meta.index}</span><h2>{heading.title}</h2><span className="journey-tag">{meta.tag}</span><span>{heading.subtitle}</span></div>
+          <div className="home-heading-copy"><h2>{heading.title}</h2><span>{heading.subtitle}</span></div>
           <a className="text-link" href={`#/${mode}`}>{t.more} <span aria-hidden="true">↗</span></a>
         </div>
         {items.length
@@ -355,14 +343,14 @@ function SiteOverview({ lang }: { lang: Language }) {
     })}
     <section className="section page-shell home-overview-section" aria-label={categoryHeading('roam', lang).title}>
       <div className="section-heading home-overview-heading">
-        <div className="home-heading-copy"><span className="journey-index" aria-hidden="true">{journeyMeta.roam.index}</span><h2>{categoryHeading('roam', lang).title}</h2><span className="journey-tag">{journeyMeta.roam.tag}</span><span>{categoryHeading('roam', lang).subtitle}</span></div>
+        <div className="home-heading-copy"><h2>{categoryHeading('roam', lang).title}</h2><span>{categoryHeading('roam', lang).subtitle}</span></div>
         <a className="text-link" href="#/roam">{t.more} <span aria-hidden="true">↗</span></a>
       </div>
       <RoamPage lang={lang} query="" embedded hideSearch previewLimit={8}/>
     </section>
     <section className="section page-shell home-overview-section home-owner-overview" aria-label={lang === 'zh' ? '资产托付' : 'Full entrustment'}>
       <div className="section-heading home-overview-heading">
-        <div className="home-heading-copy"><span className="journey-index" aria-hidden="true">{journeyMeta.management.index}</span><h2>{lang === 'zh' ? '资产托付' : 'Full entrustment'}</h2><span className="journey-tag">{journeyMeta.management.tag}</span><span>{lang === 'zh' ? '一房托管，稳定收益，畅享全球换住特权' : 'Entrust one home; earn steadily and unlock global exchange stays.'}</span></div>
+        <div className="home-heading-copy"><h2>{lang === 'zh' ? '资产托付' : 'Full entrustment'}</h2><span>{lang === 'zh' ? '一房托管，稳定收益，畅享换住特权' : 'Entrust one home; earn steadily and unlock exchange stays.'}</span></div>
         <a className="text-link" href="#/management">{t.more} <span aria-hidden="true">↗</span></a>
       </div>
       <ManagementCards lang={lang}/>

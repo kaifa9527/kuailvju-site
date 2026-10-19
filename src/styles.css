@@ -1279,7 +1279,8 @@ h1, h2, h3 { min-width: 0; overflow-wrap: anywhere; font-weight: 500; line-heigh
 /* Editorial four-column catalog shared by homepage previews and city result rows. */
 .home-overview-section { padding-block: 25px 30px; }
 
-/* Home hero — brand statement above the five journeys (Japandi tokens + micro-tactile). */.home-hero {
+/* Home hero — brand statement above the five journeys (Japandi tokens + micro-tactile). */
+.home-hero {
   padding-top: clamp(30px, 4.5vw, 60px);
   padding-bottom: clamp(22px, 3.2vw, 40px);
   border-bottom: 1px solid var(--color-rule);
@@ -1332,55 +1333,17 @@ h1, h2, h3 { min-width: 0; overflow-wrap: anywhere; font-weight: 500; line-heigh
   .home-hero-cities li { padding: 8px 12px; }
 }
 
-/* Five-journey ecosystem statement — the business logic behind the homepage. */
+/* Five-journey ecosystem — one quiet headline that lets the content breathe. */
 .home-ecosystem {
-  padding: clamp(26px, 4vw, 48px) 0 clamp(10px, 2vw, 18px);
-}
-.home-ecosystem-eyebrow {
-  margin: 0 0 10px;
-  color: var(--color-tertiary);
-  font: 600 12px/1.4 var(--font-display);
-  letter-spacing: .14em;
-}
-.home-ecosystem-copy { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 24px; }
-.home-ecosystem-copy h2 {
-  margin: 0;
+  padding: clamp(40px, 6vw, 72px) 0 clamp(14px, 2.4vw, 24px);
   color: var(--color-ink);
-  font: 600 clamp(28px, 3.4vw, 44px)/1.15 var(--font-display);
-  letter-spacing: -.04em;
-}
-.home-ecosystem-copy p {
-  margin: 0;
-  max-width: 620px;
-  color: var(--color-muted-strong);
-  font-size: 14px;
-  line-height: 1.8;
-  font-weight: 450;
+  font: 600 clamp(30px, 4.6vw, 58px)/1.15 var(--font-display);
+  letter-spacing: -.045em;
+  text-align: center;
 }
 .home-overview { border-top: 1px solid var(--color-rule); padding-top: 6px; }
 @media (max-width: 760px) {
-  .home-ecosystem { padding: 22px 0 6px; }
-  .home-ecosystem-copy { gap: 4px 14px; }
-  .home-ecosystem-copy p { font-size: 13px; }
-}
-
-/* Journey index badges — 01-05 numbering carries the business sequence. */
-.journey-index {
-  display: inline-grid;
-  place-items: center;
-  min-width: 30px;
-  height: 30px;
-  padding: 0 7px;
-  border-radius: 9px;
-  background: var(--color-accent-light);
-  color: var(--color-accent);
-  font: 600 13px/1 var(--font-display);
-  letter-spacing: .02em;
-}
-.journey-tag {
-  color: var(--color-tertiary);
-  font: 600 10px/1 var(--font-display);
-  letter-spacing: .12em;
+  .home-ecosystem { padding: 30px 0 8px; font-size: clamp(26px, 8vw, 34px); }
 }
 .home-overview-heading { align-items: baseline; margin-bottom: 14px; }
 .home-heading-copy { display: flex; align-items: baseline; flex-wrap: wrap; gap: 10px 18px; }
