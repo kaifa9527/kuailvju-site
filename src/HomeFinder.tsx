@@ -26,14 +26,7 @@ const translations = {
   },
 }
 
-const stayModes: { key: HomeMode; labelKey: 'modeRentals' | 'modeStays' | 'modeExchange' | 'modeRoam' }[] = [
-  { key: 'rentals', labelKey: 'modeRentals' },
-  { key: 'stays', labelKey: 'modeStays' },
-  { key: 'exchange', labelKey: 'modeExchange' },
-  { key: 'roam', labelKey: 'modeRoam' },
-]
-
-export function HomeFinder({ lang, mode, onModeChange, onSummaryChange, onSearch }: { lang: Language; mode: HomeMode; onModeChange?: (mode: HomeMode) => void; onSummaryChange?: (summary: [string, string, string]) => void; onSearch?: (mode: HomeMode, query: string) => void }) {
+export function HomeFinder({ lang, mode, onSummaryChange, onSearch }: { lang: Language; mode: HomeMode; onSummaryChange?: (summary: [string, string, string]) => void; onSearch?: (mode: HomeMode, query: string) => void }) {
   const t = translations[lang]
   const [draftByMode, setDraftByMode] = useState<Record<HomeMode, HomeSearch>>(() => ({
     rentals: { ...initialHomeSearch }, stays: { ...initialHomeSearch },
@@ -72,13 +65,6 @@ export function HomeFinder({ lang, mode, onModeChange, onSummaryChange, onSearch
     catch { setError(t.invalid) }
   }
   return <section className="home-discovery page-shell" aria-label={t.search}>
-    <div className="home-discovery-modes" role="tablist" aria-label={t.modeLabel}>
-      {stayModes.map(item => (
-        <button key={item.key} type="button" role="tab" aria-selected={mode === item.key}
-          className={mode === item.key ? 'is-active' : ''}
-          onClick={() => onModeChange?.(item.key)}>{t[item.labelKey]}</button>
-      ))}
-    </div>
     <form className="home-discovery-form" onSubmit={submit} role="search"
       onPointerDownCapture={() => { pointerSelection.current = true }}
       onKeyDownCapture={() => { pointerSelection.current = false }}

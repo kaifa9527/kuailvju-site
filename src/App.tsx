@@ -8,7 +8,6 @@ import type { HomeMode } from './lib/homeDiscovery'
 import { cities, listings, type Listing, type Term } from './data'
 import { canExchange, estimateLeaseMoveIn, formatPrice, longRentalMonthlyPrice, type Language, type LeasePaymentOption } from './lib/catalog'
 import { LineIcon, amenityIcon } from './components/LineIcon'
-import { NavGlyph } from './components/NavGlyph'
 import { ExchangeGallery } from './components/ExchangeGallery'
 import { ExchangeRequestPage, RentalRequestPage, TestInbox } from './TestFlows'
 import { ManagementPage } from './ManagementPage'
@@ -61,7 +60,6 @@ const words = {
     guide: '三种服务，一目了然',
     cityNote: '目前开放芭提雅、三亚、北海。更多城市将逐步加入。',
     rentalLine: '好房源，心服务。', exchangeLine: '一房托管，旅居世界。', manageLine: '专业、靠谱，知托付。',
-    ecoTitle: '五维居所生态，重构生活边界',
     eligibility: '谁可以置换？', eligibilityText: '仅已签委托租赁且明确授权的长租房业主，可在空置可交付日期互换；民宿不参与。',
     twoHomes: '两套房源，并列比较', twoHomesSub: '实际入住天数、面积、卧室与装修同屏对照；地段、景观和租金只作参考，双方匿名确认。',
     step1: '选择目标房源', step2: '双方匿名确认', step3: '确定各自入住时间', step4: '支付服务费与押金',
@@ -122,7 +120,6 @@ const words = {
     guide: 'Three clear ways to begin',
     cityNote: 'Now focusing on Pattaya, Sanya and Beihai. More cities will follow.',
     rentalLine: 'Good homes. Thoughtful service.', exchangeLine: 'One home entrusted. A world to stay in.', manageLine: 'Professional care. Trust well placed.',
-    ecoTitle: 'Five journeys, one living ecosystem',
     eligibility: 'Who can exchange?', eligibilityText: 'Only owners of entrusted long-stay homes with express authorization may exchange vacant, deliverable dates. Short stays do not join.',
     twoHomes: 'Two homes, side by side', twoHomesSub: 'Compare actual nights, size, bedrooms and condition. Location, views and rent remain references; both owners decide anonymously.',
     step1: 'Choose a home', step2: 'Confirm anonymously', step3: 'Agree on both stay dates', step4: 'Pay fee and deposit',
@@ -158,9 +155,9 @@ function parseRoute(): Route {
   }
 }
 
-function Header({ lang, setLang, route, mode, onModeChange, onSearch, onAccountClick, previewMember }: {
+function Header({ lang, setLang, route, mode, onSearch, onAccountClick, previewMember }: {
   lang: Language; setLang: (v: Language) => void; route: Route;
-  mode: HomeMode; onModeChange: (mode: HomeMode) => void; onSearch: (mode: HomeMode, query: string) => void; onAccountClick: () => void; previewMember: boolean
+  mode: HomeMode; onSearch: (mode: HomeMode, query: string) => void; onAccountClick: () => void; previewMember: boolean
 }) {
   const t = words[lang]
   const [open, setOpen] = useState(false)
@@ -235,15 +232,20 @@ function Header({ lang, setLang, route, mode, onModeChange, onSearch, onAccountC
           <span className="brand-mark">快</span><span className="brand-name">快旅居<span>KUAI LÜ JU</span></span>
         </a>
         <nav className="primary-nav clear-primary-nav" aria-label={t.menu}>
+          <a href="#/" aria-current={route.page === 'home' ? 'page' : undefined}
+            className={route.page === 'home' ? 'is-current' : ''}
+            onClick={() => { setOpen(false); if (route.page === 'home') window.scrollTo({ top: 0, behavior: 'smooth' }) }}>
+            <span>{lang === 'zh' ? '首页' : 'Home'}</span>
+          </a>
           {nav.map(item => <a key={item.key} href={item.href}
             aria-current={route.page === item.key ? 'page' : undefined}
             className={route.page === item.key ? 'is-current' : ''}
             onClick={() => {
               setOpen(false)
-            }}><NavGlyph name={item.key} size={22}/><span>{item.label}</span></a>)}
+            }}><span>{item.label}</span></a>)}
           <a href="#/management" className={'nav-owner-service' + (route.page === 'management' ? ' is-current' : '')}
             aria-label={t.manage} title={t.manage} onClick={() => setOpen(false)}>
-            <NavGlyph name="management" size={22}/><span>{lang === 'zh' ? '委托' : 'Owners'}</span>
+            <span>{lang === 'zh' ? '委托' : 'Owners'}</span>
           </a>
         </nav>
         <button type="button" className="home-compact-search" aria-controls="home-search-panel"
@@ -265,7 +267,7 @@ function Header({ lang, setLang, route, mode, onModeChange, onSearch, onAccountC
         <a href="#/test-inbox" onClick={() => setOpen(false)}>{t.testDesk}</a>
       </nav>}
       <div className="home-finder-stage" id="home-search-panel" aria-hidden={!expanded}>
-        <HomeFinder lang={lang} mode={mode} onModeChange={onModeChange} onSearch={onSearch} onSummaryChange={setSearchSummary}/>
+        <HomeFinder lang={lang} mode={mode} onSearch={onSearch} onSummaryChange={setSearchSummary}/>
         {scrolled && searchOpen && <button type="button" className="home-finder-dismiss" aria-label={t.close}
           onClick={() => setSearchOpen(false)}><LineIcon name="close" size={18}/></button>}
       </div>
@@ -316,7 +318,6 @@ function SiteOverview({ lang }: { lang: Language }) {
   const t = words[lang]
   const sections: CardContext[] = ['rentals', 'stays', 'exchange']
   return <>
-    <h2 className="home-ecosystem page-shell">{t.ecoTitle}</h2>
     <div className="home-overview">
     {sections.map(mode => {
       const heading = categoryHeading(mode, lang)
@@ -452,8 +453,6 @@ export default function App() {
   const t = words[lang]
   const category = ['rentals', 'stays', 'exchange', 'roam'].includes(route.page) && !route.id
   const routeMode: HomeMode = (['rentals', 'stays', 'exchange', 'roam'] as HomeMode[]).includes(route.page as HomeMode) ? route.page as HomeMode : 'rentals'
-  const [activeMode, setActiveMode] = useState<HomeMode>(routeMode)
-  useEffect(() => { setActiveMode(routeMode) }, [routeMode])
   const onHomeSearch = (mode: HomeMode, query: string) => {
     const hash = `#/${mode}${query ? `?${query}` : ''}`
     if (window.location.hash !== hash) window.location.hash = hash
@@ -476,7 +475,7 @@ export default function App() {
     return <SiteOverview lang={lang}/>
   }, [route, lang, category, previewMember])
   return <>
-    <Header lang={lang} setLang={setLang} route={route} mode={activeMode} onModeChange={setActiveMode} onSearch={onHomeSearch} onAccountClick={() => setAccountOpen(true)} previewMember={previewMember}/>
+    <Header lang={lang} setLang={setLang} route={route} mode={routeMode} onSearch={onHomeSearch} onAccountClick={() => setAccountOpen(true)} previewMember={previewMember}/>
     <main id="main-content">{content}</main>
     <footer className="site-footer"><div className="page-shell">
       <div className="footer-top"><a className="footer-brand" href="#/">快旅居 <span>KUAI LÜ JU</span></a>
