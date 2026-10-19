@@ -55,7 +55,6 @@ export function LegalNoticeDialog({ lang, kind, onClose }: { lang: Language; kin
   return <div className="legal-overlay" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) onClose() }}>
     <section className="legal-dialog" role="dialog" aria-modal="true" aria-labelledby="legal-dialog-title">
       <header className="legal-dialog-header">
-        <span className="eyebrow">KUAI LÜ JU / POLICY</span>
         <h2 id="legal-dialog-title">{title}</h2>
         <button ref={closeRef} type="button" className="legal-close" onClick={onClose} aria-label={lang === 'zh' ? '关闭并返回' : 'Close and return'}>×</button>
       </header>

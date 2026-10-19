@@ -230,7 +230,7 @@ function RegistrationForm({ lang, mode }: { lang: Language; mode: Mode }) {
     {previews.length > 0 && <div className="management-photo-grid">{previews.map((item, index) => <div key={item.url}><img src={item.url} alt={`${t.photos} ${index + 1}`}/><button type="button" aria-label={`${t.removePhoto} ${index + 1}`} onClick={() => setPreviews(previous => previous.filter(photo => photo.url !== item.url))}>×</button></div>)}</div>}
     <div className="management-private"><strong>{t.privateAddress}</strong><p>{t.privateHint}</p></div>
     {saveError && <p role="alert" className="form-error">{saveError}</p>}
-    <button className="button button-dark management-submit" type="submit">{t.submit}<span aria-hidden="true">↗</span></button>
+    <button className="button button-dark management-submit" type="submit">{t.submit}</button>
   </form>{exchangePromptOpen && <div className="modal-backdrop" onClick={() => setExchangePromptOpen(false)}><div className="modal management-exchange-modal" role="dialog" aria-modal="true" aria-label={t.exchangePromptTitle} onClick={event => event.stopPropagation()}><h2>{t.exchangePromptTitle}</h2><p>{t.exchangePrompt}</p><div><button className="button button-outline" type="button" onClick={() => { setExchangePromptOpen(false); exchangeCheckRef.current?.focus() }}>{t.exchangeBack}</button><button className="button button-dark" type="button" onClick={() => { setExchangePromptOpen(false); if (formRef.current) saveRegistration(formRef.current) }}>{t.exchangeSkip}</button></div></div></div>}</>
 }
 

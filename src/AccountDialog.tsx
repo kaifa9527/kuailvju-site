@@ -48,14 +48,12 @@ export function AccountDialog({ lang, onClose, onPreviewEnter, onPreviewExit, pr
     <section className="account-dialog" role="dialog" aria-modal="true" aria-labelledby="account-dialog-title">
       <button type="button" className="account-close" onClick={onClose} aria-label={zh ? '关闭' : 'Close'}>×</button>
       {previewMember ? <>
-        <span className="account-eyebrow">KUAI LÜ JU / PREVIEW</span>
         <div className="account-avatar-large" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.2"/><path d="M5.5 20c.5-3.5 2.8-5.5 6.5-5.5s6 2 6.5 5.5"/></svg></div>
         <h2 id="account-dialog-title">{zh ? '演示会员' : 'Preview member'}</h2>
         <p className="account-description">{zh ? '你正在体验本机演示身份，不代表已创建真实账户。会员认证与数据保存尚未启用。' : 'You are using a local preview identity, not a real account. Live authentication and data storage are not enabled.'}</p>
         <a className="button button-dark account-primary-link" href="#/management" onClick={onClose}>{zh ? '进入房源委托' : 'Manage a property'}</a>
         <button className="account-text-action" type="button" onClick={onPreviewExit}>{zh ? '退出演示会员' : 'Exit preview member'}</button>
       </> : <>
-        <span className="account-eyebrow">KUAI LÜ JU / MEMBER</span>
         <h2 id="account-dialog-title">{zh ? '欢迎来到快旅居' : 'Welcome to Kuai Lü Ju'}</h2>
         <p className="account-description">{zh ? '登录后收藏心仪房源，或提交房源进入平台审核。' : 'Sign in to save homes or submit a listing for review.'}</p>
         <div className="account-mode-switch" role="tablist" aria-label={zh ? '账户操作' : 'Account action'}>
@@ -78,7 +76,7 @@ export function AccountDialog({ lang, onClose, onPreviewEnter, onPreviewExit, pr
           <button type="submit" className="button button-dark account-primary-button">{mode === 'login' ? (zh ? '继续登录' : 'Continue to log in') : (zh ? '继续注册' : 'Continue to sign up')}</button>
         </form>
         <div className="account-preview-separator"><span>{zh ? '或' : 'OR'}</span></div>
-        <button type="button" className="account-preview-button" onClick={enterDemo}>{zh ? '进入演示会员' : 'Enter preview member'} <span>↗</span></button>
+        <button type="button" className="account-preview-button" onClick={enterDemo}>{zh ? '进入演示会员' : 'Enter preview member'}</button>
         <p className="account-preview-note">{zh ? '仅用于查看页面流程；不创建真实账户，不保存填写的联系方式。' : 'Interface preview only. No real account is created and contact input is not saved.'}</p>
       </>}
     </section>
