@@ -1288,34 +1288,6 @@ h1, h2, h3 { min-width: 0; overflow-wrap: anywhere; font-family: var(--font-disp
 /* Editorial four-column catalog shared by homepage previews and city result rows. */
 .home-overview-section { padding-block: 25px 30px; }
 
-/* Home hero — full-bleed forest immersion: the brand statement floats on deep green. */
-.home-hero {
-  background: radial-gradient(130% 130% at 12% 0%, #27604A 0%, var(--color-primary) 52%, #122B20 100%);
-  color: var(--color-on-solid);
-  padding-block: clamp(46px, 7vw, 88px) clamp(42px, 6.4vw, 80px);
-  border-bottom: 1px solid rgba(249, 247, 242, .16);
-}
-.home-hero-title {
-  margin: 0 0 18px;
-  max-width: 15em;
-  color: var(--color-on-solid);
-  font: 600 clamp(40px, 6.2vw, 76px)/1.08 var(--font-display);
-  letter-spacing: -.05em;
-  text-shadow: 0 2px 24px rgba(11, 34, 24, .35);
-}
-.home-hero-sub {
-  margin: 0 0 26px;
-  max-width: 640px;
-  color: rgba(249, 247, 242, .84);
-  font-size: clamp(15px, 1.5vw, 18px);
-  line-height: 1.75;
-}
-@media (max-width: 760px) {
-  .home-hero { padding-top: 34px; padding-bottom: 32px; }
-  .home-hero-title { font-size: clamp(34px, 9.5vw, 46px); }
-  .home-hero-sub { font-size: 14px; line-height: 1.7; }
-}
-
 /* Five-journey ecosystem — one quiet headline that lets the content breathe. */
 .home-ecosystem {
   padding: clamp(40px, 6vw, 72px) 0 clamp(14px, 2.4vw, 24px);

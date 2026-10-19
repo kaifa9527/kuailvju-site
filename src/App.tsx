@@ -61,7 +61,6 @@ const words = {
     guide: '三种服务，一目了然',
     cityNote: '目前开放芭提雅、三亚、北海。更多城市将逐步加入。',
     rentalLine: '好房源，心服务。', exchangeLine: '一房托管，旅居世界。', manageLine: '专业、靠谱，知托付。',
-    heroTitle: '一处房源，五种生活。', heroSub: '一个平台，安放你全部的旅居方式。',
     ecoTitle: '五维居所生态，重构生活边界',
     eligibility: '谁可以置换？', eligibilityText: '仅已签委托租赁且明确授权的长租房业主，可在空置可交付日期互换；民宿不参与。',
     twoHomes: '两套房源，并列比较', twoHomesSub: '实际入住天数、面积、卧室与装修同屏对照；地段、景观和租金只作参考，双方匿名确认。',
@@ -123,7 +122,6 @@ const words = {
     guide: 'Three clear ways to begin',
     cityNote: 'Now focusing on Pattaya, Sanya and Beihai. More cities will follow.',
     rentalLine: 'Good homes. Thoughtful service.', exchangeLine: 'One home entrusted. A world to stay in.', manageLine: 'Professional care. Trust well placed.',
-    heroTitle: 'One home. Five ways to live.', heroSub: 'Every way to live, in one place.',
     ecoTitle: 'Five journeys, one living ecosystem',
     eligibility: 'Who can exchange?', eligibilityText: 'Only owners of entrusted long-stay homes with express authorization may exchange vacant, deliverable dates. Short stays do not join.',
     twoHomes: 'Two homes, side by side', twoHomesSub: 'Compare actual nights, size, bedrooms and condition. Location, views and rent remain references; both owners decide anonymously.',
@@ -318,12 +316,6 @@ function SiteOverview({ lang }: { lang: Language }) {
   const t = words[lang]
   const sections: CardContext[] = ['rentals', 'stays', 'exchange']
   return <>
-    <section className="home-hero" aria-label={lang === 'zh' ? '快旅居 · 品牌宣言' : 'Kuai Lü Ju · Brand statement'}>
-      <div className="page-shell home-hero-inner">
-        <h1 className="home-hero-title">{t.heroTitle}</h1>
-        <p className="home-hero-sub">{t.heroSub}</p>
-      </div>
-    </section>
     <h2 className="home-ecosystem page-shell">{t.ecoTitle}</h2>
     <div className="home-overview">
     {sections.map(mode => {
