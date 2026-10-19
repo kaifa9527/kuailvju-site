@@ -254,7 +254,7 @@ export function ManagementPage({ lang, mode }: { lang: Language; mode?: string }
   useEffect(() => { setSelected(modes.includes(mode as Mode) ? mode as Mode : 'leasing') }, [mode])
   return <div className="page-shell page-top management-catalog-page">
     <div className="page-title"><h1>{t.title}</h1><p>{t.intro}</p></div>
-    <div className="management-tabs" role="tablist" aria-label={t.tabs}>{modes.map((item, index) => <button key={item} id={`management-tab-${item}`} type="button" role="tab" aria-selected={selected === item} aria-controls="management-panel" className={selected === item ? 'is-active' : ''} onClick={() => { setSelected(item); window.history.replaceState(null, '', `#/management/${item}`) }}><strong>{t.modes[item].name}</strong><small>{t.modes[item].short}</small></button>)}</div>
+    <div className="management-tabs" role="tablist" aria-label={t.tabs}>{modes.map(item => <button key={item} id={`management-tab-${item}`} type="button" role="tab" aria-selected={selected === item} aria-controls="management-panel" className={selected === item ? 'is-active' : ''} onClick={() => { setSelected(item); window.history.replaceState(null, '', `#/management/${item}`) }}><strong>{t.modes[item].name}</strong><small>{t.modes[item].short}</small></button>)}</div>
     <div className="management-mobile-highlight"><p>{t.modes[selected].lead}</p><div>{t.modes[selected].rates.slice(0, 2).map(([label, amount]) => <span key={label}>{label} <strong>{amount}</strong></span>)}</div></div>
     <div className="management-content" id="management-panel" role="tabpanel" aria-labelledby={`management-tab-${selected}`}><RegistrationForm key={selected} lang={lang} mode={selected}/><ServiceDetails lang={lang} mode={selected}/></div>
   </div>
