@@ -13,6 +13,7 @@ const translations = {
     all: '全部', attractions: '景点', tickets: '门票', experiences: '当地体验',
     invalid: '请填写有效日期：退房必须晚于入住。',
     demo: '当前为演示内容，房源、景点和档期尚未开放真实预订。',
+    modeLabel: '选择旅居类型', modeRentals: '长租', modeStays: '短租', modeExchange: '置换', modeRoam: '漫游',
   },
   en: {
     city: 'Destination', cityAny: 'Choose a city', region: 'Area', regionAny: 'All areas', start: 'Check-in', moveIn: 'Move-in', visit: 'Visit date',
@@ -21,10 +22,18 @@ const translations = {
     all: 'All', attractions: 'Attractions', tickets: 'Tickets', experiences: 'Local experiences',
     invalid: 'Choose valid dates; checkout must be after check-in.',
     demo: 'This is a preview; homes, attractions and dates are not yet bookable.',
+    modeLabel: 'Choose a stay type', modeRentals: 'Long', modeStays: 'Short', modeExchange: 'Exchange', modeRoam: 'Roam',
   },
 }
 
-export function HomeFinder({ lang, mode, onSummaryChange, onSearch }: { lang: Language; mode: HomeMode; onSummaryChange?: (summary: [string, string, string]) => void; onSearch?: (mode: HomeMode, query: string) => void }) {
+const stayModes: { key: HomeMode; labelKey: 'modeRentals' | 'modeStays' | 'modeExchange' | 'modeRoam' }[] = [
+  { key: 'rentals', labelKey: 'modeRentals' },
+  { key: 'stays', labelKey: 'modeStays' },
+  { key: 'exchange', labelKey: 'modeExchange' },
+  { key: 'roam', labelKey: 'modeRoam' },
+]
+
+export function HomeFinder({ lang, mode, onModeChange, onSummaryChange, onSearch }: { lang: Language; mode: HomeMode; onModeChange?: (mode: HomeMode) => void; onSummaryChange?: (summary: [string, string, string]) => void; onSearch?: (mode: HomeMode, query: string) => void }) {
   const t = translations[lang]
   const [draftByMode, setDraftByMode] = useState<Record<HomeMode, HomeSearch>>(() => ({
     rentals: { ...initialHomeSearch }, stays: { ...initialHomeSearch },
@@ -63,6 +72,13 @@ export function HomeFinder({ lang, mode, onSummaryChange, onSearch }: { lang: La
     catch { setError(t.invalid) }
   }
   return <section className="home-discovery page-shell" aria-label={t.search}>
+    <div className="home-discovery-modes" role="tablist" aria-label={t.modeLabel}>
+      {stayModes.map(item => (
+        <button key={item.key} type="button" role="tab" aria-selected={mode === item.key}
+          className={mode === item.key ? 'is-active' : ''}
+          onClick={() => onModeChange?.(item.key)}>{t[item.labelKey]}</button>
+      ))}
+    </div>
     <form className="home-discovery-form" onSubmit={submit} role="search"
       onPointerDownCapture={() => { pointerSelection.current = true }}
       onKeyDownCapture={() => { pointerSelection.current = false }}

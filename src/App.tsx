@@ -20,6 +20,8 @@ type Filters = { city: string; region: string; type: string; term: string; moveI
 type Route = { page: string; id?: string; mode?: string; filters: Filters; query: string }
 const asset = (path: string) => `${import.meta.env.BASE_URL}${path.replace(/^\//, '')}`
 
+type JourneyItem = { key: string; title: string; line: string; owner?: boolean }
+
 const words = {
   zh: {
     rent: '长租房', stays: '短租', exchange: '旅居置换', roam: '漫游', navRent: '长租', navStays: '短租', navExchange: '置换', manage: '物业托管', explore: '探索房源', more: '了解详情',
@@ -39,6 +41,14 @@ const words = {
     pinned: '置顶', exchangeBadge: '可置换 · 示意', exchangeMayWaive: '符合条件可免住宿费', exchangeCostsBrief: '保洁费 + 押金 + 水电',
     exchangeSectionNote: '仅已授权的委托租赁业主可申请。每次入住收 ¥600 入住前后保洁费；押金按目标长租房一个月租金，水电据实结算。已出租期间不可置换，芭提雅收等值泰铢。',
     homeManageNote: '委托租赁、委托经营、委托看护。选一种适合您房屋现状的方式。',
+    journeyTitle: '从一处好房，进入整个旅居生态',
+    journey: [
+      { key: 'rentals', title: '长租', line: '半年或一年起租 · 租客免中介费' },
+      { key: 'stays', title: '短租', line: '按晚入住 · 委托经营房源' },
+      { key: 'exchange', title: '置换', line: '业主旅居互换 · 对等可免房费' },
+      { key: 'roam', title: '漫游', line: '景点门票 · 高尔夫 · 在地体验' },
+      { key: 'manage', title: '委托', line: '房东收口录入 · 三种托管方式', owner: true },
+    ],
     roamLead: '住进一座城市，再走进它的日常。', roamNote: '三城本地活动体验 · 查看示意内容与站内预约流程',
     registrationTitle: '登记房源意向', serviceScope: '服务与收费', registrationPreview: '可测试提交流程 · 不收集真实资料',
     registrationNotice: '选择房屋信息后可生成一条站内测试记录，保存在当前浏览器。电话与邮箱暂不填写，也不会发送给平台。',
@@ -101,6 +111,14 @@ const words = {
     pinned: 'Pinned', exchangeBadge: 'Exchange eligible · concept', exchangeMayWaive: 'Eligible stays may waive rent', exchangeCostsBrief: 'Cleaning + deposit + utilities',
     exchangeSectionNote: 'Only authorized entrusted-leasing owners may apply. Each stay has a ¥600 pre/post-stay cleaning fee, a deposit equal to the occupied home’s monthly rent and metered utilities. Tenanted dates are unavailable. Pattaya charges the THB equivalent.',
     homeManageNote: 'Leasing, full management or home care. Choose the service that fits your property.',
+    journeyTitle: 'One good home. A whole living ecosystem.',
+    journey: [
+      { key: 'rentals', title: 'Long stays', line: 'Six or twelve months · no tenant fee' },
+      { key: 'stays', title: 'Short stays', line: 'Operated homes by the night' },
+      { key: 'exchange', title: 'Exchange', line: 'Owner stays, side by side' },
+      { key: 'roam', title: 'Roam', line: 'Tickets · golf · local experiences' },
+      { key: 'manage', title: 'Entrust', line: 'One entry for owners · three care modes', owner: true },
+    ],
     roamLead: 'Find a place to stay. Then explore its everyday life.', roamNote: 'Local activity concepts in three cities · preview the booking flow',
     registrationTitle: 'Register a property enquiry', serviceScope: 'Service & fees', registrationPreview: 'Interactive workflow test · no real details collected',
     registrationNotice: 'Submit property choices to create a browser-only test record. Phone and email remain disabled; nothing is sent to the platform.',
@@ -160,9 +178,9 @@ function parseRoute(): Route {
   }
 }
 
-function Header({ lang, setLang, route, mode, onSearch, onAccountClick, previewMember }: {
+function Header({ lang, setLang, route, mode, onModeChange, onSearch, onAccountClick, previewMember }: {
   lang: Language; setLang: (v: Language) => void; route: Route;
-  mode: HomeMode; onSearch: (mode: HomeMode, query: string) => void; onAccountClick: () => void; previewMember: boolean
+  mode: HomeMode; onModeChange: (mode: HomeMode) => void; onSearch: (mode: HomeMode, query: string) => void; onAccountClick: () => void; previewMember: boolean
 }) {
   const t = words[lang]
   const [open, setOpen] = useState(false)
@@ -267,7 +285,7 @@ function Header({ lang, setLang, route, mode, onSearch, onAccountClick, previewM
         <a href="#/test-inbox" onClick={() => setOpen(false)}>{t.testDesk}</a>
       </nav>}
       <div className="home-finder-stage" id="home-search-panel" aria-hidden={!expanded}>
-        <HomeFinder lang={lang} mode={mode} onSearch={onSearch} onSummaryChange={setSearchSummary}/>
+        <HomeFinder lang={lang} mode={mode} onModeChange={onModeChange} onSearch={onSearch} onSummaryChange={setSearchSummary}/>
         {scrolled && searchOpen && <button type="button" className="home-finder-dismiss" aria-label={t.close}
           onClick={() => setSearchOpen(false)}><LineIcon name="close" size={18}/></button>}
       </div>
@@ -316,6 +334,7 @@ function ManagementCards({ lang }: { lang: Language }) {
 
 function SiteOverview({ lang }: { lang: Language }) {
   const t = words[lang]
+  const journey = t.journey as JourneyItem[]
   const sections: CardContext[] = ['rentals', 'stays', 'exchange']
   return <>
     <section className="home-hero" aria-label={lang === 'zh' ? '快旅居 · 品牌宣言' : 'Kuai Lü Ju · Brand statement'}>
@@ -327,6 +346,13 @@ function SiteOverview({ lang }: { lang: Language }) {
         </ul>
       </div>
     </section>
+    <nav className="home-journey page-shell" aria-label={lang === 'zh' ? '探索旅居方式' : 'Explore stay journeys'}>
+      {journey.map(item => (
+        <a key={item.key} className={'home-journey-link' + (item.owner ? ' home-journey-owner' : '')} href={item.key === 'manage' ? '#/management' : `#/${item.key}`}>
+          <b>{item.title}</b><span>{item.line}</span>{item.owner && <small>{lang === 'zh' ? '房东入口' : 'Owner'}</small>}
+        </a>
+      ))}
+    </nav>
     <h2 className="home-ecosystem page-shell">{t.ecoTitle}</h2>
     <div className="home-overview">
     {sections.map(mode => {
@@ -462,7 +488,9 @@ export default function App() {
   useEffect(() => { if (route.page === 'management' && !previewMember) setAccountOpen(true) }, [route.page, previewMember])
   const t = words[lang]
   const category = ['rentals', 'stays', 'exchange', 'roam'].includes(route.page) && !route.id
-  const activeMode: HomeMode = (['rentals', 'stays', 'exchange', 'roam'] as HomeMode[]).includes(route.page as HomeMode) ? route.page as HomeMode : 'rentals'
+  const routeMode: HomeMode = (['rentals', 'stays', 'exchange', 'roam'] as HomeMode[]).includes(route.page as HomeMode) ? route.page as HomeMode : 'rentals'
+  const [activeMode, setActiveMode] = useState<HomeMode>(routeMode)
+  useEffect(() => { setActiveMode(routeMode) }, [routeMode])
   const onHomeSearch = (mode: HomeMode, query: string) => {
     const hash = `#/${mode}${query ? `?${query}` : ''}`
     if (window.location.hash !== hash) window.location.hash = hash
@@ -485,7 +513,7 @@ export default function App() {
     return <SiteOverview lang={lang}/>
   }, [route, lang, category, previewMember])
   return <>
-    <Header lang={lang} setLang={setLang} route={route} mode={activeMode} onSearch={onHomeSearch} onAccountClick={() => setAccountOpen(true)} previewMember={previewMember}/>
+    <Header lang={lang} setLang={setLang} route={route} mode={activeMode} onModeChange={setActiveMode} onSearch={onHomeSearch} onAccountClick={() => setAccountOpen(true)} previewMember={previewMember}/>
     <main id="main-content">{content}</main>
     <footer className="site-footer"><div className="page-shell">
       <div className="footer-top"><a className="footer-brand" href="#/">快旅居 <span>KUAI LÜ JU</span></a>
