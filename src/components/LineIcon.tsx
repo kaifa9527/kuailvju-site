@@ -1,6 +1,6 @@
 import type { ReactNode, SVGProps } from 'react'
 
-export type IconName = 'search' | 'compass' | 'guests' | 'bedroom' | 'bed' | 'bath' | 'area' | 'window' | 'garden' | 'pool' | 'climate' | 'wifi' | 'living' | 'dining' | 'balcony' | 'arrow' | 'calendar' | 'location' | 'shield' | 'check' | 'utility' | 'kitchen' | 'workspace' | 'parking' | 'tv' | 'lift' | 'washer' | 'lock' | 'photos' | 'heart' | 'share' | 'close' | 'family'
+export type IconName = 'search' | 'compass' | 'guests' | 'bedroom' | 'bed' | 'bath' | 'area' | 'window' | 'garden' | 'pool' | 'climate' | 'wifi' | 'living' | 'dining' | 'balcony' | 'arrow' | 'calendar' | 'location' | 'shield' | 'check' | 'utility' | 'kitchen' | 'workspace' | 'parking' | 'tv' | 'lift' | 'washer' | 'lock' | 'photos' | 'heart' | 'share' | 'close' | 'family' | 'star'
 
 const paths: Record<IconName, ReactNode> = {
   search: <><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></>,
@@ -36,6 +36,7 @@ const paths: Record<IconName, ReactNode> = {
   share: <><path d="M12 16V3m0 0L8 7m4-4 4 4M5 12v8h14v-8"/></>,
   close: <path d="M4 4 20 20M20 4 4 20"/>,
   family: <><circle cx="8" cy="7" r="2"/><circle cx="17" cy="7" r="2"/><circle cx="12" cy="14" r="1.5"/><path d="M2.5 19v-2a5.5 5.5 0 0 1 8-4.9M21.5 19v-2a5.5 5.5 0 0 0-8-4.9M8.5 21v-1a3.5 3.5 0 0 1 7 0v1"/></>,
+  star: <path d="M12 3.4l2.6 5.4 5.9.8-4.3 4.1 1.1 5.9L12 16.9l-5.3 2.7 1.1-5.9-4.3-4.1 5.9-.8z"/>,
 }
 
 export function LineIcon({ name, size = 22, ...rest }: SVGProps<SVGSVGElement> & { name: IconName; size?: number }) {
